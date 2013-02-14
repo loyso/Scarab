@@ -1,0 +1,6 @@
+/external
+/intermediate
+/output
+/doc/bin
+*.suo
+*.vcxproj.user
