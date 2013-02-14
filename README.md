@@ -1,4 +1,4 @@
 Scarab
 ======
 
-Patches delivery system.
+A system to patch your content files.
