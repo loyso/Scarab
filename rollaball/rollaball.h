@@ -5,13 +5,14 @@
 
 namespace rab
 {
-	typedef std::vector< std::string > ConfigValues_t;
+	typedef std::wstring String_t;
+	typedef std::vector< String_t > ConfigValues_t;
 
 	struct Options
 	{
-		std::string src, dst, tmp;
-		std::string src_ver, dst_ver;
-		std::string config_file;
+		String_t src, dst, tmp;
+		String_t src_ver, dst_ver;
+		String_t config_file;
 	};
 
 	struct Config
@@ -25,7 +26,7 @@ namespace rab
 		ConfigValues_t dst_preserve_removed;
 		ConfigValues_t src_ignore_files;
 		int src_file_limit;
-		std::string packed_extension;
+		String_t packed_extension;
 	};
 };
 
