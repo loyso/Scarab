@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dung/dung.h>
+
 #include <string>
 #include <vector>
 
@@ -28,5 +30,7 @@ namespace rab
 		int src_file_limit;
 		String_t packed_extension;
 	};
+
+	void ProcessData( Options const &options, Config const &config );
 };
 

@@ -1,20 +1,18 @@
-#include <tchar.h>
-
 #include <iostream>
 #include <fstream>
 #include <boost/program_options.hpp>
 
 #include <rollaball/rollaball.h>
 
-int ParseCommandLine( int argc, wchar_t** argv, rab::Options& options, rab::Config& config )
+int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Config& config )
 {
 	namespace po = boost::program_options;
 
 	po::options_description command_line_options("Command line options");
 	command_line_options.add_options()
 		("help,H", "produce help message")
-		("src,S", po::wvalue(&options.src), "path to new content folder")
-		("dst,D", po::wvalue(&options.dst), "path to old content folder")
+		("src,S", po::wvalue(&options.src)->required(), "path to new content folder")
+		("dst,D", po::wvalue(&options.dst)->required(), "path to old content folder")
 		("tmp,T", po::wvalue(&options.tmp)->default_value(_T("./temp"),"./temp"), "path to temp folder")
 		("config,C", po::wvalue(&options.config_file), "name of a configuration file.")
 		("src_ver", po::wvalue(&options.src_ver), "a name for new version")
@@ -82,6 +80,8 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	if( result )
 		return result;
+
+	rab::ProcessData( options, config );
 
 	return 0;
 }

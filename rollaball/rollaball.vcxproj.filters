@@ -2,8 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="rollaball.cpp" />
+    <ClCompile Include="filetree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rollaball.h" />
+    <ClInclude Include="filetree.h" />
   </ItemGroup>
 </Project>
