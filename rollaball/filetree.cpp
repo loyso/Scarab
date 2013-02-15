@@ -21,6 +21,26 @@ namespace rab
 
 	void CreateFilesInTree( VectorString_t const& v, FolderInfo::FileInfos_t& fileInfos );
 	void CreateFoldersInTree( VectorString_t const& v, FolderInfo::FolderInfos_t& folderInfos );
+
+	template< typename T >
+	void DeleteContainer( T& container )
+	{
+		for( T::iterator i = container.begin(); i != container.end(); ++i )
+			delete *i;
+		container.clear();
+	}
+}
+
+
+rab::FolderInfo::~FolderInfo()
+{
+	DeleteContainer( m_folders_newOnly );
+	DeleteContainer( m_folders_oldOnly );
+	DeleteContainer( m_folders_existInBoth );
+
+	DeleteContainer( m_files_newOnly );
+	DeleteContainer( m_files_oldOnly );
+	DeleteContainer( m_files_existInBoth );
 }
 
 void rab::BuildFilesAndFoldersForPath( Path_t const& path, StringSet_t& files, StringSet_t& folders )
@@ -69,9 +89,9 @@ void rab::BuildThreeSets( StringSet_t& newSet, StringSet_t& oldSet,
 	newSet.clear();
 }
 
-void rab::CreateFilesInTree( VectorString_t const& v, FolderInfo::FileInfos_t& fileInfos )
+void rab::CreateFilesInTree( VectorString_t const& names, FolderInfo::FileInfos_t& fileInfos )
 {
-	for( VectorString_t::const_iterator i = v.begin(); i != v.end(); ++i )
+	for( VectorString_t::const_iterator i = names.begin(); i != names.end(); ++i )
 	{
 		FileInfo* pFileInfo = SCARAB_NEW FileInfo();
 		pFileInfo->m_name = *i;
@@ -79,9 +99,9 @@ void rab::CreateFilesInTree( VectorString_t const& v, FolderInfo::FileInfos_t& f
 	}
 }
 
-void rab::CreateFoldersInTree( VectorString_t const& v, FolderInfo::FolderInfos_t& folderInfos )
+void rab::CreateFoldersInTree( VectorString_t const& names, FolderInfo::FolderInfos_t& folderInfos )
 {
-	for( VectorString_t::const_iterator i = v.begin(); i != v.end(); ++i )
+	for( VectorString_t::const_iterator i = names.begin(); i != names.end(); ++i )
 	{
 		FolderInfo* pFolderInfo = SCARAB_NEW FolderInfo();
 		pFolderInfo->m_name = *i;

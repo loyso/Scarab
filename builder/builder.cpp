@@ -11,12 +11,12 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 	po::options_description command_line_options("Command line options");
 	command_line_options.add_options()
 		("help,H", "produce help message")
-		("src,S", po::wvalue(&options.src)->required(), "path to new content folder")
-		("dst,D", po::wvalue(&options.dst)->required(), "path to old content folder")
-		("tmp,T", po::wvalue(&options.tmp)->default_value(_T("./temp"),"./temp"), "path to temp folder")
-		("config,C", po::wvalue(&options.config_file), "name of a configuration file.")
-		("src_ver", po::wvalue(&options.src_ver), "a name for new version")
-		("dst_ver", po::wvalue(&options.dst_ver), "a name for old version")
+		("src,S", po::wvalue(&options.pathToNew)->required(), "path to new content folder")
+		("dst,D", po::wvalue(&options.pathToOld)->required(), "path to old content folder")
+		("tmp,T", po::wvalue(&options.pathToTemp)->default_value(_T("./temp"),"./temp"), "path to temp folder")
+		("config,C", po::wvalue(&options.configFile), "name of a configuration file.")
+		("src_ver", po::wvalue(&options.newVersion), "a name for new version")
+		("dst_ver", po::wvalue(&options.oldVersion), "a name for old version")
 		;
 
 	po::options_description config_file_options("Config file options");
@@ -30,7 +30,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("dst_preserve_removed", po::wvalue(&config.dst_preserve_removed), "destination files to preserve, if src removed")
 		("src_ignore_files", po::wvalue(&config.src_ignore_files), "skip source files")
 		("src_file_limit", po::wvalue(&config.src_file_limit)->default_value(0), "skip source files greater then the limit")		
-		("packed_extension", po::wvalue(&config.packed_extension)->default_value(_T("diff"),"diff"), "extension for packed files")
+		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
 		;
 
 	po::variables_map vm;
@@ -43,12 +43,12 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		std::cout << config_file_options << "\n";
 	}
 
-	if( !options.config_file.empty() )
+	if( !options.configFile.empty() )
 	{
-		std::ifstream ifs(options.config_file.c_str());
+		std::ifstream ifs(options.configFile.c_str());
 		if (!ifs)
 		{
-			std::wcout << _T("can not open config file: ") << options.config_file << _T("\n");
+			std::wcout << _T("can not open config file: ") << options.configFile << _T("\n");
 			return 1;
 		}
 		else
@@ -64,6 +64,9 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 int _tmain(int argc, _TCHAR* argv[])
 {
 	setlocale(LC_ALL, "");
+#ifdef _MSC_VER
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
 
 	int result = 1;
 

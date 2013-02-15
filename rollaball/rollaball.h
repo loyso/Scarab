@@ -12,9 +12,9 @@ namespace rab
 
 	struct Options
 	{
-		String_t src, dst, tmp;
-		String_t src_ver, dst_ver;
-		String_t config_file;
+		String_t pathToNew, pathToOld, pathToTemp;
+		String_t newVersion, oldVersion;
+		String_t configFile;
 	};
 
 	struct Config
@@ -28,7 +28,7 @@ namespace rab
 		ConfigValues_t dst_preserve_removed;
 		ConfigValues_t src_ignore_files;
 		int src_file_limit;
-		String_t packed_extension;
+		String_t packedExtension;
 	};
 
 	void ProcessData( Options const &options, Config const &config );

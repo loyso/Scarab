@@ -11,10 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="filediff.cpp" />
     <ClCompile Include="filetree.cpp" />
     <ClCompile Include="rollaball.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="filediff.h" />
     <ClInclude Include="filetree.h" />
     <ClInclude Include="rollaball.h" />
   </ItemGroup>

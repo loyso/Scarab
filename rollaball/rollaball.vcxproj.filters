@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClCompile Include="rollaball.cpp" />
     <ClCompile Include="filetree.cpp" />
+    <ClCompile Include="filediff.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rollaball.h" />
     <ClInclude Include="filetree.h" />
+    <ClInclude Include="filediff.h" />
   </ItemGroup>
 </Project>

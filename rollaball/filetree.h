@@ -14,6 +14,7 @@ namespace rab
 	struct FolderInfo 
 	{
 		String_t m_name;
+		~FolderInfo();
 
 		typedef std::vector< FolderInfo* > FolderInfos_t;
 		typedef std::vector< FileInfo* > FileInfos_t;
