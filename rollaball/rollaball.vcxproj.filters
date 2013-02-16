@@ -4,10 +4,12 @@
     <ClCompile Include="rollaball.cpp" />
     <ClCompile Include="filetree.cpp" />
     <ClCompile Include="filediff.cpp" />
+    <ClCompile Include="filecopy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rollaball.h" />
     <ClInclude Include="filetree.h" />
     <ClInclude Include="filediff.h" />
+    <ClInclude Include="filecopy.h" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,8 @@
 #include "rollaball.h"
 
 #include "filetree.h"
+
+#include "filecopy.h"
 #include "filediff.h"
 
 void rab::ProcessData( Options const& options, Config const& config )
@@ -9,6 +11,8 @@ void rab::ProcessData( Options const& options, Config const& config )
 	pRootFolder->m_name = _T("./");
 
 	BuildFileTree( options.pathToNew, options.pathToOld, *pRootFolder );
+
+	BuildTempCopies( options, config, *pRootFolder );
 	BuildDiffs( options, config, *pRootFolder );
 
 	delete pRootFolder;

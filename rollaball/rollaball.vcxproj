@@ -11,11 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="filecopy.cpp" />
     <ClCompile Include="filediff.cpp" />
     <ClCompile Include="filetree.cpp" />
     <ClCompile Include="rollaball.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="filecopy.h" />
     <ClInclude Include="filediff.h" />
     <ClInclude Include="filetree.h" />
     <ClInclude Include="rollaball.h" />
