@@ -11,15 +11,19 @@ namespace rab
 	struct FileInfo
 	{
 		String_t name;
+		
+		Sha1 newSha1;
+		Sha1 oldSha1;
 	};
 
 	struct FolderInfo 
 	{
-		String_t name;
 		~FolderInfo();
 
 		typedef std::vector< FolderInfo* > FolderInfos_t;
 		typedef std::vector< FileInfo* > FileInfos_t;
+
+		String_t name;
 
 		FolderInfos_t folders_newOnly;
 		FolderInfos_t folders_oldOnly;

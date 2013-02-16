@@ -27,6 +27,7 @@ namespace rab
 
 	bool ReadWholeFile( Path_t const& fullPath, MemoryBlock& memoryBlock );
 	bool WriteWholeFile( Path_t const& fullPath, MemoryBlock& memoryBlock );
+	bool EncodeAndWrite( MemoryBlock const& newFile, MemoryBlock const& oldFile, Path_t const& fullTemp );
 
 	void BuildDiffFiles( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos );
 	void BuildDiffFolders( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FolderInfos_t const& folderInfos );
@@ -71,6 +72,22 @@ bool rab::WriteWholeFile( Path_t const& fullPath, MemoryBlock& memoryBlock )
 	return true;
 }
 
+bool rab::EncodeAndWrite( MemoryBlock const& newFile, MemoryBlock const& oldFile, Path_t const& fullTemp )
+{
+	MemoryBlock deltaFile;
+	deltaFile.size = 2 * ( newFile.size + oldFile.size );
+	deltaFile.pBlock = SCARAB_NEW Byte_t[ deltaFile.size ];
+	size_t size;
+
+	int ret = xd3_encode_memory( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, &size, deltaFile.size, 0 );
+	if( ret != 0 )
+		return false;
+
+	deltaFile.size = size;
+	WriteWholeFile( fullTemp, deltaFile );
+	return true;
+}
+
 void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos )
 {
 	for( FolderInfo::FileInfos_t::const_iterator i = fileInfos.begin(); i != fileInfos.end(); ++i )
@@ -85,17 +102,11 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 		MemoryBlock oldFile;
 		if( ReadWholeFile( fullNew, newFile ) && ReadWholeFile( fullOld, oldFile ) )
 		{
-			MemoryBlock deltaFile;
-			deltaFile.size = newFile.size + oldFile.size;
-			deltaFile.pBlock = SCARAB_NEW Byte_t[ deltaFile.size ];
-			size_t size;
+			int sha1resultNew = SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
+			int sha1resultOld = SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
 
-			int ret = xd3_encode_memory( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, &size, deltaFile.size, 0 );
-			if( ret == 0 )
-			{
-				deltaFile.size = size;
-				WriteWholeFile( fullTemp, deltaFile );
-			}
+			if( sha1resultNew == shaSuccess && sha1resultOld == shaSuccess )
+				EncodeAndWrite(newFile, oldFile, fullTemp);
 		}
 	}
 }

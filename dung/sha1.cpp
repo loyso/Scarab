@@ -1,6 +1,7 @@
 #include "sha1.h"
 
 #include <stdio.h>
+#include <memory.h>
 
 /*
  *  sha1.c
@@ -391,10 +392,26 @@ void SHA1PadMessage ( SHA1Context *context )
 	return;
 }
 
+// helpers
 
-void SHA1Result( SHA1Context* context, Sha1& sha1 )
+Sha1::Sha1()
 {
-	SHA1Result( context, sha1.digest );
+	memset( digest, 0, sizeof(digest) );
+}
+
+int SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
+{
+	SHA1Context context;
+
+	int result = SHA1Reset( &context );
+	if( result != shaSuccess )
+		return result;
+		
+	SHA1Input( &context, (uint8_t*)pMemoryBlock, size );
+	if( result != shaSuccess )
+		return result;
+
+	return SHA1Result( &context, sha1.digest );
 }
 
 void SHA1ToString( Sha1 const& sha1, _TCHAR output[SHA1StringSize] )
@@ -408,4 +425,5 @@ void SHA1ToString( Sha1 const& sha1, _TCHAR output[SHA1StringSize] )
 #endif
 	}
 }
+
 
