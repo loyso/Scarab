@@ -2,14 +2,8 @@
 
 #include "filetree.h"
 
-#include <fstream>
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
-
-extern "C"
-{
-#include <external/xdelta/xdelta3.h>
-}
 
 namespace rab
 {
