@@ -19,8 +19,8 @@ void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 	{
 		FileInfo& fileInfo = **i;
 
-		Path_t fullNew = options.pathToNew / relativePath / fileInfo.m_name;
-		Path_t fullTemp = options.pathToTemp / relativePath / fileInfo.m_name;
+		Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
+		Path_t fullTemp = options.pathToTemp / relativePath / fileInfo.name;
 
 		fs::copy( fullNew, fullTemp );
 	}
@@ -32,13 +32,13 @@ void rab::BuildTempCopiesFolders( Options const& options, Config const& config, 
 	{
 		FolderInfo& folderInfo = **i;
 
-		Path_t nextRelativePath = relativePath / folderInfo.m_name;
+		Path_t nextRelativePath = relativePath / folderInfo.name;
 		fs::create_directory( options.pathToTemp / nextRelativePath );
 
-		BuildTempCopiesFiles( options, config, nextRelativePath, folderInfo.m_files_newOnly );
+		BuildTempCopiesFiles( options, config, nextRelativePath, folderInfo.files_newOnly );
 		
-		BuildTempCopiesFolders( options, config, nextRelativePath, folderInfo.m_folders_newOnly );
-		BuildTempCopiesFolders( options, config, nextRelativePath, folderInfo.m_folders_existInBoth );
+		BuildTempCopiesFolders( options, config, nextRelativePath, folderInfo.folders_newOnly );
+		BuildTempCopiesFolders( options, config, nextRelativePath, folderInfo.folders_existInBoth );
 	}
 }
 
@@ -47,8 +47,8 @@ void rab::BuildTempCopies( Options const& options, Config const& config, FolderI
 	Path_t relativePath;
 	fs::create_directories( options.pathToTemp );
 
-	BuildTempCopiesFiles( options, config, relativePath, rootFolder.m_files_newOnly );
+	BuildTempCopiesFiles( options, config, relativePath, rootFolder.files_newOnly );
 
-	BuildTempCopiesFolders( options, config, relativePath, rootFolder.m_folders_newOnly );
-	BuildTempCopiesFolders( options, config, relativePath, rootFolder.m_folders_existInBoth );
+	BuildTempCopiesFolders( options, config, relativePath, rootFolder.folders_newOnly );
+	BuildTempCopiesFolders( options, config, relativePath, rootFolder.folders_existInBoth );
 }

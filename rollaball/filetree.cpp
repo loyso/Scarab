@@ -34,13 +34,13 @@ namespace rab
 
 rab::FolderInfo::~FolderInfo()
 {
-	DeleteContainer( m_folders_newOnly );
-	DeleteContainer( m_folders_oldOnly );
-	DeleteContainer( m_folders_existInBoth );
+	DeleteContainer( folders_newOnly );
+	DeleteContainer( folders_oldOnly );
+	DeleteContainer( folders_existInBoth );
 
-	DeleteContainer( m_files_newOnly );
-	DeleteContainer( m_files_oldOnly );
-	DeleteContainer( m_files_existInBoth );
+	DeleteContainer( files_newOnly );
+	DeleteContainer( files_oldOnly );
+	DeleteContainer( files_existInBoth );
 }
 
 void rab::BuildFilesAndFoldersForPath( Path_t const& path, StringSet_t& files, StringSet_t& folders )
@@ -94,7 +94,7 @@ void rab::CreateFilesInTree( VectorString_t const& names, FolderInfo::FileInfos_
 	for( VectorString_t::const_iterator i = names.begin(); i != names.end(); ++i )
 	{
 		FileInfo* pFileInfo = SCARAB_NEW FileInfo();
-		pFileInfo->m_name = *i;
+		pFileInfo->name = *i;
 		fileInfos.push_back( pFileInfo );
 	}
 }
@@ -104,7 +104,7 @@ void rab::CreateFoldersInTree( VectorString_t const& names, FolderInfo::FolderIn
 	for( VectorString_t::const_iterator i = names.begin(); i != names.end(); ++i )
 	{
 		FolderInfo* pFolderInfo = SCARAB_NEW FolderInfo();
-		pFolderInfo->m_name = *i;
+		pFolderInfo->name = *i;
 		folderInfos.push_back( pFolderInfo );
 	}
 }
@@ -114,7 +114,7 @@ void rab::BuildFileTreeForFolder_Rec( Path_t const& pathToNew, Path_t const& pat
 	for( FolderInfo::FolderInfos_t::const_iterator i = folderInfos.begin(); i != folderInfos.end(); ++i )
 	{
 		FolderInfo& folderInfo = **i;
-		BuildFileTree_Rec( pathToNew / folderInfo.m_name, pathToOld / folderInfo.m_name, folderInfo );
+		BuildFileTree_Rec( pathToNew / folderInfo.name, pathToOld / folderInfo.name, folderInfo );
 	}
 }
 
@@ -131,23 +131,23 @@ void rab::BuildFileTree_Rec( Path_t const& pathToNew, Path_t const& pathToOld, F
 		VectorString_t existInBoth, newOnly, oldOnly;
 		BuildThreeSets( newFiles, oldFiles, existInBoth, newOnly, oldOnly );
 
-		CreateFilesInTree( existInBoth, folderInfo.m_files_existInBoth );
-		CreateFilesInTree( newOnly, folderInfo.m_files_newOnly );
-		CreateFilesInTree( oldOnly, folderInfo.m_files_oldOnly );
+		CreateFilesInTree( existInBoth, folderInfo.files_existInBoth );
+		CreateFilesInTree( newOnly, folderInfo.files_newOnly );
+		CreateFilesInTree( oldOnly, folderInfo.files_oldOnly );
 	}
 	// folders
 	{
 		VectorString_t existInBoth, newOnly, oldOnly;
 		BuildThreeSets( newFolders, oldFolders, existInBoth, newOnly, oldOnly );
 
-		CreateFoldersInTree( existInBoth, folderInfo.m_folders_existInBoth );
-		CreateFoldersInTree( newOnly, folderInfo.m_folders_newOnly );
-		CreateFoldersInTree( oldOnly, folderInfo.m_folders_oldOnly );
+		CreateFoldersInTree( existInBoth, folderInfo.folders_existInBoth );
+		CreateFoldersInTree( newOnly, folderInfo.folders_newOnly );
+		CreateFoldersInTree( oldOnly, folderInfo.folders_oldOnly );
 	}
 
-	BuildFileTreeForFolder_Rec( pathToNew, pathToOld, folderInfo.m_folders_existInBoth );
-	BuildFileTreeForFolder_Rec( pathToNew, pathToOld, folderInfo.m_folders_newOnly );
-	BuildFileTreeForFolder_Rec( pathToNew, pathToOld, folderInfo.m_folders_oldOnly );
+	BuildFileTreeForFolder_Rec( pathToNew, pathToOld, folderInfo.folders_existInBoth );
+	BuildFileTreeForFolder_Rec( pathToNew, pathToOld, folderInfo.folders_newOnly );
+	BuildFileTreeForFolder_Rec( pathToNew, pathToOld, folderInfo.folders_oldOnly );
 }
 
 void rab::BuildFileTree( String_t const& pathToNew, String_t const& pathToOld, FolderInfo& rootFolder )

@@ -77,9 +77,9 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 	{
 		FileInfo& fileInfo = **i;
 		
-		Path_t fullNew = options.pathToNew / relativePath / fileInfo.m_name;
-		Path_t fullOld = options.pathToOld / relativePath / fileInfo.m_name;
-		Path_t fullTemp = options.pathToTemp / relativePath / ( fileInfo.m_name + _T(".") + config.packedExtension );
+		Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
+		Path_t fullOld = options.pathToOld / relativePath / fileInfo.name;
+		Path_t fullTemp = options.pathToTemp / relativePath / ( fileInfo.name + _T(".") + config.packedExtension );
 
 		MemoryBlock newFile;
 		MemoryBlock oldFile;
@@ -106,11 +106,11 @@ void rab::BuildDiffFolders( Options const& options, Config const& config, Path_t
 	{
 		FolderInfo& folderInfo = **i;
 		
-		Path_t nextRelativePath = relativePath / folderInfo.m_name;
+		Path_t nextRelativePath = relativePath / folderInfo.name;
 		fs::create_directory( options.pathToTemp / nextRelativePath );
 
-		BuildDiffFiles( options, config, nextRelativePath, folderInfo.m_files_existInBoth );
-		BuildDiffFolders( options, config, nextRelativePath, folderInfo.m_folders_existInBoth );
+		BuildDiffFiles( options, config, nextRelativePath, folderInfo.files_existInBoth );
+		BuildDiffFolders( options, config, nextRelativePath, folderInfo.folders_existInBoth );
 	}
 }
 
@@ -119,6 +119,6 @@ void rab::BuildDiffs( Options const& options, Config const& config, FolderInfo c
 	Path_t relativePath;
 	fs::create_directories( options.pathToTemp );
 
-	BuildDiffFiles( options, config, relativePath, rootFolder.m_files_existInBoth );
-	BuildDiffFolders( options, config, relativePath, rootFolder.m_folders_existInBoth );
+	BuildDiffFiles( options, config, relativePath, rootFolder.files_existInBoth );
+	BuildDiffFolders( options, config, relativePath, rootFolder.folders_existInBoth );
 }
