@@ -15,6 +15,7 @@ namespace rab
 		String_t pathToNew, pathToOld, pathToTemp;
 		String_t newVersion, oldVersion;
 		String_t configFile;
+		String_t registryFile;
 	};
 
 	struct Config
