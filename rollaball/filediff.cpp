@@ -75,15 +75,14 @@ bool rab::WriteWholeFile( Path_t const& fullPath, MemoryBlock& memoryBlock )
 bool rab::EncodeAndWrite( MemoryBlock const& newFile, MemoryBlock const& oldFile, Path_t const& fullTemp )
 {
 	MemoryBlock deltaFile;
-	deltaFile.size = 2 * ( newFile.size + oldFile.size );
-	deltaFile.pBlock = SCARAB_NEW Byte_t[ deltaFile.size ];
-	size_t size;
+	const size_t reservedSize = 2 * ( newFile.size + oldFile.size );
+	deltaFile.pBlock = SCARAB_NEW Byte_t[ reservedSize ];
+	deltaFile.size = 0;
 
-	int ret = xd3_encode_memory( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, &size, deltaFile.size, 0 );
+	int ret = xd3_encode_memory( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, &deltaFile.size, reservedSize, 0 );
 	if( ret != 0 )
 		return false;
 
-	deltaFile.size = size;
 	WriteWholeFile( fullTemp, deltaFile );
 	return true;
 }
@@ -106,7 +105,11 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 			int sha1resultOld = SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
 
 			if( sha1resultNew == shaSuccess && sha1resultOld == shaSuccess )
+			{
+				fileInfo.oldSize = oldFile.size;
+				fileInfo.newSize = newFile.size;
 				EncodeAndWrite(newFile, oldFile, fullTemp);
+			}
 		}
 	}
 }

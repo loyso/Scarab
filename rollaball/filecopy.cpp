@@ -22,7 +22,8 @@ void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 		Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
 		Path_t fullTemp = options.pathToTemp / relativePath / fileInfo.name;
 
-		fs::copy( fullNew, fullTemp );
+		if( !fs::exists(fullTemp) )
+			fs::copy( fullNew, fullTemp );
 	}
 }
 

@@ -10,10 +10,12 @@ namespace rab
 {
 	struct FileInfo
 	{
+		FileInfo();
+
 		String_t name;
 		
-		Sha1 newSha1;
-		Sha1 oldSha1;
+		Sha1 newSha1, oldSha1;
+		size_t newSize, oldSize;
 	};
 
 	struct FolderInfo 

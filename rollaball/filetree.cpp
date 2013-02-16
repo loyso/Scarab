@@ -32,6 +32,12 @@ namespace rab
 }
 
 
+rab::FileInfo::FileInfo()
+	: newSize()
+	, oldSize()
+{
+}
+
 rab::FolderInfo::~FolderInfo()
 {
 	DeleteContainer( folders_newOnly );
