@@ -15,7 +15,7 @@ namespace rab
 		String_t name;
 		
 		Sha1 newSha1, oldSha1;
-		size_t newSize, oldSize;
+		int newSize, oldSize;
 		bool isDifferent;
 	};
 

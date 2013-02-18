@@ -72,14 +72,14 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 		output.stream << _T("file") << std::endl;
 		output.stream << _T("{") << std::endl;
 
-		if( fileAction != Action::DELETE  )
+		if( fileInfo.newSize >= 0 )
 		{
 			output.stream << _T("\t") << _T("src_path=") << ( relativePath / fileInfo.name ).generic_wstring() << std::endl;
 			output.stream << _T("\t") << _T("src_size=") << fileInfo.newSize << std::endl;
 			output.stream << _T("\t") << _T("src_sha1=") << SHA1ToString(fileInfo.newSha1) << std::endl;
 		}
 
-		if( fileAction != Action::NEW && fileAction != Action::NEW_BUT_NOT_INCLUDED )
+		if( fileInfo.oldSize >= 0 )
 		{
 			output.stream << _T("\t") << _T("dst_path=") << ( relativePath / fileInfo.name ).generic_wstring() << std::endl;
 			output.stream << _T("\t") << _T("dst_size=") << fileInfo.oldSize << std::endl;
