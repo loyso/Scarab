@@ -12,10 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dung.cpp" />
+    <ClCompile Include="memoryblock.cpp" />
     <ClCompile Include="sha1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dung.h" />
+    <ClInclude Include="memoryblock.h" />
     <ClInclude Include="sha1.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

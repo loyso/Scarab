@@ -22,8 +22,10 @@
 #	define	_TCHAR wchar_t
 #	define _T(x) L ## x
 #	define _tmain wmain
+#	define _tstring std::wstring
 #else
 #	define	_TCHAR char
 #	define _T(x) x
 #	define _tmain main
+#	define _tstring std::string
 #endif

@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClCompile Include="dung.cpp" />
     <ClCompile Include="sha1.cpp" />
+    <ClCompile Include="memoryblock.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dung.h" />
     <ClInclude Include="sha1.h" />
+    <ClInclude Include="memoryblock.h" />
   </ItemGroup>
 </Project>

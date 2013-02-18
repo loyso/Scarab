@@ -399,6 +399,11 @@ Sha1::Sha1()
 	memset( digest, 0, sizeof(digest) );
 }
 
+bool Sha1::operator==( Sha1 const& other ) const
+{
+	return memcmp( digest, other.digest, sizeof(digest) ) == 0;
+}
+
 int SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
 {
 	SHA1Context context;
@@ -414,16 +419,25 @@ int SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
 	return SHA1Result( &context, sha1.digest );
 }
 
-void SHA1ToString( Sha1 const& sha1, _TCHAR output[SHA1StringSize] )
+_tstring SHA1ToString( Sha1 const& sha1 )
 {
+	static const int SHA1StringSize = SHA1HashSize * 2 + 1;
+
+	_TCHAR output[SHA1StringSize+1];
+
 	for (int i = 0; i < SHA1HashSize; i++)
 	{
 #ifdef _UNICODE
-		swprintf(output + (i * 2), 2, _T("%02x"), sha1.digest[i]);
+		swprintf(output + (i * 2), 3, _T("%02X"), sha1.digest[i]);
 #else
-		sprintf(output + (i * 2), _T("%02x"), sha1.digest[i]);
+		sprintf(output + (i * 2), _T("%02X"), sha1.digest[i]);
 #endif
 	}
+
+	output[SHA1StringSize] = 0;
+	
+	_tstring result( output );
+	return result;
 }
 
 
