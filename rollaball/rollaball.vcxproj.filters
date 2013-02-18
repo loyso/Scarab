@@ -5,11 +5,15 @@
     <ClCompile Include="filetree.cpp" />
     <ClCompile Include="filediff.cpp" />
     <ClCompile Include="filecopy.cpp" />
+    <ClCompile Include="registry.cpp" />
+    <ClCompile Include="filesha1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rollaball.h" />
     <ClInclude Include="filetree.h" />
     <ClInclude Include="filediff.h" />
     <ClInclude Include="filecopy.h" />
+    <ClInclude Include="registry.h" />
+    <ClInclude Include="filesha1.h" />
   </ItemGroup>
 </Project>

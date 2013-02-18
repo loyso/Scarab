@@ -2,6 +2,8 @@
 
 #include "filetree.h"
 
+#include <dung/memoryblock.h>
+
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
@@ -22,8 +24,17 @@ void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 		Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
 		Path_t fullTemp = options.pathToTemp / relativePath / fileInfo.name;
 
-		if( !fs::exists(fullTemp) )
-			fs::copy( fullNew, fullTemp );
+		dung::MemoryBlock newFile;
+		if( dung::ReadWholeFile( fullNew.wstring(), newFile ) )
+		{
+			int sha1result = SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
+			if( sha1result == shaSuccess )
+			{
+				fileInfo.newSize = newFile.size;
+				if( !fs::exists(fullTemp) )
+					dung::WriteWholeFile( fullTemp.wstring(), newFile );
+			}
+		}
 	}
 }
 

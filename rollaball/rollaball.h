@@ -7,7 +7,7 @@
 
 namespace rab
 {
-	typedef std::wstring String_t;
+	typedef _tstring String_t;
 	typedef std::vector< String_t > ConfigValues_t;
 
 	struct Options
@@ -31,6 +31,8 @@ namespace rab
 		int src_file_limit;
 		String_t packedExtension;
 	};
+
+	String_t DiffFileName( String_t const& fileName, Config const& config );
 
 	void ProcessData( Options const &options, Config const &config );
 };

@@ -2,7 +2,8 @@
 
 #include "filetree.h"
 
-#include <fstream>
+#include <dung/memoryblock.h>
+
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
@@ -14,76 +15,24 @@ extern "C"
 namespace rab
 {
 	typedef fs::path Path_t;
-	typedef unsigned char Byte_t;
 
-	struct MemoryBlock
-	{
-		MemoryBlock();
-		~MemoryBlock();
-
-		Byte_t* pBlock;
-		size_t size;
-	};
-
-	bool ReadWholeFile( Path_t const& fullPath, MemoryBlock& memoryBlock );
-	bool WriteWholeFile( Path_t const& fullPath, MemoryBlock& memoryBlock );
-	bool EncodeAndWrite( MemoryBlock const& newFile, MemoryBlock const& oldFile, Path_t const& fullTemp );
+	bool EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp );
 
 	void BuildDiffFiles( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos );
 	void BuildDiffFolders( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FolderInfos_t const& folderInfos );
 }
 
-rab::MemoryBlock::MemoryBlock()
-	: pBlock()
-	, size()
+bool rab::EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp )
 {
-}
-
-rab::MemoryBlock::~MemoryBlock()
-{
-	delete[] pBlock;
-}
-
-bool rab::ReadWholeFile( Path_t const& fullPath, MemoryBlock& memoryBlock )
-{
-	std::ifstream file ( fullPath.string(), std::ios::in|std::ios::binary|std::ios::ate );
-	if( !file.is_open() )
-		return false;
-
-	memoryBlock.size = (size_t)file.tellg();
-
-	memoryBlock.pBlock = SCARAB_NEW Byte_t [memoryBlock.size];
-
-	file.seekg( 0, std::ios::beg );
-	file.read( (char*)memoryBlock.pBlock, memoryBlock.size );
-	file.close();
-
-	return true;
-}
-
-bool rab::WriteWholeFile( Path_t const& fullPath, MemoryBlock& memoryBlock )
-{
-	std::ofstream file ( fullPath.string(), std::ios::out|std::ios::binary|std::ios::trunc );
-	if( !file.is_open() )
-		return false;
-
-	file.write( (const char*)memoryBlock.pBlock, memoryBlock.size );
-	file.close();
-	return true;
-}
-
-bool rab::EncodeAndWrite( MemoryBlock const& newFile, MemoryBlock const& oldFile, Path_t const& fullTemp )
-{
-	MemoryBlock deltaFile;
 	const size_t reservedSize = 2 * ( newFile.size + oldFile.size );
-	deltaFile.pBlock = SCARAB_NEW Byte_t[ reservedSize ];
+	dung::MemoryBlock deltaFile( reservedSize );
 	deltaFile.size = 0;
 
 	int ret = xd3_encode_memory( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, &deltaFile.size, reservedSize, 0 );
 	if( ret != 0 )
 		return false;
 
-	WriteWholeFile( fullTemp, deltaFile );
+	WriteWholeFile( fullTemp.wstring(), deltaFile );
 	return true;
 }
 
@@ -95,11 +44,11 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 		
 		Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
 		Path_t fullOld = options.pathToOld / relativePath / fileInfo.name;
-		Path_t fullTemp = options.pathToTemp / relativePath / ( fileInfo.name + _T(".") + config.packedExtension );
+		Path_t fullTemp = options.pathToTemp / relativePath / DiffFileName(fileInfo.name, config);
 
-		MemoryBlock newFile;
-		MemoryBlock oldFile;
-		if( ReadWholeFile( fullNew, newFile ) && ReadWholeFile( fullOld, oldFile ) )
+		dung::MemoryBlock newFile;
+		dung::MemoryBlock oldFile;
+		if( ReadWholeFile( fullNew.wstring(), newFile ) && ReadWholeFile( fullOld.wstring(), oldFile ) )
 		{
 			int sha1resultNew = SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
 			int sha1resultOld = SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
@@ -108,7 +57,16 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 			{
 				fileInfo.oldSize = oldFile.size;
 				fileInfo.newSize = newFile.size;
-				EncodeAndWrite(newFile, oldFile, fullTemp);
+				if( Equals( newFile, oldFile ) )
+				{
+					SCARAB_ASSERT( fileInfo.newSha1 == fileInfo.oldSha1 ); //TODO: rely on this.
+					fileInfo.isDifferent = false;
+				}
+				else
+				{
+					fileInfo.isDifferent = true;
+					EncodeAndWrite(newFile, oldFile, fullTemp);
+				}
 			}
 		}
 	}

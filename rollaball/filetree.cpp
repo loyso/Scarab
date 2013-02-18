@@ -35,6 +35,7 @@ namespace rab
 rab::FileInfo::FileInfo()
 	: newSize()
 	, oldSize()
+	, isDifferent( false )
 {
 }
 

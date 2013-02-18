@@ -65,6 +65,11 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 int _tmain(int argc, _TCHAR* argv[])
 {
 	setlocale(LC_ALL, "");
+
+	// Consider to use Boost.Locale
+	// std::locale::global(boost::locale::generator().generate(""));
+	// boost::filesystem::path::imbue(std::locale());
+
 #ifdef _MSC_VER
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
