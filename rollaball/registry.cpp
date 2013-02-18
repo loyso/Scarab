@@ -74,20 +74,20 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 
 		if( fileAction != Action::DELETE  )
 		{
-			output.stream << _T("\t") << _T("src_path=") << relativePath / fileInfo.name << std::endl;
+			output.stream << _T("\t") << _T("src_path=") << ( relativePath / fileInfo.name ).generic_wstring() << std::endl;
 			output.stream << _T("\t") << _T("src_size=") << fileInfo.newSize << std::endl;
 			output.stream << _T("\t") << _T("src_sha1=") << SHA1ToString(fileInfo.newSha1) << std::endl;
 		}
 
 		if( fileAction != Action::NEW && fileAction != Action::NEW_BUT_NOT_INCLUDED )
 		{
-			output.stream << _T("\t") << _T("dst_path=") << relativePath / fileInfo.name << std::endl;
+			output.stream << _T("\t") << _T("dst_path=") << ( relativePath / fileInfo.name ).generic_wstring() << std::endl;
 			output.stream << _T("\t") << _T("dst_size=") << fileInfo.oldSize << std::endl;
 			output.stream << _T("\t") << _T("dst_sha1=") << SHA1ToString(fileInfo.oldSha1) << std::endl;
 		}
 
 		if( fileInfo.isDifferent )
-			output.stream << _T("\t") << _T("diff_path=") << relativePath / DiffFileName(fileInfo.name, config) << std::endl;
+			output.stream << _T("\t") << _T("diff_path=") << ( relativePath / DiffFileName(fileInfo.name, config) ).generic_wstring() << std::endl;
 
 		output.stream << _T("\t") << _T("action=") << ActionToString(fileAction) << std::endl;
 		output.stream << _T("}") << std::endl;

@@ -52,7 +52,7 @@ rab::FolderInfo::~FolderInfo()
 
 void rab::BuildFilesAndFoldersForPath( Path_t const& path, StringSet_t& files, StringSet_t& folders )
 {
-	for( fs::recursive_directory_iterator it( path ); it != fs::recursive_directory_iterator(); ++it )
+	for( fs::directory_iterator it( path ); it != fs::directory_iterator(); ++it )
 	{		
 		fs::file_status status = it->status();
 		fs::path fullpath = it->path();
@@ -130,8 +130,11 @@ void rab::BuildFileTree_Rec( Path_t const& pathToNew, Path_t const& pathToOld, F
 	StringSet_t newFiles, oldFiles;
 	StringSet_t newFolders, oldFolders;
 
-	BuildFilesAndFoldersForPath( pathToOld, oldFiles, oldFolders );
-	BuildFilesAndFoldersForPath( pathToNew, newFiles, newFolders );
+	if( fs::exists( pathToOld ) )
+		BuildFilesAndFoldersForPath( pathToOld, oldFiles, oldFolders );
+
+	if( fs::exists( pathToNew ) )
+		BuildFilesAndFoldersForPath( pathToNew, newFiles, newFolders );
 
 	// files
 	{

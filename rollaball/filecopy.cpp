@@ -31,6 +31,7 @@ void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 			if( sha1result == shaSuccess )
 			{
 				fileInfo.newSize = newFile.size;
+				fs::create_directories( fullTemp.parent_path() );
 				if( !fs::exists(fullTemp) )
 					dung::WriteWholeFile( fullTemp.wstring(), newFile );
 			}
@@ -45,7 +46,6 @@ void rab::BuildTempCopiesFolders( Options const& options, Config const& config, 
 		FolderInfo& folderInfo = **i;
 
 		Path_t nextRelativePath = relativePath / folderInfo.name;
-		fs::create_directory( options.pathToTemp / nextRelativePath );
 
 		BuildTempCopiesFiles( options, config, nextRelativePath, folderInfo.files_newOnly );
 		
@@ -57,7 +57,6 @@ void rab::BuildTempCopiesFolders( Options const& options, Config const& config, 
 void rab::BuildTempCopies( Options const& options, Config const& config, FolderInfo const& rootFolder )
 {
 	Path_t relativePath;
-	fs::create_directories( options.pathToTemp );
 
 	BuildTempCopiesFiles( options, config, relativePath, rootFolder.files_newOnly );
 

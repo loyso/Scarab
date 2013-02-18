@@ -65,6 +65,7 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 				else
 				{
 					fileInfo.isDifferent = true;
+					fs::create_directories( fullTemp.parent_path() );
 					EncodeAndWrite(newFile, oldFile, fullTemp);
 				}
 			}
@@ -79,7 +80,6 @@ void rab::BuildDiffFolders( Options const& options, Config const& config, Path_t
 		FolderInfo& folderInfo = **i;
 		
 		Path_t nextRelativePath = relativePath / folderInfo.name;
-		fs::create_directory( options.pathToTemp / nextRelativePath );
 
 		BuildDiffFiles( options, config, nextRelativePath, folderInfo.files_existInBoth );
 		BuildDiffFolders( options, config, nextRelativePath, folderInfo.folders_existInBoth );
@@ -89,7 +89,6 @@ void rab::BuildDiffFolders( Options const& options, Config const& config, Path_t
 void rab::BuildDiffs( Options const& options, Config const& config, FolderInfo const& rootFolder )
 {
 	Path_t relativePath;
-	fs::create_directories( options.pathToTemp );
 
 	BuildDiffFiles( options, config, relativePath, rootFolder.files_existInBoth );
 	BuildDiffFolders( options, config, relativePath, rootFolder.folders_existInBoth );
