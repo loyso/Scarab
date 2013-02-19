@@ -26,6 +26,7 @@
     <ClCompile Include="..\external\zlib\trees.c" />
     <ClCompile Include="..\external\zlib\uncompr.c" />
     <ClCompile Include="..\external\zlib\zutil.c" />
+    <ClCompile Include="minizip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\external\zlib\contrib\minizip\crypt.h" />
@@ -44,6 +45,7 @@
     <ClInclude Include="..\external\zlib\zconf.h" />
     <ClInclude Include="..\external\zlib\zlib.h" />
     <ClInclude Include="..\external\zlib\zutil.h" />
+    <ClInclude Include="minizip.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{860B9860-D258-409C-BF4A-336542B3439F}</ProjectGuid>
@@ -91,7 +93,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\external\zlib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\external\zlib;$(SolutionDir)\external\zlib\contrib\minizip</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +109,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\external\zlib</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\external\zlib;$(SolutionDir)\external\zlib\contrib\minizip</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
