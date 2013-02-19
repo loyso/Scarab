@@ -11,35 +11,53 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="builder.cpp" />
+    <ClCompile Include="..\external\zlib\adler32.c" />
+    <ClCompile Include="..\external\zlib\compress.c" />
+    <ClCompile Include="..\external\zlib\contrib\minizip\ioapi.c" />
+    <ClCompile Include="..\external\zlib\contrib\minizip\iowin32.c" />
+    <ClCompile Include="..\external\zlib\contrib\minizip\mztools.c" />
+    <ClCompile Include="..\external\zlib\contrib\minizip\unzip.c" />
+    <ClCompile Include="..\external\zlib\contrib\minizip\zip.c" />
+    <ClCompile Include="..\external\zlib\crc32.c" />
+    <ClCompile Include="..\external\zlib\deflate.c" />
+    <ClCompile Include="..\external\zlib\inffast.c" />
+    <ClCompile Include="..\external\zlib\inflate.c" />
+    <ClCompile Include="..\external\zlib\inftrees.c" />
+    <ClCompile Include="..\external\zlib\trees.c" />
+    <ClCompile Include="..\external\zlib\uncompr.c" />
+    <ClCompile Include="..\external\zlib\zutil.c" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\dung\dung.vcxproj">
-      <Project>{da69a041-d12c-447c-bf78-c7e11ec33a49}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\rollaball\rollaball.vcxproj">
-      <Project>{45a9d0e9-7aa9-4de9-88c8-dfed34d44654}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\xdelta\xdelta.vcxproj">
-      <Project>{8f9d37b5-b78e-4816-be61-aef679dbf3bc}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\zlib\zlib.vcxproj">
-      <Project>{860b9860-d258-409c-bf4a-336542b3439f}</Project>
-    </ProjectReference>
+    <ClInclude Include="..\external\zlib\contrib\minizip\crypt.h" />
+    <ClInclude Include="..\external\zlib\contrib\minizip\ioapi.h" />
+    <ClInclude Include="..\external\zlib\contrib\minizip\iowin32.h" />
+    <ClInclude Include="..\external\zlib\contrib\minizip\mztools.h" />
+    <ClInclude Include="..\external\zlib\contrib\minizip\unzip.h" />
+    <ClInclude Include="..\external\zlib\contrib\minizip\zip.h" />
+    <ClInclude Include="..\external\zlib\crc32.h" />
+    <ClInclude Include="..\external\zlib\deflate.h" />
+    <ClInclude Include="..\external\zlib\inffast.h" />
+    <ClInclude Include="..\external\zlib\inffixed.h" />
+    <ClInclude Include="..\external\zlib\inflate.h" />
+    <ClInclude Include="..\external\zlib\inftrees.h" />
+    <ClInclude Include="..\external\zlib\trees.h" />
+    <ClInclude Include="..\external\zlib\zconf.h" />
+    <ClInclude Include="..\external\zlib\zlib.h" />
+    <ClInclude Include="..\external\zlib\zutil.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{98DDBF76-7399-472D-A89B-81DF85840E67}</ProjectGuid>
+    <ProjectGuid>{860B9860-D258-409C-BF4A-336542B3439F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>builder</RootNamespace>
+    <RootNamespace>zlib</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -55,13 +73,15 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>$(SolutionDir)intermediate\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -70,11 +90,11 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\external\zlib</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -86,11 +106,11 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\external\zlib</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>

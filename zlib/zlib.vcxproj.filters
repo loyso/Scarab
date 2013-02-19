@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\external\zlib\adler32.c" />
+    <ClCompile Include="..\external\zlib\compress.c" />
+    <ClCompile Include="..\external\zlib\crc32.c" />
+    <ClCompile Include="..\external\zlib\deflate.c" />
+    <ClCompile Include="..\external\zlib\inffast.c" />
+    <ClCompile Include="..\external\zlib\inflate.c" />
+    <ClCompile Include="..\external\zlib\inftrees.c" />
+    <ClCompile Include="..\external\zlib\trees.c" />
+    <ClCompile Include="..\external\zlib\uncompr.c" />
+    <ClCompile Include="..\external\zlib\zutil.c" />
+    <ClCompile Include="..\external\zlib\contrib\minizip\ioapi.c">
+      <Filter>minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\zlib\contrib\minizip\iowin32.c">
+      <Filter>minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\zlib\contrib\minizip\mztools.c">
+      <Filter>minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\zlib\contrib\minizip\unzip.c">
+      <Filter>minizip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\external\zlib\contrib\minizip\zip.c">
+      <Filter>minizip</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\external\zlib\crc32.h" />
+    <ClInclude Include="..\external\zlib\deflate.h" />
+    <ClInclude Include="..\external\zlib\inffast.h" />
+    <ClInclude Include="..\external\zlib\inffixed.h" />
+    <ClInclude Include="..\external\zlib\inflate.h" />
+    <ClInclude Include="..\external\zlib\inftrees.h" />
+    <ClInclude Include="..\external\zlib\trees.h" />
+    <ClInclude Include="..\external\zlib\zconf.h" />
+    <ClInclude Include="..\external\zlib\zlib.h" />
+    <ClInclude Include="..\external\zlib\zutil.h" />
+    <ClInclude Include="..\external\zlib\contrib\minizip\crypt.h">
+      <Filter>minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\zlib\contrib\minizip\ioapi.h">
+      <Filter>minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\zlib\contrib\minizip\iowin32.h">
+      <Filter>minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\zlib\contrib\minizip\mztools.h">
+      <Filter>minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\zlib\contrib\minizip\unzip.h">
+      <Filter>minizip</Filter>
+    </ClInclude>
+    <ClInclude Include="..\external\zlib\contrib\minizip\zip.h">
+      <Filter>minizip</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="minizip">
+      <UniqueIdentifier>{b0699a84-000b-46a0-b0a1-a8d7d923f6d5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

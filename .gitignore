@@ -1,5 +1,6 @@
 /external/xdelta
 /external/open-vcdiff
+/external/zlib
 /intermediate
 /output
 /doc/bin
