@@ -71,24 +71,25 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 		output.stream << _T("file") << std::endl;
 		output.stream << _T("{") << std::endl;
 
-		if( fileInfo.newSize >= 0 )
+		output.stream << _T("\t") << _T("action=") << ActionToString(fileAction) << std::endl;
+
+		if( fileInfo.newSize >= 0 && fileAction != Action::NONE )
 		{
-			output.stream << _T("\t") << _T("src_path=") << ( relativePath / fileInfo.name ).generic_wstring() << std::endl;
-			output.stream << _T("\t") << _T("src_size=") << fileInfo.newSize << std::endl;
-			output.stream << _T("\t") << _T("src_sha1=") << SHA1ToString(fileInfo.newSha1) << std::endl;
+			output.stream << _T("\t") << _T("new_path=") << ( relativePath / fileInfo.name ).generic_wstring() << std::endl;
+			output.stream << _T("\t") << _T("new_size=") << fileInfo.newSize << std::endl;
+			output.stream << _T("\t") << _T("new_sha1=") << SHA1ToString(fileInfo.newSha1) << std::endl;
 		}
 
 		if( fileInfo.oldSize >= 0 )
 		{
-			output.stream << _T("\t") << _T("dst_path=") << ( relativePath / fileInfo.name ).generic_wstring() << std::endl;
-			output.stream << _T("\t") << _T("dst_size=") << fileInfo.oldSize << std::endl;
-			output.stream << _T("\t") << _T("dst_sha1=") << SHA1ToString(fileInfo.oldSha1) << std::endl;
+			output.stream << _T("\t") << _T("old_path=") << ( relativePath / fileInfo.name ).generic_wstring() << std::endl;
+			output.stream << _T("\t") << _T("old_size=") << fileInfo.oldSize << std::endl;
+			output.stream << _T("\t") << _T("old_sha1=") << SHA1ToString(fileInfo.oldSha1) << std::endl;
 		}
 
 		if( fileInfo.isDifferent )
 			output.stream << _T("\t") << _T("diff_path=") << ( relativePath / DiffFileName(fileInfo.name, config) ).generic_wstring() << std::endl;
 
-		output.stream << _T("\t") << _T("action=") << ActionToString(fileAction) << std::endl;
 		output.stream << _T("}") << std::endl;
 	}
 }
@@ -119,8 +120,8 @@ bool rab::WriteRegistry( Options const& options, Config const& config, FolderInf
 
 	OutputContext output( file );
 
-	output.stream << _T("source_version=") << options.newVersion << std::endl;
-	output.stream << _T("dest_version=") << options.oldVersion << std::endl;
+	output.stream << _T("new_version=") << options.newVersion << std::endl;
+	output.stream << _T("old_version=") << options.oldVersion << std::endl;
 
 	Path_t relativePath;
 	WriteRegistryFolders( options, config, FolderInfo::FolderInfos_t( 1, &rootFolder ), relativePath, output );
