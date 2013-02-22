@@ -1,4 +1,5 @@
 // Based on a sample part of the MiniZip project.
+#include "minizip.h"
 
 #ifndef WIN32
 #	ifndef __USE_FILE_OFFSET64
@@ -25,6 +26,12 @@
 #include <time.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#include <boost/locale.hpp>
+#include <boost/filesystem.hpp>
+
+namespace loc = boost::locale;
+namespace fs = boost::filesystem;
 
 #ifdef WIN32
 #	include <direct.h>
@@ -107,45 +114,6 @@ uLong filetime( char *f, tm_zip *tmzip, uLong *dt )
 }
 #endif
 
-// to encrypt a file, we need known the CRC32 of the file before
-int getFileCrc(const char* filenameinzip,void*buf,unsigned long size_buf,unsigned long* result_crc)
-{
-   unsigned long calculate_crc=0;
-   int err=ZIP_OK;
-   FILE * fin = FOPEN_FUNC(filenameinzip,"rb");
-
-   unsigned long size_read = 0;
-   unsigned long total_read = 0;
-   if (fin==NULL)
-   {
-       err = ZIP_ERRNO;
-   }
-
-    if (err == ZIP_OK)
-        do
-        {
-            err = ZIP_OK;
-            size_read = (int)fread(buf,1,size_buf,fin);
-            if (size_read < size_buf)
-                if (feof(fin)==0)
-            {
-                printf("error in reading %s\n",filenameinzip);
-                err = ZIP_ERRNO;
-            }
-
-            if (size_read>0)
-                calculate_crc = crc32(calculate_crc,(Bytef*)buf,size_read);
-            total_read += size_read;
-
-        } while ((err == ZIP_OK) && (size_read>0));
-
-    if (fin)
-        fclose(fin);
-
-    *result_crc=calculate_crc;
-    return err;
-}
-
 int isLargeFile(const char* filename)
 {
   int largeFile = 0;
@@ -166,118 +134,83 @@ int isLargeFile(const char* filename)
  return largeFile;
 }
 
-int ZipFiles( int argc, char *argv[] )
+zip::ZipArchiveOutput::ZipArchiveOutput( String_t const& archiveName, bool utf8fileNames )
+	: m_archiveName( archiveName )
+	, m_utf8fileNames( utf8fileNames )
+	, opt_compress_level( Z_DEFAULT_COMPRESSION )
+	, password()
+	, err( 0 )
+	, errclose( 0 )
+	, zf()
 {
-    int opt_compress_level=Z_DEFAULT_COMPRESSION;
-    char zipfilename[MAXFILENAME+16];
-    int err=0;
-    int size_buf=0;
-    void* buf=NULL;
-    const char* password=NULL;
-
-    size_buf = WRITEBUFFERSIZE;
-    buf = (void*)malloc(size_buf);
-    if (buf==NULL)
-        return ZIP_INTERNALERROR;
-
-    zipFile zf;
-    int errclose;
+	const fs::path& archiveNamePath = archiveName;
 #ifdef USEWIN32IOAPI
-    zlib_filefunc64_def ffunc;
-    fill_win32_filefunc64A(&ffunc);
-    zf = zipOpen2_64(zipfilename,false,NULL,&ffunc);
+	zlib_filefunc64_def ffunc;
+	fill_win32_filefunc64A(&ffunc);
+	zf = zipOpen2_64(archiveNamePath.generic_string().c_str(),false,NULL,&ffunc);
 #else
-    zf = zipOpen64(zipfilename,false);
+	zf = zipOpen64(archiveNamePath.generic_string().c_str(),false);
 #endif
 
-    if (zf == NULL)
-        err= ZIP_ERRNO;
+	if (zf == NULL)
+		err = ZIP_ERRNO;
+}
 
-    for( int i=0; i<argc && err==ZIP_OK; i++ )
+void zip::ZipArchiveOutput::WriteFile( String_t const& fileName, const void* pMemoryBlock, size_t size )
+{
+    const boost::filesystem::path& filenamePath = fileName;
+	std::string c_str = filenamePath.generic_string();
+	const char* filenameinzip = c_str.c_str();
+    zip_fileinfo zi;
+    unsigned long crcFile=0;
+    int zip64 = 0;
+
+    zi.tmz_date.tm_sec = zi.tmz_date.tm_min = zi.tmz_date.tm_hour =
+    zi.tmz_date.tm_mday = zi.tmz_date.tm_mon = zi.tmz_date.tm_year = 0;
+    zi.dosDate = 0;
+    zi.internal_fa = 0;
+    zi.external_fa = 0;
+    filetime(filenameinzip,&zi.tmz_date,&zi.dosDate);
+    if ((password != NULL) && (err==ZIP_OK))
+	{
+		unsigned long crcFile=0;
+		crcFile = crc32(crcFile,(Bytef*)pMemoryBlock,size);
+	}
+
+    zip64 = false; // isLargeFile(filenameinzip);
+	
+	std::string savefilenameinzip = loc::conv::utf_to_utf<char>( filenamePath.generic_wstring() );
+
+	const uLong zipVersion = 36; // pkzip 6.3.* started to use utf-8 filenames
+	const uLong zipUtf8FilenamesEncoding = 1 << 11;
+
+    err = zipOpenNewFileInZip4_64(zf,savefilenameinzip.c_str(),&zi,
+                        NULL,0,NULL,0,NULL /* comment*/,
+                        (opt_compress_level != 0) ? Z_DEFLATED : 0,
+                        opt_compress_level,0,
+                        -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
+                        password,crcFile, zipVersion, zipUtf8FilenamesEncoding, zip64);
+
+    if (err != ZIP_OK)
+        printf("error in opening %s in zipfile\n",filenameinzip);
+
+    if (err == ZIP_OK)
+		err = zipWriteInFileInZip (zf,pMemoryBlock,size);
+	
+	if (err<0)
+		printf("error in writing %s in the zipfile\n", filenameinzip);
+
+    if (err<0)
+        err=ZIP_ERRNO;
+    else
     {
-        FILE * fin;
-        int size_read;
-        const char* filenameinzip = argv[i];
-        const char *savefilenameinzip;
-        zip_fileinfo zi;
-        unsigned long crcFile=0;
-        int zip64 = 0;
-
-        zi.tmz_date.tm_sec = zi.tmz_date.tm_min = zi.tmz_date.tm_hour =
-        zi.tmz_date.tm_mday = zi.tmz_date.tm_mon = zi.tmz_date.tm_year = 0;
-        zi.dosDate = 0;
-        zi.internal_fa = 0;
-        zi.external_fa = 0;
-        filetime(filenameinzip,&zi.tmz_date,&zi.dosDate);
-        if ((password != NULL) && (err==ZIP_OK))
-            err = getFileCrc(filenameinzip,buf,size_buf,&crcFile);
-
-        zip64 = isLargeFile(filenameinzip);
-
-        /* The path name saved, should not include a leading slash. */
-        /*if it did, windows/xp and dynazip couldn't read the zip file. */
-        savefilenameinzip = filenameinzip;
-        while( savefilenameinzip[0] == '\\' || savefilenameinzip[0] == '/' )
-        {
-            savefilenameinzip++;
-        }
-
-        err = zipOpenNewFileInZip3_64(zf,savefilenameinzip,&zi,
-                            NULL,0,NULL,0,NULL /* comment*/,
-                            (opt_compress_level != 0) ? Z_DEFLATED : 0,
-                            opt_compress_level,0,
-                            -MAX_WBITS, DEF_MEM_LEVEL, Z_DEFAULT_STRATEGY,
-                            password,crcFile, zip64);
-
-        if (err != ZIP_OK)
-            printf("error in opening %s in zipfile\n",filenameinzip);
-        else
-        {
-            fin = FOPEN_FUNC(filenameinzip,"rb");
-            if (fin==NULL)
-            {
-                err=ZIP_ERRNO;
-                printf("error in opening %s for reading\n",filenameinzip);
-            }
-        }
-
-        if (err == ZIP_OK)
-            do
-            {
-                err = ZIP_OK;
-                size_read = (int)fread(buf,1,size_buf,fin);
-                if (size_read < size_buf)
-                    if (feof(fin)==0)
-                {
-                    printf("error in reading %s\n",filenameinzip);
-                    err = ZIP_ERRNO;
-                }
-
-                if (size_read>0)
-                {
-                    err = zipWriteInFileInZip (zf,buf,size_read);
-                    if (err<0)
-                        printf("error in writing %s in the zipfile\n", filenameinzip);
-                }
-            } 
-			while ((err == ZIP_OK) && (size_read>0));
-
-        if (fin)
-            fclose(fin);
-
-        if (err<0)
-            err=ZIP_ERRNO;
-        else
-        {
-            err = zipCloseFileInZip(zf);
-            if (err!=ZIP_OK)
-                printf("error in closing %s in the zipfile\n", filenameinzip);
-        }
+        err = zipCloseFileInZip(zf);
+        if (err!=ZIP_OK)
+            printf("error in closing %s in the zipfile\n", filenameinzip);
     }
-    errclose = zipClose(zf,NULL);
-    if (errclose != ZIP_OK)
-        printf("error in closing %s\n",zipfilename);
+}
 
-    free(buf);
-    return 0;
+void zip::ZipArchiveOutput::Close()
+{
+	errclose = zipClose(zf,NULL);
 }

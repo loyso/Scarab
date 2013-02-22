@@ -3,6 +3,7 @@
 #include "filetree.h"
 
 #include <dung/memoryblock.h>
+#include <zlib/minizip.h>
 
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
@@ -16,13 +17,13 @@ namespace rab
 {
 	typedef fs::path Path_t;
 
-	bool EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp );
+	bool EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp, Path_t const& relativeTemp, PackageOutput_t& output );
 
-	void BuildDiffFiles( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos );
-	void BuildDiffFolders( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FolderInfos_t const& folderInfos );
+	void BuildDiffFiles( Options const& options, Config const& config, Path_t const& relativePath, PackageOutput_t& output, FolderInfo::FileInfos_t const& fileInfos );
+	void BuildDiffFolders( Options const& options, Config const& config, Path_t const& relativePath, PackageOutput_t& output, FolderInfo::FolderInfos_t const& folderInfos );
 }
 
-bool rab::EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp )
+bool rab::EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp, Path_t const& relativeTemp, PackageOutput_t& output )
 {
 	const size_t reservedSize = 2 * ( newFile.size + oldFile.size );
 	dung::MemoryBlock deltaFile( reservedSize );
@@ -33,10 +34,13 @@ bool rab::EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock co
 		return false;
 
 	WriteWholeFile( fullTemp.wstring(), deltaFile );
+
+	output.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size );
+
 	return true;
 }
 
-void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos )
+void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t const& relativePath, PackageOutput_t& output, FolderInfo::FileInfos_t const& fileInfos )
 {
 	for( FolderInfo::FileInfos_t::const_iterator i = fileInfos.begin(); i != fileInfos.end(); ++i )
 	{
@@ -44,7 +48,8 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 		
 		Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
 		Path_t fullOld = options.pathToOld / relativePath / fileInfo.name;
-		Path_t fullTemp = options.pathToTemp / relativePath / DiffFileName(fileInfo.name, config);
+		Path_t relativeTemp = relativePath / DiffFileName(fileInfo.name, config);
+		Path_t fullTemp = options.pathToTemp / relativeTemp;
 
 		dung::MemoryBlock newFile;
 		dung::MemoryBlock oldFile;
@@ -66,14 +71,14 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 				{
 					fileInfo.isDifferent = true;
 					fs::create_directories( fullTemp.parent_path() );
-					EncodeAndWrite(newFile, oldFile, fullTemp);
+					EncodeAndWrite( newFile, oldFile, fullTemp, relativeTemp, output );
 				}
 			}
 		}
 	}
 }
 
-void rab::BuildDiffFolders( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FolderInfos_t const& folderInfos )
+void rab::BuildDiffFolders( Options const& options, Config const& config, Path_t const& relativePath, PackageOutput_t& output, FolderInfo::FolderInfos_t const& folderInfos )
 {
 	for( FolderInfo::FolderInfos_t::const_iterator i = folderInfos.begin(); i != folderInfos.end(); ++i )
 	{
@@ -81,15 +86,15 @@ void rab::BuildDiffFolders( Options const& options, Config const& config, Path_t
 		
 		Path_t nextRelativePath = relativePath / folderInfo.name;
 
-		BuildDiffFiles( options, config, nextRelativePath, folderInfo.files_existInBoth );
-		BuildDiffFolders( options, config, nextRelativePath, folderInfo.folders_existInBoth );
+		BuildDiffFiles( options, config, nextRelativePath, output, folderInfo.files_existInBoth );
+		BuildDiffFolders( options, config, nextRelativePath, output, folderInfo.folders_existInBoth );
 	}
 }
 
-void rab::BuildDiffs( Options const& options, Config const& config, FolderInfo const& rootFolder )
+void rab::BuildDiffs( Options const& options, Config const& config, FolderInfo const& rootFolder, PackageOutput_t& output )
 {
 	Path_t relativePath;
 
-	BuildDiffFiles( options, config, relativePath, rootFolder.files_existInBoth );
-	BuildDiffFolders( options, config, relativePath, rootFolder.folders_existInBoth );
+	BuildDiffFiles( options, config, relativePath, output, rootFolder.files_existInBoth );
+	BuildDiffFolders( options, config, relativePath, output, rootFolder.folders_existInBoth );
 }

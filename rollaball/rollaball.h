@@ -5,10 +5,16 @@
 #include <string>
 #include <vector>
 
+namespace zip
+{
+	class ZipArchiveOutput;
+}
+
 namespace rab
 {
 	typedef _tstring String_t;
 	typedef std::vector< String_t > ConfigValues_t;
+	typedef zip::ZipArchiveOutput PackageOutput_t;
 
 	struct Options
 	{
@@ -16,6 +22,7 @@ namespace rab
 		String_t newVersion, oldVersion;
 		String_t configFile;
 		String_t registryFile;
+		String_t packageFile;
 	};
 
 	struct Config

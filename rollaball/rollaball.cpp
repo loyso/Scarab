@@ -8,17 +8,23 @@
 
 #include "registry.h"
 
+#include <zlib/minizip.h>
+
 void rab::ProcessData( Options const& options, Config const& config )
 {
 	FolderInfo* pRootFolder = SCARAB_NEW FolderInfo();
 
 	BuildFileTree( options.pathToNew, options.pathToOld, *pRootFolder );
 
-	BuildTempCopies( options, config, *pRootFolder );
-	BuildDiffs( options, config, *pRootFolder );
+	zip::ZipArchiveOutput zipOut( options.packageFile, true );
+
+	BuildTempCopies( options, config, *pRootFolder, zipOut );
+	BuildDiffs( options, config, *pRootFolder, zipOut );
 	GatherSha1( options, config, *pRootFolder );
 
 	WriteRegistry( options, config, *pRootFolder, options.registryFile );
+	
+	zipOut.Close();
 
 	delete pRootFolder;
 	pRootFolder = NULL;

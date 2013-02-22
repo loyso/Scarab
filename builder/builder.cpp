@@ -16,6 +16,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("tmp,T", po::wvalue(&options.pathToTemp)->default_value(_T("./temp"),"./temp"), "path to temp folder")
 		("config,C", po::wvalue(&options.configFile), "name of a configuration file.")
 		("registry,R", po::wvalue(&options.registryFile)->default_value(_T("./registry.txt"), "./registry.txt"), "name of output registry file (patch description).")
+		("package,P", po::wvalue(&options.packageFile)->default_value(_T("./package.zip"), "./package.zip"), "name of output package file.")
 		("src_ver", po::wvalue(&options.newVersion), "a name for new version")
 		("dst_ver", po::wvalue(&options.oldVersion), "a name for old version")
 		;
