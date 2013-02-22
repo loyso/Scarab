@@ -47,6 +47,7 @@
       <Filter>zlib</Filter>
     </ClCompile>
     <ClCompile Include="minizip.cpp" />
+    <ClCompile Include="miniunzip.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\external\zlib\contrib\minizip\crypt.h">
@@ -98,6 +99,7 @@
       <Filter>zlib</Filter>
     </ClInclude>
     <ClInclude Include="minizip.h" />
+    <ClInclude Include="miniunzip.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="minizip">

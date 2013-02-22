@@ -26,6 +26,7 @@
     <ClCompile Include="..\external\zlib\trees.c" />
     <ClCompile Include="..\external\zlib\uncompr.c" />
     <ClCompile Include="..\external\zlib\zutil.c" />
+    <ClCompile Include="miniunzip.cpp" />
     <ClCompile Include="minizip.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -45,6 +46,7 @@
     <ClInclude Include="..\external\zlib\zconf.h" />
     <ClInclude Include="..\external\zlib\zlib.h" />
     <ClInclude Include="..\external\zlib\zutil.h" />
+    <ClInclude Include="miniunzip.h" />
     <ClInclude Include="minizip.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
