@@ -2,6 +2,9 @@
 
 #include "filetree.h"
 
+#include <dung/memoryblock.h>
+#include <zlib/minizip.h>
+
 #include <fstream>
 
 #include <boost/filesystem.hpp>
@@ -112,20 +115,27 @@ void rab::WriteRegistryFolders( Options const& options, Config const& config, Fo
 	}
 }
 
-bool rab::WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, String_t const& filePath )
+bool rab::WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, PackageOutput_t& output )
 {
-	std::wofstream file ( filePath, std::ios::out|std::ios::trunc );
+	std::wofstream file ( REGISTRY_FILENAME, std::ios::out|std::ios::trunc );
 	if( !file.is_open() )
 		return false;
 
-	OutputContext output( file );
+	OutputContext os( file );
 
-	output.stream << _T("new_version=") << options.newVersion << std::endl;
-	output.stream << _T("old_version=") << options.oldVersion << std::endl;
+	os.stream << _T("new_version=") << options.newVersion << std::endl;
+	os.stream << _T("old_version=") << options.oldVersion << std::endl;
 
 	Path_t relativePath;
-	WriteRegistryFolders( options, config, FolderInfo::FolderInfos_t( 1, &rootFolder ), relativePath, output );
+	WriteRegistryFolders( options, config, FolderInfo::FolderInfos_t( 1, &rootFolder ), relativePath, os );
 
 	file.close();
+
+	dung::MemoryBlock registryFileContent;
+	if( !dung::ReadWholeFile( REGISTRY_FILENAME, registryFileContent ) )
+		return false;
+
+	output.WriteFile( REGISTRY_FILENAME, registryFileContent.pBlock, registryFileContent.size );
+
 	return true;
 }

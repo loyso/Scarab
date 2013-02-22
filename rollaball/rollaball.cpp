@@ -22,8 +22,8 @@ void rab::ProcessData( Options const& options, Config const& config )
 	BuildDiffs( options, config, *pRootFolder, zipOut );
 	GatherSha1( options, config, *pRootFolder );
 
-	WriteRegistry( options, config, *pRootFolder, options.registryFile );
-	
+	WriteRegistry( options, config, *pRootFolder, zipOut );	
+
 	zipOut.Close();
 
 	delete pRootFolder;

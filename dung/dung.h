@@ -29,3 +29,5 @@
 #	define _tmain main
 #	define _tstring std::string
 #endif
+
+extern const _TCHAR REGISTRY_FILENAME[];

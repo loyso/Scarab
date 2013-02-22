@@ -9,5 +9,5 @@ namespace rab
 
 namespace rab
 {
-	bool WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, String_t const& filePath );
+	bool WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, PackageOutput_t& output );
 }
