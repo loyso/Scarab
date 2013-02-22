@@ -1,6 +1,9 @@
 #include <iostream>
 #include <fstream>
+
 #include <boost/program_options.hpp>
+#include <boost/locale.hpp>
+#include <boost/filesystem.hpp>
 
 #include <rollaball/rollaball.h>
 
@@ -45,35 +48,33 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		std::cout << config_file_options << "\n";
 	}
 
+	std::ifstream ifs;
 	if( !options.configFile.empty() )
 	{
-		std::ifstream ifs(options.configFile.c_str());
+		ifs.open(options.configFile.c_str());
 		if (!ifs)
 		{
 			std::wcout << _T("can not open config file: ") << options.configFile << _T("\n");
 			return 1;
 		}
-		else
-		{
-			po::store(po::parse_config_file(ifs, config_file_options), vm, true);
-			po::notify(vm);
-		}
 	}
+
+	po::store(po::parse_config_file(ifs, config_file_options), vm, true);
+	po::notify(vm);
 
 	return 0;
 }
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	setlocale(LC_ALL, "");
-
-	// Consider to use Boost.Locale
-	// std::locale::global(boost::locale::generator().generate(""));
-	// boost::filesystem::path::imbue(std::locale());
-
 #ifdef _MSC_VER
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
+
+	setlocale(LC_ALL, ""); // WinConsole to show wchar_t
+
+	std::locale loc2 = std::locale::global(boost::locale::generator().generate(""));
+	// boost::filesystem::path::imbue(std::locale());
 
 	int result = 1;
 
@@ -93,5 +94,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	rab::ProcessData( options, config );
 
+	std::locale::global(std::locale::classic());
+	
 	return 0;
 }

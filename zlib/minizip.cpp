@@ -134,22 +134,23 @@ int isLargeFile(const char* filename)
  return largeFile;
 }
 
-zip::ZipArchiveOutput::ZipArchiveOutput( String_t const& archiveName, bool utf8fileNames )
+zip::ZipArchiveOutput::ZipArchiveOutput( String_t const& archiveName, bool utf8fileNames, int compressionLevel )
 	: m_archiveName( archiveName )
 	, m_utf8fileNames( utf8fileNames )
-	, opt_compress_level( Z_DEFAULT_COMPRESSION )
+	, opt_compress_level( compressionLevel )
 	, password()
 	, err( 0 )
 	, errclose( 0 )
 	, zf()
 {
 	const fs::path& archiveNamePath = archiveName;
+	std::string zipArchiveName = archiveNamePath.generic_string();
 #ifdef USEWIN32IOAPI
 	zlib_filefunc64_def ffunc;
 	fill_win32_filefunc64A(&ffunc);
-	zf = zipOpen2_64(archiveNamePath.generic_string().c_str(),false,NULL,&ffunc);
+	zf = zipOpen2_64(zipArchiveName.c_str(),false,NULL,&ffunc);
 #else
-	zf = zipOpen64(archiveNamePath.generic_string().c_str(),false);
+	zf = zipOpen64(zipArchiveName.c_str(),false);
 #endif
 
 	if (zf == NULL)

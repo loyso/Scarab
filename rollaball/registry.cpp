@@ -4,7 +4,6 @@
 
 #include <fstream>
 
-#include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
@@ -114,9 +113,7 @@ void rab::WriteRegistryFolders( Options const& options, Config const& config, Fo
 
 bool rab::WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, String_t const& filePath )
 {
-	std::locale loc = boost::locale::generator().generate(""); // system + utf-8 by default
 	std::wofstream file ( filePath, std::ios::out|std::ios::trunc );
-	file.imbue(loc);
 	if( !file.is_open() )
 		return false;
 

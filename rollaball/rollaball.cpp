@@ -16,7 +16,7 @@ void rab::ProcessData( Options const& options, Config const& config )
 
 	BuildFileTree( options.pathToNew, options.pathToOld, *pRootFolder );
 
-	zip::ZipArchiveOutput zipOut( options.packageFile, true );
+	zip::ZipArchiveOutput zipOut( options.packageFile, true, zip::CompressionLevel::NO_COMPRESSION );
 
 	BuildTempCopies( options, config, *pRootFolder, zipOut );
 	BuildDiffs( options, config, *pRootFolder, zipOut );
