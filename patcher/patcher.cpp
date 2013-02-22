@@ -12,8 +12,8 @@ int ParseCommandLine( int argc, _TCHAR** argv, hatch::Options& options )
 	po::options_description command_line_options("Command line options");
 	command_line_options.add_options()
 		("help,H", "produce help message")
-		("package,P", po::wvalue(&options.pathToPackage)->required(), "path to new content folder")
-		("old,O", po::wvalue(&options.pathToOld)->required(), "path to old content folder")
+		("package,P", po::value(&options.pathToPackage)->required(), "path to new content folder")
+		("old,O", po::value(&options.pathToOld)->required(), "path to old content folder")
 		("quiet,Q", po::bool_switch(&options.quiet)->default_value(false), "quiet mode")
 		("reportFile,F", po::bool_switch(&options.reportFile)->default_value(false), "report each file")
 		("verbose,V", po::bool_switch(&options.verbose)->default_value(false), "report everything")
@@ -53,10 +53,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		std::cerr << e.what() << "\n";
 	}
 
-	hatch::ProcessData( options );
-
 	if( result )
 		return result;
+
+	hatch::ProcessData( options );
 
 	return 0;
 }

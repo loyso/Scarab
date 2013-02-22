@@ -6,7 +6,7 @@
 
 namespace hatch
 {
-	typedef _tstring String_t;
+	typedef std::string String_t;
 
 	struct Options
 	{
