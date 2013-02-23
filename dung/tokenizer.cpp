@@ -20,37 +20,36 @@ dung::CharacterSet::~CharacterSet()
 
 void dung::CharacterSet::AddChar( unsigned char ch )
 {
-	mh [ ch ] = 1;
+	mh[ ch ] = 1;
 	return;
 }
 
 void dung::CharacterSet::AddChar( unsigned char chMin, unsigned char chMax )
 {
 	for( int i = chMin;  i <= chMax;  i++ )
-		mh [ i ] = 1;
+		mh[ i ] = 1;
 }
 
 void dung::CharacterSet::RemoveChar( unsigned char ch )
 {
-	mh [ ch ] = 0;
+	mh[ ch ] = 0;
 	return;
 }
 
 void dung::CharacterSet::RemoveChar( unsigned char chMin, unsigned char chMax )
 {
 	for( int i = chMin;  i <= chMax;  i++ )
-		mh [ i ] = 0;
+		mh[ i ] = 0;
 }
 
 bool dung::CharacterSet::IsHere( unsigned char ch ) const
 {
-	return( mh [ ch ] != 0 );
+	return mh[ ch ] != 0;
 }
 
 void dung::CharacterSet::Clear()
 {
 	memset( mh, 0, sizeof(char) * 256 );
-	return;
 }
 
 
@@ -64,7 +63,6 @@ dung::TextTokenizer::TextTokenizer() :
 	mhSymbol( '\0' ),
 	m_pPos( NULL )
 {
-	SetDefaultCharsets();
 }
 
 dung::TextTokenizer::~TextTokenizer()
@@ -268,6 +266,38 @@ void dung::TextTokenizer::SetCharacterRule( char chMin, char chMax, CharacterPar
 	}
 }
 
+
+void dung::TextTokenizer::ClearCharsets()
+{
+	m_wordStartSet.Clear();
+	m_stringQuotaSet.Clear();
+	m_numberStartSet.Clear();
+	m_symbolSet.Clear();
+	m_wordSet.Clear();
+	m_numberSet.Clear();
+}
+
+void dung::TextTokenizer::SetUtf8Charsets()
+{
+	m_wordStartSet.Clear();
+	m_wordStartSet.AddChar( (unsigned char)0x21, (unsigned char)0x7E ); // ASCII.
+	m_wordStartSet.AddChar( (unsigned char)0x80, (unsigned char)0xff ); // UTF8 bits.
+
+	m_wordSet.Clear();
+	m_wordSet.AddChar( (unsigned char)0x21, (unsigned char)0x7E ); // ASCII.
+	m_wordSet.AddChar( (unsigned char)0x80, (unsigned char)0xff ); // UTF8 bits.
+
+	m_stringQuotaSet.Clear();
+	m_stringQuotaSet.AddChar( '\"' );
+	m_wordStartSet.RemoveChar( '\"' );
+
+	m_numberStartSet.Clear();
+	m_numberSet.Clear();
+
+	m_symbolSet.Clear();
+	m_symbolSet.AddChar( '\n' );
+}
+
 void dung::TextTokenizer::SetDefaultCharsets()
 {
 	m_wordStartSet.Clear();
@@ -291,6 +321,7 @@ void dung::TextTokenizer::SetDefaultCharsets()
 	m_symbolSet.AddChar( ':', '@' );
 	m_symbolSet.AddChar( '[', '`' );
 	m_symbolSet.AddChar( '{', (unsigned char) 0xff );
+	m_symbolSet.AddChar( '\n' );
 
 	m_wordSet.Clear();
 	m_wordSet.AddChar( 'A', 'Z' );

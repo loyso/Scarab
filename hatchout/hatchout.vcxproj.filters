@@ -2,8 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="hatchout.cpp" />
+    <ClCompile Include="registry_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hatchout.h" />
+    <ClInclude Include="registry_parser.h" />
   </ItemGroup>
 </Project>

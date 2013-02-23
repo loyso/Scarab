@@ -31,3 +31,11 @@
 #endif
 
 extern const _TCHAR REGISTRY_FILENAME[];
+
+template< typename T >
+void DeleteContainer( T& container )
+{
+	for( T::iterator i = container.begin(); i != container.end(); ++i )
+		delete *i;
+	container.clear();
+}

@@ -41,6 +41,7 @@ namespace rab
 	void WriteRegistryFolders( Options const& options, Config const& config, FolderInfo::FolderInfos_t const& folderInfos, Path_t const& relativePath, OutputContext& output );
 
 	const _TCHAR endl = '\n';
+	const _TCHAR quote = '\"';
 }
 
 rab::OutputContext::OutputContext( OutputStream_t& stream )
@@ -80,20 +81,20 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 
 		if( fileInfo.newSize >= 0 && fileAction != Action::NONE )
 		{
-			output.stream << _T("\t") << _T("new_path=") << ( relativePath / fileInfo.name ).generic_wstring() << endl;
+			output.stream << _T("\t") << _T("new_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
 			output.stream << _T("\t") << _T("new_size=") << fileInfo.newSize << endl;
 			output.stream << _T("\t") << _T("new_sha1=") << SHA1ToString(fileInfo.newSha1) << endl;
 		}
 
 		if( fileInfo.oldSize >= 0 )
 		{
-			output.stream << _T("\t") << _T("old_path=") << ( relativePath / fileInfo.name ).generic_wstring() << endl;
+			output.stream << _T("\t") << _T("old_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
 			output.stream << _T("\t") << _T("old_size=") << fileInfo.oldSize << endl;
 			output.stream << _T("\t") << _T("old_sha1=") << SHA1ToString(fileInfo.oldSha1) << endl;
 		}
 
 		if( fileInfo.isDifferent )
-			output.stream << _T("\t") << _T("diff_path=") << ( relativePath / DiffFileName(fileInfo.name, config) ).generic_wstring() << endl;
+			output.stream << _T("\t") << _T("diff_path=") << quote << ( relativePath / DiffFileName(fileInfo.name, config) ).generic_wstring() << quote << endl;
 
 		output.stream << _T("}") << endl;
 	}

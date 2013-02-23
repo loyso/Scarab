@@ -12,9 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="hatchout.cpp" />
+    <ClCompile Include="registry_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hatchout.h" />
+    <ClInclude Include="registry_parser.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{74C2AD2E-D568-46F7-9E81-8A9AB5E9854F}</ProjectGuid>

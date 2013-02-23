@@ -21,14 +21,6 @@ namespace rab
 
 	void CreateFilesInTree( VectorString_t const& v, FolderInfo::FileInfos_t& fileInfos );
 	void CreateFoldersInTree( VectorString_t const& v, FolderInfo::FolderInfos_t& folderInfos );
-
-	template< typename T >
-	void DeleteContainer( T& container )
-	{
-		for( T::iterator i = container.begin(); i != container.end(); ++i )
-			delete *i;
-		container.clear();
-	}
 }
 
 
