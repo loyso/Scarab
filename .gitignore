@@ -4,5 +4,6 @@
 /intermediate
 /output
 /doc/bin
+/data
 *.suo
 *.vcxproj.user
