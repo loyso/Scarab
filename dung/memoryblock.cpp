@@ -28,9 +28,20 @@ bool dung::Equals( MemoryBlock const& block1, MemoryBlock const& block2 )
 	return memcmp( block1.pBlock, block2.pBlock, block1.size ) == 0;
 }
 
-bool dung::ReadWholeFile( String_t const& fullPath, MemoryBlock& memoryBlock )
+bool dung::ReadWholeFile( std::wstring const& fullPath, MemoryBlock& memoryBlock )
 {
 	std::ifstream file ( fullPath, std::ios::in|std::ios::binary|std::ios::ate );
+	return ReadWholeFile( file, memoryBlock );
+}
+
+bool dung::ReadWholeFile( std::string const& fullPath, MemoryBlock& memoryBlock )
+{
+	std::ifstream file ( fullPath, std::ios::in|std::ios::binary|std::ios::ate );
+	return ReadWholeFile( file, memoryBlock );
+}
+
+bool dung::ReadWholeFile( std::ifstream& file, MemoryBlock& memoryBlock )
+{
 	if( !file.is_open() )
 		return false;
 
@@ -45,9 +56,20 @@ bool dung::ReadWholeFile( String_t const& fullPath, MemoryBlock& memoryBlock )
 	return true;
 }
 
-bool dung::WriteWholeFile( String_t const& fullPath, MemoryBlock& memoryBlock )
+bool dung::WriteWholeFile( std::wstring const& fullPath, MemoryBlock& memoryBlock )
 {
 	std::ofstream file ( fullPath, std::ios::out|std::ios::binary|std::ios::trunc );
+	return WriteWholeFile( file, memoryBlock );
+}
+
+bool dung::WriteWholeFile( std::string const& fullPath, MemoryBlock& memoryBlock )
+{
+	std::ofstream file ( fullPath, std::ios::out|std::ios::binary|std::ios::trunc );
+	return WriteWholeFile( file, memoryBlock );
+}
+
+bool dung::WriteWholeFile( std::ofstream& file, MemoryBlock& memoryBlock )
+{
 	if( !file.is_open() )
 		return false;
 
@@ -55,4 +77,3 @@ bool dung::WriteWholeFile( String_t const& fullPath, MemoryBlock& memoryBlock )
 	file.close();
 	return true;
 }
-

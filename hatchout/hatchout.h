@@ -7,6 +7,7 @@
 namespace hatch
 {
 	typedef std::string String_t;
+	typedef std::ostream LogOutput_t;
 
 	struct Options
 	{
@@ -21,5 +22,5 @@ namespace hatch
 		bool checkOldSha1;
 	};
 
-	void ProcessData( Options const& options );
+	void ProcessData( Options const& options, LogOutput_t& out );
 }

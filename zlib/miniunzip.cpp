@@ -49,7 +49,7 @@
     filename : the filename of the file where date/time must be modified
     dosdate : the new date at the MSDos format (4 bytes)
     tmu_date : the SAME new date at the tm_unz format */
-void change_file_date( const char *filename, uLong dosdate, tm_unz tmu_date )
+void ChangeFileDate( const char *filename, uLong dosdate, tm_unz tmu_date )
 {
 #ifdef WIN32
   HANDLE hFile;
@@ -82,9 +82,7 @@ void change_file_date( const char *filename, uLong dosdate, tm_unz tmu_date )
 }
 
 
-/* mymkdir and change_file_date are not 100 % portable
-   As I don't know well Unix, I wait feedback for the unix portion */
-int mymkdir( const char* dirname )
+int zip::ZipCreateDirectory( const char* dirname )
 {
     int ret=0;
 #ifdef WIN32
@@ -95,30 +93,31 @@ int mymkdir( const char* dirname )
     return ret;
 }
 
-int makedir( const char *newdir )
+bool zip::ZipCreateDirectories( const char *newdir )
 {
 	char *buffer ;
 	char *p;
 	int  len = (int)strlen(newdir);
 
 	if (len <= 0)
-		return 0;
+		return false;
 
 	buffer = (char*)malloc(len+1);
 	if (buffer==NULL)
 	{
 		printf("Error allocating memory\n");
-		return UNZ_INTERNALERROR;
+		return false;
 	}
 	strcpy(buffer,newdir);
 
 	if (buffer[len-1] == '/') {
 		buffer[len-1] = '\0';
 	}
-	if (mymkdir(buffer) == 0)
+
+	if (ZipCreateDirectory(buffer) == 0)
 	{
 		free(buffer);
-		return 1;
+		return true;
 	}
 
 	p = buffer+1;
@@ -130,18 +129,18 @@ int makedir( const char *newdir )
 			p++;
 		hold = *p;
 		*p = 0;
-		if ((mymkdir(buffer) == -1) && (errno == ENOENT))
+		if ((ZipCreateDirectory(buffer) == -1) && (errno == ENOENT))
 		{
 			printf("couldn't create directory %s\n",buffer);
 			free(buffer);
-			return 0;
+			return false;
 		}
 		if (hold == 0)
 			break;
 		*p++ = hold;
 	}
 	free(buffer);
-	return 1;
+	return true;
 }
 
 zip::ZipArchiveInput::ZipArchiveInput( String_t const& archiveName )

@@ -22,4 +22,7 @@ namespace zip
 		typedef void* UnzipFile_t;
 		UnzipFile_t uf;
 	};
+
+	int ZipCreateDirectory( const char* path );
+	bool ZipCreateDirectories( const char *path );
 }

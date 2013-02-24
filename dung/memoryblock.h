@@ -7,7 +7,6 @@
 namespace dung
 {
 	typedef unsigned char Byte_t;
-	typedef _tstring String_t;
 
 	struct MemoryBlock
 	{
@@ -19,7 +18,13 @@ namespace dung
 		size_t size;
 	};
 
-	bool ReadWholeFile( String_t const& fullPath, MemoryBlock& memoryBlock );
-	bool WriteWholeFile( String_t const& fullPath, MemoryBlock& memoryBlock );
+	bool ReadWholeFile( std::wstring const& fullPath, MemoryBlock& memoryBlock );
+	bool ReadWholeFile( std::string const& fullPath, MemoryBlock& memoryBlock );
+	bool ReadWholeFile( std::ifstream& in, MemoryBlock& memoryBlock );
+	
+	bool WriteWholeFile( std::wstring const& fullPath, MemoryBlock& memoryBlock );
+	bool WriteWholeFile( std::string const& fullPath, MemoryBlock& memoryBlock );
+	bool WriteWholeFile( std::ofstream& out, MemoryBlock& memoryBlock );
+	
 	bool Equals( MemoryBlock const& block1, MemoryBlock const& block2 );
 }

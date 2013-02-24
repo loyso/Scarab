@@ -3,9 +3,11 @@
   <ItemGroup>
     <ClCompile Include="hatchout.cpp" />
     <ClCompile Include="registry_parser.cpp" />
+    <ClCompile Include="apply_actions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hatchout.h" />
     <ClInclude Include="registry_parser.h" />
+    <ClInclude Include="apply_actions.h" />
   </ItemGroup>
 </Project>

@@ -11,10 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="apply_actions.cpp" />
     <ClCompile Include="hatchout.cpp" />
     <ClCompile Include="registry_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="apply_actions.h" />
     <ClInclude Include="hatchout.h" />
     <ClInclude Include="registry_parser.h" />
   </ItemGroup>

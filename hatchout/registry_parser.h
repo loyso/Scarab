@@ -46,7 +46,9 @@ namespace hatch
 
 		String_t newVersion;
 		String_t oldVersion;
-		std::vector< RegistryAction* > actions;
+
+		typedef std::vector< RegistryAction* > Actions_t;
+		Actions_t actions;
 	};
 
 	struct RegistryAction

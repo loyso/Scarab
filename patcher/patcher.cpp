@@ -56,7 +56,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	if( result )
 		return result;
 
-	hatch::ProcessData( options );
+	hatch::ProcessData( options, std::cout );
 
 	return 0;
 }

@@ -4,8 +4,9 @@
 #include <zlib/miniunzip.h>
 
 #include "registry_parser.h"
+#include "apply_actions.h"
 
-void hatch::ProcessData( Options const& options )
+void hatch::ProcessData( Options const& options, LogOutput_t& out )
 {
 	zip::ZipArchiveInput zipInput( options.pathToPackage );
 
@@ -19,6 +20,8 @@ void hatch::ProcessData( Options const& options )
 		parser.Parse( registry );
 		parser.Close();
 	}
+
+	ApplyActions( options, registry, zipInput, out );
 
 	zipInput.Close();
 }
