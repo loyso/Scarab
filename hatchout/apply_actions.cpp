@@ -46,17 +46,27 @@ bool hatch::CreateNewFile( Options const& options, RegistryAction const& action,
 {
 	dung::MemoryBlock memoryBlock;
 	if( !zipInput.ReadFile( action.new_path, memoryBlock.pBlock, memoryBlock.size ) )
+	{
+		out << "Can't unzip file " << action.new_path << std::endl;
 		return false;
+	}
 
 	String_t dirPath;
-	if( !ParentPath( FullPath( options, action.new_path ), dirPath ) )
+	String_t fullPathNew = FullPath( options, action.new_path );
+	if( !ParentPath( fullPathNew, dirPath ) )
 		return false;
 
 	if( !zip::ZipCreateDirectories( dirPath.c_str() ) )
+	{
+		out << "Can't create directory " << dirPath << std::endl;
 		return false;
+	}
 
-	if( !dung::WriteWholeFile( FullPath( options, action.new_path ), memoryBlock ) )
+	if( !dung::WriteWholeFile( fullPathNew, memoryBlock ) )
+	{
+		out << "Can't write file " << fullPathNew << std::endl;
 		return false;
+	}
 
 	return true;
 }
@@ -65,23 +75,36 @@ bool hatch::ApplyDiff( Options const& options, RegistryAction const& action, zip
 {
 	dung::MemoryBlock diffBlock;
 	if( !zipInput.ReadFile( action.diff_path, diffBlock.pBlock, diffBlock.size ) )
+	{
+		out << "Can't unzip file " << action.diff_path << std::endl;
 		return false;
+	}
 
 	dung::MemoryBlock oldFile;
-	if( !ReadWholeFile( FullPath( options, action.old_path ), oldFile ) )
+	String_t fullPathOld = FullPath( options, action.old_path );
+	if( !ReadWholeFile( fullPathOld, oldFile ) )
+	{
+		out << "Can't read file " << fullPathOld << std::endl;
 		return false;
+	}
 
 	dung::MemoryBlock newFile( action.newSize );
 
 	size_t size;
 	int ret = xd3_decode_memory( diffBlock.pBlock, diffBlock.size, oldFile.pBlock, oldFile.size, newFile.pBlock, &size, newFile.size, 0 );
 	if( ret != 0 )
+	{
+		out << "Can't decode file " << action.diff_path << " error code=" << ret << std::endl;
 		return false;
+	}
 
-	SCARAB_ASSERT( size == newFile.size );
+	SCARAB_ASSERT( size == action.newSize );
 
-	if( !WriteWholeFile( FullPath( options, action.old_path ), newFile ) )
+	if( !WriteWholeFile( fullPathOld, newFile ) )
+	{
+		out << "Can't write file " << fullPathOld << std::endl;
 		return false;
+	}
 
 	return true;
 }
@@ -89,7 +112,11 @@ bool hatch::ApplyDiff( Options const& options, RegistryAction const& action, zip
 bool hatch::DeleteOldFile( Options const& options, RegistryAction const& action, LogOutput_t& out )
 {
 	String_t fullPath = FullPath( options, action.old_path );
-	return !::remove( fullPath.c_str() );
+	bool result = !::remove( fullPath.c_str() );
+	if( !result )
+		out << "Can't delete file " << fullPath << std::endl;
+
+	return result;
 }
 
 
