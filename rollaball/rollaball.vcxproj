@@ -15,7 +15,7 @@
     <ClCompile Include="filediff.cpp" />
     <ClCompile Include="filesha1.cpp" />
     <ClCompile Include="filetree.cpp" />
-    <ClCompile Include="registry.cpp" />
+    <ClCompile Include="registry_creator.cpp" />
     <ClCompile Include="rollaball.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -23,7 +23,7 @@
     <ClInclude Include="filediff.h" />
     <ClInclude Include="filesha1.h" />
     <ClInclude Include="filetree.h" />
-    <ClInclude Include="registry.h" />
+    <ClInclude Include="registry_creator.h" />
     <ClInclude Include="rollaball.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

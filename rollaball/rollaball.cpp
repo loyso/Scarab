@@ -6,7 +6,7 @@
 #include "filediff.h"
 #include "filesha1.h"
 
-#include "registry.h"
+#include "registry_creator.h"
 
 #include <zlib/minizip.h>
 

@@ -29,7 +29,7 @@ void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 		dung::MemoryBlock newFile;
 		if( dung::ReadWholeFile( fullNew.wstring(), newFile ) )
 		{
-			int sha1result = SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
+			int sha1result = dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
 			if( sha1result == shaSuccess )
 			{
 				fileInfo.newSize = newFile.size;

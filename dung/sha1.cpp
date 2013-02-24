@@ -392,19 +392,23 @@ void SHA1PadMessage ( SHA1Context *context )
 	return;
 }
 
-// helpers
+namespace dung
+{
+	const int SHA1StringSize = SHA1HashSize * 2 + 1;
+	bool CharToByte( char c, unsigned char& byte );
+}
 
-Sha1::Sha1()
+dung::Sha1::Sha1()
 {
 	memset( digest, 0, sizeof(digest) );
 }
 
-bool Sha1::operator==( Sha1 const& other ) const
+bool dung::Sha1::operator==( Sha1 const& other ) const
 {
 	return memcmp( digest, other.digest, sizeof(digest) ) == 0;
 }
 
-int SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
+int dung::SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
 {
 	SHA1Context context;
 
@@ -419,10 +423,8 @@ int SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
 	return SHA1Result( &context, sha1.digest );
 }
 
-_tstring SHA1ToString( Sha1 const& sha1 )
+_tstring dung::SHA1ToString( Sha1 const& sha1 )
 {
-	static const int SHA1StringSize = SHA1HashSize * 2 + 1;
-
 	_TCHAR output[SHA1StringSize+1];
 
 	for (int i = 0; i < SHA1HashSize; i++)
@@ -440,4 +442,55 @@ _tstring SHA1ToString( Sha1 const& sha1 )
 	return result;
 }
 
+std::string dung::SHA1ToStringTest( Sha1 const& sha1 )
+{
+	char output[SHA1StringSize+1];
 
+	for (int i = 0; i < SHA1HashSize; i++)
+		sprintf(output + (i * 2), "%02X", sha1.digest[i]);
+
+	output[SHA1StringSize] = 0;
+
+	return output;
+}
+
+bool dung::CharToByte( char c, unsigned char& byte )
+{
+	if( c >= '0' && c <= '9' )
+	{
+		byte = c - '0';
+		return true;
+	}
+	if( c >= 'a' && c <= 'f' )
+	{
+		byte = c - 'a' + 10;
+		return true;
+	}
+	if( c >= 'A' && c <= 'F' )
+	{
+		byte = c - 'A' + 10;
+		return true;
+	}
+	
+	return false;
+}
+
+bool dung::StringToSHA1( const char* parse, Sha1& sha1 )
+{
+	int size = strlen( parse );
+	if( size+1 != SHA1StringSize )
+		return false;
+
+	for (int i = 0; i < SHA1HashSize; i++)
+	{
+		unsigned char hi, lo;
+		if( !CharToByte( parse[i*2], hi ) )
+			return false;
+		if( !CharToByte( parse[i*2+1], lo ) )
+			return false;
+
+		sha1.digest[i] = ( hi << 4 ) | lo;
+	}
+
+	return true;
+}

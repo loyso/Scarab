@@ -94,13 +94,17 @@ int SHA1Input( SHA1Context *, const uint8_t *, unsigned );
 ///		sha Error Code.
 int SHA1Result( SHA1Context *, uint8_t Message_Digest[SHA1HashSize] );
 
-/// Helpers
-struct Sha1
+namespace dung
 {
-	Sha1();
-	unsigned char digest[SHA1HashSize];
-	bool operator==( Sha1 const& other ) const;
-};
+	struct Sha1
+	{
+		Sha1();
+		unsigned char digest[SHA1HashSize];
+		bool operator==( Sha1 const& other ) const;
+	};
 
-int SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 );
-_tstring SHA1ToString( Sha1 const& sha1 );
+	int SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 );
+	_tstring SHA1ToString( Sha1 const& sha1 );
+	std::string SHA1ToStringTest( Sha1 const& sha1 );
+	bool StringToSHA1( const char* parse, Sha1& sha1 );
+}

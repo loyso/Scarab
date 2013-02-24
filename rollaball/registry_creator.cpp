@@ -1,8 +1,9 @@
-#include "registry.h"
+#include "registry_creator.h"
 
 #include "filetree.h"
 
 #include <dung/memoryblock.h>
+#include <dung/registry.h>
 #include <zlib/minizip.h>
 
 #include <fstream>
@@ -22,22 +23,7 @@ namespace rab
 		OutputStream_t& stream;
 	};
 
-	namespace Action
-	{
-		enum Enum
-		{
-			  NEW
-			, DELETE
-			, MOVE
-			, APPLY_DIFF
-			, NONE
-			, NEW_BUT_NOT_INCLUDED
-		};
-	}
-
-	String_t ActionToString( Action::Enum action );
-
-	void WriteRegistryFiles( Options const& options, Config const& config, FolderInfo::FileInfos_t const& fileInfos, Action::Enum action, Path_t const& relativePath, OutputContext& output );
+	void WriteRegistryFiles( Options const& options, Config const& config, FolderInfo::FileInfos_t const& fileInfos, dung::Action::Enum action, Path_t const& relativePath, OutputContext& output );
 	void WriteRegistryFolders( Options const& options, Config const& config, FolderInfo::FolderInfos_t const& folderInfos, Path_t const& relativePath, OutputContext& output );
 
 	const _TCHAR endl = '\n';
@@ -49,48 +35,31 @@ rab::OutputContext::OutputContext( OutputStream_t& stream )
 {
 }
 
-rab::String_t rab::ActionToString( Action::Enum action )
-{
-	switch( action )
-	{
-		case Action::NEW: return _T("new");
-		case Action::DELETE: return _T("delete");
-		case Action::MOVE: return _T("move");
-		case Action::APPLY_DIFF: return _T("apply_diff");
-		case Action::NONE: return _T("none");
-		case Action::NEW_BUT_NOT_INCLUDED: return _T("new_but_not_included");
-	}
-
-	SCARAB_ASSERT( false && _T("unknown Action enum entry") );
-	return _T("unknown");
-}
-
-
 void rab::WriteRegistryFiles( Options const& options, Config const& config, 
-	FolderInfo::FileInfos_t const& fileInfos, Action::Enum action, Path_t const& relativePath, OutputContext& output )
+	FolderInfo::FileInfos_t const& fileInfos, dung::Action::Enum action, Path_t const& relativePath, OutputContext& output )
 {
 	for( FolderInfo::FileInfos_t::const_iterator i = fileInfos.begin(); i != fileInfos.end(); ++i )
 	{
 		FileInfo const& fileInfo = **i;
-		Action::Enum fileAction = fileInfo.isDifferent ? Action::APPLY_DIFF : action;
+		dung::Action::Enum fileAction = fileInfo.isDifferent ? dung::Action::APPLY_DIFF : action;
 
 		output.stream << _T("file") << endl;
 		output.stream << _T("{") << endl;
 
-		output.stream << _T("\t") << _T("action=") << ActionToString(fileAction) << endl;
+		output.stream << _T("\t") << _T("action=") << dung::ActionToString(fileAction) << endl;
 
-		if( fileInfo.newSize >= 0 && fileAction != Action::NONE )
+		if( fileInfo.newSize >= 0 && fileAction != dung::Action::NONE )
 		{
 			output.stream << _T("\t") << _T("new_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
 			output.stream << _T("\t") << _T("new_size=") << fileInfo.newSize << endl;
-			output.stream << _T("\t") << _T("new_sha1=") << SHA1ToString(fileInfo.newSha1) << endl;
+			output.stream << _T("\t") << _T("new_sha1=") << quote << dung::SHA1ToString(fileInfo.newSha1) << quote << endl;
 		}
 
 		if( fileInfo.oldSize >= 0 )
 		{
 			output.stream << _T("\t") << _T("old_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
 			output.stream << _T("\t") << _T("old_size=") << fileInfo.oldSize << endl;
-			output.stream << _T("\t") << _T("old_sha1=") << SHA1ToString(fileInfo.oldSha1) << endl;
+			output.stream << _T("\t") << _T("old_sha1=") << quote << dung::SHA1ToString(fileInfo.oldSha1) << quote << endl;
 		}
 
 		if( fileInfo.isDifferent )
@@ -108,9 +77,9 @@ void rab::WriteRegistryFolders( Options const& options, Config const& config, Fo
 
 		Path_t nextRelativePath = relativePath / folderInfo.name;
 
-		WriteRegistryFiles( options, config,  folderInfo.files_existInBoth, Action::NONE, nextRelativePath, output );
-		WriteRegistryFiles( options, config, folderInfo.files_newOnly, Action::NEW, nextRelativePath, output );
-		WriteRegistryFiles( options, config, folderInfo.files_oldOnly, Action::DELETE, nextRelativePath, output );
+		WriteRegistryFiles( options, config,  folderInfo.files_existInBoth, dung::Action::NONE, nextRelativePath, output );
+		WriteRegistryFiles( options, config, folderInfo.files_newOnly, dung::Action::NEW, nextRelativePath, output );
+		WriteRegistryFiles( options, config, folderInfo.files_oldOnly, dung::Action::DELETE, nextRelativePath, output );
 
 		WriteRegistryFolders( options, config, folderInfo.folders_existInBoth, nextRelativePath, output );
 		WriteRegistryFolders( options, config, folderInfo.folders_newOnly, nextRelativePath, output );
@@ -126,8 +95,8 @@ bool rab::WriteRegistry( Options const& options, Config const& config, FolderInf
 
 	OutputContext os( file );
 
-	os.stream << _T("new_version=") << options.newVersion << endl;
-	os.stream << _T("old_version=") << options.oldVersion << endl;
+	os.stream << _T("new_version=") << quote << options.newVersion << quote << endl;
+	os.stream << _T("old_version=") << quote << options.oldVersion << quote << endl;
 
 	Path_t relativePath;
 	WriteRegistryFolders( options, config, FolderInfo::FolderInfos_t( 1, &rootFolder ), relativePath, os );

@@ -2,6 +2,7 @@
 
 #include <dung/tokenizer.h>
 #include <dung/sha1.h>
+#include <dung/registry.h>
 
 #include <string>
 #include <vector>
@@ -29,6 +30,9 @@ namespace hatch
 
 	private:
 		bool ParseWordValue( String_t& value );
+		bool ParseStringValue( String_t& value );
+		bool ParseNumValue( String_t& value );
+		
 		bool ParseFile( Registry& registry, RegistryAction& action );
 		bool SkipEndLines();
 
@@ -47,7 +51,14 @@ namespace hatch
 
 	struct RegistryAction
 	{
-		Sha1 newSha1, oldSha1;
+		RegistryAction();
+
+		dung::Action::Enum action;
+		dung::Sha1 newSha1, oldSha1;
 		int newSize, oldSize;
+		
+		String_t diff_path;
+		String_t new_path;
+		String_t old_path;
 	};
 }

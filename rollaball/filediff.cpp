@@ -55,8 +55,8 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 		dung::MemoryBlock oldFile;
 		if( ReadWholeFile( fullNew.wstring(), newFile ) && ReadWholeFile( fullOld.wstring(), oldFile ) )
 		{
-			int sha1resultNew = SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
-			int sha1resultOld = SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
+			int sha1resultNew = dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
+			int sha1resultOld = dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
 
 			if( sha1resultNew == shaSuccess && sha1resultOld == shaSuccess )
 			{

@@ -5,11 +5,13 @@
     <ClCompile Include="sha1.cpp" />
     <ClCompile Include="memoryblock.cpp" />
     <ClCompile Include="tokenizer.cpp" />
+    <ClCompile Include="registry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dung.h" />
     <ClInclude Include="sha1.h" />
     <ClInclude Include="memoryblock.h" />
     <ClInclude Include="tokenizer.h" />
+    <ClInclude Include="registry.h" />
   </ItemGroup>
 </Project>

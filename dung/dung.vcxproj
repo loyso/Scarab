@@ -13,12 +13,14 @@
   <ItemGroup>
     <ClCompile Include="dung.cpp" />
     <ClCompile Include="memoryblock.cpp" />
+    <ClCompile Include="registry.cpp" />
     <ClCompile Include="sha1.cpp" />
     <ClCompile Include="tokenizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dung.h" />
     <ClInclude Include="memoryblock.h" />
+    <ClInclude Include="registry.h" />
     <ClInclude Include="sha1.h" />
     <ClInclude Include="tokenizer.h" />
   </ItemGroup>

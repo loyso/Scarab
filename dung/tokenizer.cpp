@@ -6,6 +6,7 @@ namespace dung
 {
 	static const int WORD_MAX_LENGTH = 512;
 	static const int STRING_MAX_LENGTH = 24*1024;
+	static const int NUMBER_MAX_LENGTH = 128;
 }
 
 dung::CharacterSet::CharacterSet()
@@ -59,7 +60,7 @@ dung::TextTokenizer::TextTokenizer() :
 	m_lastParsed( dung::TextTokenizer::LAST_PARSED_NOTHING ),
 	m_szWord( NULL ),
 	m_szString( NULL ),
-	m_fNumber( 0.0f ),
+	m_szNumber( NULL ),
 	mhSymbol( '\0' ),
 	m_pPos( NULL )
 {
@@ -93,6 +94,8 @@ bool dung::TextTokenizer::Open( const char *szText, const char *szTextEnd )
 	*m_szWord = '\0';
 	m_szString = SCARAB_NEW char[ STRING_MAX_LENGTH ];
 	*m_szString = '\0';
+	m_szNumber = SCARAB_NEW char[ NUMBER_MAX_LENGTH ];
+	*m_szNumber = '\0';
 
 	return true;
 }
@@ -123,7 +126,6 @@ bool dung::TextTokenizer::Open( const char *szText, int iTextLength )
 void dung::TextTokenizer::Close()
 {
 	m_szText = m_pTextEnd = m_pPos = NULL;
-	m_fNumber = 0.0f;
 	mhSymbol = '\0';
 	m_lastParsed = LAST_PARSED_NOTHING;
 	
@@ -132,6 +134,9 @@ void dung::TextTokenizer::Close()
 	
 	delete[] m_szString;
 	m_szString = NULL;
+
+	delete[] m_szNumber;
+	m_szNumber = NULL;
 }
 
 bool dung::TextTokenizer::ParseNext()
@@ -187,9 +192,9 @@ bool dung::TextTokenizer::IsString() const
 	return( m_lastParsed == LAST_PARSED_STRING );
 }
 
-float dung::TextTokenizer::GetNumber() const
+const char* dung::TextTokenizer::GetNumber() const
 {
-	return m_fNumber;
+	return m_szNumber;
 }
 
 bool dung::TextTokenizer::IsNumber() const
@@ -277,27 +282,6 @@ void dung::TextTokenizer::ClearCharsets()
 	m_numberSet.Clear();
 }
 
-void dung::TextTokenizer::SetUtf8Charsets()
-{
-	m_wordStartSet.Clear();
-	m_wordStartSet.AddChar( (unsigned char)0x21, (unsigned char)0x7E ); // ASCII.
-	m_wordStartSet.AddChar( (unsigned char)0x80, (unsigned char)0xff ); // UTF8 bits.
-
-	m_wordSet.Clear();
-	m_wordSet.AddChar( (unsigned char)0x21, (unsigned char)0x7E ); // ASCII.
-	m_wordSet.AddChar( (unsigned char)0x80, (unsigned char)0xff ); // UTF8 bits.
-
-	m_stringQuotaSet.Clear();
-	m_stringQuotaSet.AddChar( '\"' );
-	m_wordStartSet.RemoveChar( '\"' );
-
-	m_numberStartSet.Clear();
-	m_numberSet.Clear();
-
-	m_symbolSet.Clear();
-	m_symbolSet.AddChar( '\n' );
-}
-
 void dung::TextTokenizer::SetDefaultCharsets()
 {
 	m_wordStartSet.Clear();
@@ -314,13 +298,6 @@ void dung::TextTokenizer::SetDefaultCharsets()
 	m_numberStartSet.AddChar( '-' );
 
 	m_symbolSet.Clear();
-	m_symbolSet.AddChar( '!' );
-	m_symbolSet.AddChar( '#',  '*' );
-	m_symbolSet.AddChar( ',' );
-	m_symbolSet.AddChar( '.', '/' );
-	m_symbolSet.AddChar( ':', '@' );
-	m_symbolSet.AddChar( '[', '`' );
-	m_symbolSet.AddChar( '{', (unsigned char) 0xff );
 	m_symbolSet.AddChar( '\n' );
 
 	m_wordSet.Clear();
@@ -428,11 +405,8 @@ void dung::TextTokenizer::ParseNumber()
 {
 	SCARAB_ASSERT( m_lastParsed == LAST_PARSED_NUMBER );
 
-	const int iNumberMaxLength = 128; 
-	char szNumber[ iNumberMaxLength ] = "";
-
-	char * pBuf = m_szWord;
-	char * pBufEnd = m_szWord + iNumberMaxLength;
+	char * pBuf = m_szNumber;
+	char * pBufEnd = m_szNumber + NUMBER_MAX_LENGTH;
 
 	*pBuf++ = mhFirstChar;
 
@@ -449,8 +423,6 @@ void dung::TextTokenizer::ParseNumber()
 		*(pBuf - 1) = '\0';
 		SCARAB_ASSERT( false && "TextTokenizer::ParseNumber : number buffer overflow.");
 	}
-
-	m_fNumber = (float) ::atof( szNumber );
 }
 
 void dung::TextTokenizer::ParseSymbol()
