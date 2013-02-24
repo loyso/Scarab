@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 namespace zip
 {
@@ -10,12 +11,27 @@ namespace zip
 	class ZipArchiveInput
 	{
 	public:
-		ZipArchiveInput( String_t const& archiveName );
+		ZipArchiveInput();
 
-		bool ReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );
+		bool Open( String_t const& archiveName );
 		void Close();
 
+		bool LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );
+		bool ReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );
+
 	private:
+		bool Index();
+		bool ReadCurrentFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );
+
+		struct ZipEntry
+		{
+			unsigned long pos_in_zip_directory;   // offset in zip file directory
+			unsigned long num_of_file;            // # of file
+		};
+
+		typedef std::unordered_map< String_t, ZipEntry > NameToEntry_t;
+		NameToEntry_t m_nameToEntry;
+
 		String_t m_archiveName;
 		const char* password;
 

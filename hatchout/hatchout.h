@@ -22,5 +22,5 @@ namespace hatch
 		bool checkOldSha1;
 	};
 
-	void ProcessData( Options const& options, LogOutput_t& out );
+	bool ProcessData( Options const& options, LogOutput_t& out );
 }

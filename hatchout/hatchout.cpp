@@ -6,12 +6,13 @@
 #include "registry_parser.h"
 #include "apply_actions.h"
 
-void hatch::ProcessData( Options const& options, LogOutput_t& out )
+bool hatch::ProcessData( Options const& options, LogOutput_t& out )
 {
-	zip::ZipArchiveInput zipInput( options.pathToPackage );
+	zip::ZipArchiveInput zipInput;
+	zipInput.Open( options.pathToPackage );
 
 	dung::MemoryBlock registryContent;
-	zipInput.ReadFile( "registry.txt", registryContent.pBlock, registryContent.size );
+	zipInput.LocateAndReadFile( "registry.txt", registryContent.pBlock, registryContent.size );
 
 	Registry registry;
 	{
@@ -21,7 +22,9 @@ void hatch::ProcessData( Options const& options, LogOutput_t& out )
 		parser.Close();
 	}
 
-	ApplyActions( options, registry, zipInput, out );
+	bool result = ApplyActions( options, registry, zipInput, out );
 
 	zipInput.Close();
+	
+	return result;
 }

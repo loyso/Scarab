@@ -143,11 +143,16 @@ bool zip::ZipCreateDirectories( const char *newdir )
 	return true;
 }
 
-zip::ZipArchiveInput::ZipArchiveInput( String_t const& archiveName )
-	: m_archiveName( archiveName )
+zip::ZipArchiveInput::ZipArchiveInput()
+	: m_archiveName()
 	, uf()
 	, password()
 {
+}
+
+bool zip::ZipArchiveInput::Open( String_t const& archiveName )
+{
+	m_archiveName = archiveName;
 #ifdef USEWIN32IOAPI
 	zlib_filefunc64_def ffunc;
 #endif
@@ -160,11 +165,17 @@ zip::ZipArchiveInput::ZipArchiveInput( String_t const& archiveName )
 #endif
 
 	if (uf==NULL)
+	{
 		printf("Cannot open %s\n",m_archiveName.c_str());
+		return false;
+	}
+
 	printf("%s opened\n",m_archiveName.c_str());
+
+	return Index();
 }
 
-bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
+bool zip::ZipArchiveInput::LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
 {
 	int err = UNZ_OK;
 	if (unzLocateFile(uf,fileName.c_str(),CASESENSITIVITY)!=UNZ_OK)
@@ -172,6 +183,34 @@ bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryB
 		printf("file %s not found in the zipfile\n",fileName.c_str());
 		return false;
 	}
+
+	return ReadCurrentFile( fileName, pMemoryBlock, size );
+}
+
+bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
+{
+	NameToEntry_t::const_iterator keyValue = m_nameToEntry.find( fileName );
+	if( keyValue == m_nameToEntry.end() )
+		return false;
+
+	ZipEntry const& zipEntry = keyValue->second;
+	unz_file_pos pos;
+	pos.pos_in_zip_directory = zipEntry.pos_in_zip_directory;
+	pos.num_of_file = zipEntry.num_of_file;
+
+	int err = unzGoToFilePos( uf, &pos );
+	if( err != UNZ_OK )
+	{
+		printf("file %s not found in the index\n", fileName.c_str());
+		return false;
+	}
+
+	return ReadCurrentFile( fileName, pMemoryBlock, size );
+}
+
+bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
+{
+	int err = UNZ_OK;
 
 	char filename_inzip[256];
 	strncpy( filename_inzip, fileName.c_str(), sizeof(filename_inzip) );
@@ -237,3 +276,36 @@ void zip::ZipArchiveInput::Close()
 {
 	unzClose(uf);
 }
+
+bool zip::ZipArchiveInput::Index()
+{
+	static const int UNZ_MAXFILENAMEINZIP = 256;
+
+	int err = unzGoToFirstFile(uf);
+
+	while (err == UNZ_OK)
+	{
+		char szCurrentFileName[UNZ_MAXFILENAMEINZIP+1];
+		err = unzGetCurrentFileInfo64(uf, NULL,	szCurrentFileName, sizeof(szCurrentFileName)-1,NULL,0,NULL,0);
+		if(err == UNZ_OK)
+		{
+			unz_file_pos pos;
+			err = unzGetFilePos( uf, &pos );
+			if( err != UNZ_OK )
+			{
+				return false;
+			}
+
+			ZipEntry zipEntry;
+			zipEntry.pos_in_zip_directory = pos.pos_in_zip_directory;
+			zipEntry.num_of_file = pos.num_of_file;
+			m_nameToEntry.insert( std::make_pair( szCurrentFileName, zipEntry ) );
+
+			err = unzGoToNextFile(uf);
+		}
+	}
+
+	return err == UNZ_END_OF_LIST_OF_FILE;
+}
+
+
