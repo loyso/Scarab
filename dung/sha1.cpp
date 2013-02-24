@@ -408,41 +408,32 @@ bool dung::Sha1::operator==( Sha1 const& other ) const
 	return memcmp( digest, other.digest, sizeof(digest) ) == 0;
 }
 
-int dung::SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
+void dung::SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
 {
 	SHA1Context context;
 
 	int result = SHA1Reset( &context );
-	if( result != shaSuccess )
-		return result;
+	SCARAB_ASSERT( result == shaSuccess );
 		
-	SHA1Input( &context, (uint8_t*)pMemoryBlock, size );
-	if( result != shaSuccess )
-		return result;
+	result = SHA1Input( &context, (uint8_t*)pMemoryBlock, size );
+	SCARAB_ASSERT( result == shaSuccess );
 
-	return SHA1Result( &context, sha1.digest );
+	result = SHA1Result( &context, sha1.digest );
+	SCARAB_ASSERT( result == shaSuccess );
 }
 
-_tstring dung::SHA1ToString( Sha1 const& sha1 )
+std::wstring dung::SHA1ToWString( Sha1 const& sha1 )
 {
-	_TCHAR output[SHA1StringSize+1];
+	wchar_t output[SHA1StringSize+1];
 
 	for (int i = 0; i < SHA1HashSize; i++)
-	{
-#ifdef _UNICODE
 		swprintf(output + (i * 2), 3, _T("%02X"), sha1.digest[i]);
-#else
-		sprintf(output + (i * 2), _T("%02X"), sha1.digest[i]);
-#endif
-	}
 
 	output[SHA1StringSize] = 0;
-	
-	_tstring result( output );
-	return result;
+	return output;
 }
 
-std::string dung::SHA1ToStringTest( Sha1 const& sha1 )
+std::string dung::SHA1ToString( Sha1 const& sha1 )
 {
 	char output[SHA1StringSize+1];
 

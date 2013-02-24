@@ -29,17 +29,15 @@ void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 		dung::MemoryBlock newFile;
 		if( dung::ReadWholeFile( fullNew.wstring(), newFile ) )
 		{
-			int sha1result = dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
-			if( sha1result == shaSuccess )
-			{
-				fileInfo.newSize = newFile.size;
+			dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
 
-				fs::create_directories( fullTemp.parent_path() );
-				if( !fs::exists(fullTemp) )
-					dung::WriteWholeFile( fullTemp.wstring(), newFile );
+			fileInfo.newSize = newFile.size;
 
-				output.WriteFile( relativeTemp.generic_wstring(), newFile.pBlock, newFile.size );
-			}
+			fs::create_directories( fullTemp.parent_path() );
+			if( !fs::exists(fullTemp) )
+				dung::WriteWholeFile( fullTemp.wstring(), newFile );
+
+			output.WriteFile( relativeTemp.generic_wstring(), newFile.pBlock, newFile.size );
 		}
 	}
 }

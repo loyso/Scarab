@@ -52,14 +52,14 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 		{
 			output.stream << _T("\t") << _T("new_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
 			output.stream << _T("\t") << _T("new_size=") << fileInfo.newSize << endl;
-			output.stream << _T("\t") << _T("new_sha1=") << quote << dung::SHA1ToString(fileInfo.newSha1) << quote << endl;
+			output.stream << _T("\t") << _T("new_sha1=") << quote << dung::SHA1ToWString(fileInfo.newSha1) << quote << endl;
 		}
 
 		if( fileInfo.oldSize >= 0 )
 		{
 			output.stream << _T("\t") << _T("old_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
 			output.stream << _T("\t") << _T("old_size=") << fileInfo.oldSize << endl;
-			output.stream << _T("\t") << _T("old_sha1=") << quote << dung::SHA1ToString(fileInfo.oldSha1) << quote << endl;
+			output.stream << _T("\t") << _T("old_sha1=") << quote << dung::SHA1ToWString(fileInfo.oldSha1) << quote << endl;
 		}
 
 		if( fileInfo.isDifferent )

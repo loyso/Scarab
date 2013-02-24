@@ -184,7 +184,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 				if( !dung::StringToSHA1( value.c_str(), action.oldSha1 ))
 					return false;
 
-				SCARAB_ASSERT( dung::SHA1ToStringTest( action.oldSha1 ) == value );
+				SCARAB_ASSERT( dung::SHA1ToString( action.oldSha1 ) == value );
 			}
 			else if( Cmp( "new_sha1", key ) )
 			{
@@ -195,7 +195,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 				if( !dung::StringToSHA1( value.c_str(), action.newSha1 ))
 					return false;
 
-				SCARAB_ASSERT( dung::SHA1ToStringTest( action.newSha1 ) == value );
+				SCARAB_ASSERT( dung::SHA1ToString( action.newSha1 ) == value );
 			}
 			else if( Cmp( "old_size", key ) )
 			{

@@ -26,9 +26,8 @@ void rab::GatherSha1Files( Options const& options, Config const& config, Path_t 
 		dung::MemoryBlock oldFile;
 		if( dung::ReadWholeFile( fullOld.wstring(), oldFile ) )
 		{
-			int sha1result = dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
-			if( sha1result == shaSuccess )
-				fileInfo.oldSize = oldFile.size;
+			dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
+			fileInfo.oldSize = oldFile.size;
 		}
 	}
 }
