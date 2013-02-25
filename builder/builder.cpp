@@ -83,15 +83,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	try
 	{
 		result = ParseCommandLine( argc, argv, options, config );
+		if( result )
+			return result;
+
+		rab::ProcessData( options, config );
 	}
 	catch(std::exception& e) {
 		std::cerr << e.what() << "\n";
 	}
-
-	if( result )
-		return result;
-
-	rab::ProcessData( options, config );
 
 	std::locale::global(std::locale::classic());
 	

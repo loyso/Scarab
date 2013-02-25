@@ -48,16 +48,15 @@ int _tmain(int argc, _TCHAR* argv[])
 	try
 	{
 		result = ParseCommandLine( argc, argv, options );
+		if( result )
+			return result;
+
+		if( !hatch::ProcessData( options, std::cout ) )
+			return 1;
 	}
 	catch(std::exception& e) {
 		std::cerr << e.what() << "\n";
 	}
-
-	if( result )
-		return result;
-
-	if( !hatch::ProcessData( options, std::cout ) )
-		return 1;
 
 	return 0;
 }

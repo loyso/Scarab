@@ -5,6 +5,7 @@
 #include <dung/memoryblock.h>
 #include <zlib/minizip.h>
 
+#include <algorithm>
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
@@ -25,7 +26,7 @@ namespace rab
 
 bool rab::EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp, Path_t const& relativeTemp, PackageOutput_t& output )
 {
-	const size_t reservedSize = 2 * ( newFile.size + oldFile.size );
+	const size_t reservedSize = max( newFile.size, 1024 );
 	dung::MemoryBlock deltaFile( reservedSize );
 	deltaFile.size = 0;
 
@@ -69,7 +70,10 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 			{
 				fileInfo.isDifferent = true;
 				fs::create_directories( fullTemp.parent_path() );
-				EncodeAndWrite( newFile, oldFile, fullTemp, relativeTemp, output );
+				if( !EncodeAndWrite( newFile, oldFile, fullTemp, relativeTemp, output ) )
+				{
+					// TODO: report errors.
+				}
 			}
 		}
 	}
