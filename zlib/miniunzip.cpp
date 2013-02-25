@@ -213,7 +213,7 @@ bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryB
 {
 	String_t fileNameKey = fileName;
 	if( !m_caseSensitive )
-		for (int i = 0; fileNameKey.size(); ++i )
+		for (size_t i = 0; i < fileNameKey.size(); ++i )
 			fileNameKey[i] = tolower( fileNameKey[i] );
 
 	NameToEntry_t::const_iterator keyValue = m_nameToEntry.find( fileName );
