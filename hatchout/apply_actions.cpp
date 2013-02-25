@@ -20,6 +20,7 @@ namespace hatch
 	bool DeleteOldFile( Options const& options, RegistryAction const& action, LogOutput_t& out );
 	bool ApplyDiff( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
 	
+	bool CheckOldFileData( Options const& options, dung::MemoryBlock const& oldFile, RegistryAction const& action, LogOutput_t& out );
 	bool ApplyAction( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
 
 	String_t FullPath( Options const& options, String_t const& relativePath )
@@ -80,6 +81,30 @@ bool hatch::CreateNewFile( Options const& options, RegistryAction const& action,
 	return true;
 }
 
+bool hatch::CheckOldFileData( Options const& options, dung::MemoryBlock const& oldFile, RegistryAction const& action, LogOutput_t& out )
+{
+	if( options.checkOldSize && oldFile.size != action.oldSize )
+	{
+		if( !options.quiet )
+			out << "Old file has wrong size. " << action.old_path << " Real size=" << oldFile.size << ", registry size=" << action.oldSize << std::endl;
+		return false;
+	}
+
+	if( options.checkOldSha1 )
+	{
+		dung::Sha1 oldSha1;
+		dung::SHA1Compute( oldFile.pBlock, oldFile.size, oldSha1 );
+		if( oldSha1 != action.oldSha1 )
+		{
+			if( !options.quiet )
+				out << "Old file has wrong SHA1. " << action.old_path << " Real SHA1=" << SHA1ToString(oldSha1) << ", registry SHA1=" << SHA1ToString(action.oldSha1) << std::endl;
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool hatch::ApplyDiff( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
 {
 	dung::MemoryBlock diffBlock;
@@ -97,6 +122,28 @@ bool hatch::ApplyDiff( Options const& options, RegistryAction const& action, zip
 		if( !options.quiet )
 			out << "Can't read file " << fullPathOld << std::endl;
 		return false;
+	}
+
+	if( !CheckOldFileData( options, oldFile, action, out ) )
+		return false;
+
+	if( options.checkOldSize && oldFile.size != action.oldSize )
+	{
+		if( !options.quiet )
+			out << "Old file has wrong size. " << fullPathOld << " Real size=" << oldFile.size << " Registry size=" << action.oldSize << std::endl;
+		return false;
+	}
+
+	if( options.checkOldSha1 )
+	{
+		dung::Sha1 oldSha1;
+		dung::SHA1Compute( oldFile.pBlock, oldFile.size, oldSha1 );
+		if( oldSha1 != action.oldSha1 )
+		{
+			if( !options.quiet )
+				out << "Old file has wrong size. " << fullPathOld << " Real size=" << oldFile.size << " Registry size=" << action.oldSize << std::endl;
+			return false;
+		}
 	}
 
 	dung::MemoryBlock newFile( action.newSize );
@@ -202,7 +249,7 @@ bool hatch::ApplyActions( Options const& options, Registry const& registry, zip:
 		return true;
 
 	if( !options.quiet )
-		out << "FAILED. " << numErrors << " occured." << std::endl;
+		out << "FAILED. " << numErrors << " errors occured." << std::endl;
 
 	return false;
 }
