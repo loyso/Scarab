@@ -408,6 +408,11 @@ bool dung::Sha1::operator==( Sha1 const& other ) const
 	return memcmp( digest, other.digest, sizeof(digest) ) == 0;
 }
 
+bool dung::Sha1::operator!=( Sha1 const& other ) const
+{
+	return !operator==( other );
+}
+
 void dung::SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 )
 {
 	SHA1Context context;

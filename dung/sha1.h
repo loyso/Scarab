@@ -101,6 +101,7 @@ namespace dung
 		Sha1();
 		unsigned char digest[SHA1HashSize];
 		bool operator==( Sha1 const& other ) const;
+		bool operator!=( Sha1 const& other ) const;
 	};
 
 	void SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 );
