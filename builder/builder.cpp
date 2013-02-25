@@ -25,12 +25,12 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 
 	po::options_description config_file_options("Config file options");
 	config_file_options.add_options()
-		("old_folders", po::wvalue(&config.dst_folders), "destination folders to patch")
-		("old_files", po::wvalue(&config.dst_files), "destination files to patch")
-		("old_ignore_folders", po::wvalue(&config.dst_ignore_folders), "skip destination folders")
-		("old_ignore_files", po::wvalue(&config.dst_ignore_files), "skip destination files")
-		("old_ignore_changed", po::wvalue(&config.dst_ignore_changed), "destination files not to patch, if dst changed")
-		("old_preserve_removed", po::wvalue(&config.dst_preserve_removed), "destination files to preserve, if src removed")
+		("include_folders", po::wvalue(&config.includeFolders), "folders to process")
+		("include_files", po::wvalue(&config.includeFiles), "files to process")
+		("ignore_folders", po::wvalue(&config.ignoreFolders), "skip destination folders")
+		("ignore_files", po::wvalue(&config.ignoreFiles), "skip destination files")
+		("old_skip_changed", po::wvalue(&config.oldSkipChanged), "destination files not to patch, if dst changed")
+		("old_preserve_removed", po::wvalue(&config.oldPreserveRemoved), "destination files to preserve, if src removed")
 		("new_ignore_folders", po::wvalue(&config.newIgnoreFolders), "skip source folders")
 		("new_ignore_files", po::wvalue(&config.newIgnoreFiles), "skip source files")
 		("new_file_limit", po::wvalue(&config.newFileLimit)->default_value(0), "skip source files greater then the limit")		

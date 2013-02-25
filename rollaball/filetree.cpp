@@ -14,7 +14,7 @@ namespace rab
 	void BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, FolderInfo& rootFolder );
 	void BuildFileTreeForFolder_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, FolderInfo::FolderInfos_t const& folderInfos );
 
-	void BuildFilesAndFoldersForPath( Config const& config, Path_t const& path, StringSet_t& files, StringSet_t& folders );
+	void BuildFilesAndFoldersForPath( Config const& config, Path_t const& path, StringSet_t& files, StringSet_t& folders, bool newPath );
 
 	void BuildThreeSets( StringSet_t& newSet, StringSet_t& oldSet, 
 		VectorString_t& existInBoth, VectorString_t& newOnly, VectorString_t& oldOnly );
@@ -42,7 +42,7 @@ rab::FolderInfo::~FolderInfo()
 	DeleteContainer( files_existInBoth );
 }
 
-void rab::BuildFilesAndFoldersForPath( Config const& config, Path_t const& path, StringSet_t& files, StringSet_t& folders )
+void rab::BuildFilesAndFoldersForPath( Config const& config, Path_t const& path, StringSet_t& files, StringSet_t& folders, bool newPath )
 {
 	for( fs::directory_iterator it( path ); it != fs::directory_iterator(); ++it )
 	{		
@@ -52,13 +52,21 @@ void rab::BuildFilesAndFoldersForPath( Config const& config, Path_t const& path,
 
 		if( fs::is_regular_file( status ))
 		{
-			if( !MatchName( config.newIgnoreFiles_regex, name ) )
-				files.insert( fullpath.filename().wstring() );
+			if( ( config.includeFiles_regex.empty() || MatchName( config.includeFiles_regex, name ) ) 
+				&& !MatchName( config.ignoreFiles_regex, name ) )
+			{
+				if( !newPath || !MatchName( config.newIgnoreFiles_regex, name ) )
+					files.insert( fullpath.filename().wstring() );
+			}
 		}
 		else if( fs::is_directory( status ) )
 		{
-			if( !MatchName( config.newIgnoreFolders_regex, name ) )
-				folders.insert( fullpath.filename().wstring() );
+			if( ( config.includeFolders_regex.empty() || MatchName( config.includeFolders_regex, name ) ) 
+				&& !MatchName( config.ignoreFolders_regex, name ) )
+			{
+				if( !newPath || !MatchName( config.newIgnoreFolders_regex, name ) )
+					folders.insert( fullpath.filename().wstring() );
+			}
 		}
 	}
 }
@@ -126,10 +134,10 @@ void rab::BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path
 	StringSet_t newFolders, oldFolders;
 
 	if( fs::exists( pathToOld ) )
-		BuildFilesAndFoldersForPath( config, pathToOld, oldFiles, oldFolders );
+		BuildFilesAndFoldersForPath( config, pathToOld, oldFiles, oldFolders, false );
 
 	if( fs::exists( pathToNew ) )
-		BuildFilesAndFoldersForPath( config, pathToNew, newFiles, newFolders );
+		BuildFilesAndFoldersForPath( config, pathToNew, newFiles, newFolders, true );
 
 	// files
 	{

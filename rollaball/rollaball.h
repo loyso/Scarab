@@ -30,22 +30,22 @@ namespace rab
 		typedef std::vector< String_t > StringValues_t;
 		typedef std::vector< Regex_t > RegexValues_t;
 
-		StringValues_t dst_folders;
-		StringValues_t dst_files;
-		StringValues_t dst_ignore_folders;
-		StringValues_t dst_ignore_files;
-		StringValues_t dst_ignore_changed;
-		StringValues_t dst_preserve_removed;
+		StringValues_t includeFolders;
+		StringValues_t includeFiles;
+		StringValues_t ignoreFolders;
+		StringValues_t ignoreFiles;
+		StringValues_t oldSkipChanged;
+		StringValues_t oldPreserveRemoved;
 		StringValues_t newIgnoreFolders;
 		StringValues_t newIgnoreFiles;
 
 		void BuildRegexps();
-		RegexValues_t dst_folders_regex;
-		RegexValues_t dst_files_regex;
-		RegexValues_t dst_ignore_folders_regex;
-		RegexValues_t dst_ignore_files_regex;
-		RegexValues_t dst_ignore_changed_regex;
-		RegexValues_t dst_preserve_removed_regex;
+		RegexValues_t includeFolders_regex;
+		RegexValues_t includeFiles_regex;
+		RegexValues_t ignoreFolders_regex;
+		RegexValues_t ignoreFiles_regex;
+		RegexValues_t oldSkipChanged_regex;
+		RegexValues_t oldPreserveRemoved_regex;
 		RegexValues_t newIgnoreFolders_regex;
 		RegexValues_t newIgnoreFiles_regex;
 

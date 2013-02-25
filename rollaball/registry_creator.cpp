@@ -46,6 +46,12 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 		if( fileAction == dung::Action::NEW && config.newFileLimit > 0 && fileInfo.newSize >= config.newFileLimit )
 			fileAction = dung::Action::NEW_BUT_NOT_INCLUDED;
 
+		if( fileAction == dung::Action::DELETE && MatchName( config.oldPreserveRemoved_regex, fileInfo.name ) )
+			fileAction = dung::Action::NONE;
+
+		if( fileAction == dung::Action::APPLY_DIFF && MatchName( config.oldSkipChanged_regex, fileInfo.name ) )
+			fileAction = dung::Action::NONE;
+
 		output.stream << _T("file") << endl;
 		output.stream << _T("{") << endl;
 
@@ -65,7 +71,7 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 			output.stream << _T("\t") << _T("old_sha1=") << quote << dung::SHA1ToWString(fileInfo.oldSha1) << quote << endl;
 		}
 
-		if( fileInfo.isDifferent )
+		if( fileAction == dung::Action::APPLY_DIFF )
 			output.stream << _T("\t") << _T("diff_path=") << quote << ( relativePath / DiffFileName(fileInfo.name, config) ).generic_wstring() << quote << endl;
 
 		output.stream << _T("}") << endl;

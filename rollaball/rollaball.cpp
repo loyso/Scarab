@@ -70,12 +70,12 @@ void rab::BuildRegexVector( Config::StringValues_t const& strings, Config::Regex
 
 void rab::Config::BuildRegexps()
 {
-	BuildRegexVector( dst_folders, dst_folders_regex );
-	BuildRegexVector( dst_files, dst_files_regex );
-	BuildRegexVector( dst_ignore_folders, dst_ignore_folders_regex );
-	BuildRegexVector( dst_ignore_files, dst_ignore_files_regex );
-	BuildRegexVector( dst_ignore_changed, dst_ignore_changed_regex );
-	BuildRegexVector( dst_preserve_removed, dst_preserve_removed_regex );
+	BuildRegexVector( includeFolders, includeFolders_regex );
+	BuildRegexVector( includeFiles, includeFiles_regex );
+	BuildRegexVector( ignoreFolders, ignoreFolders_regex );
+	BuildRegexVector( ignoreFiles, ignoreFiles_regex );
+	BuildRegexVector( oldSkipChanged, oldSkipChanged_regex );
+	BuildRegexVector( oldPreserveRemoved, oldPreserveRemoved_regex );
 	BuildRegexVector( newIgnoreFolders, newIgnoreFolders_regex );
 	BuildRegexVector( newIgnoreFiles, newIgnoreFiles_regex );
 }

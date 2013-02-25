@@ -46,23 +46,26 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 	for( FolderInfo::FileInfos_t::const_iterator i = fileInfos.begin(); i != fileInfos.end(); ++i )
 	{
 		FileInfo& fileInfo = **i;
-		
+
 		Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
 		Path_t fullOld = options.pathToOld / relativePath / fileInfo.name;
 		Path_t relativeTemp = relativePath / DiffFileName(fileInfo.name, config);
 		Path_t fullTemp = options.pathToTemp / relativeTemp;
-
-		dung::MemoryBlock newFile;
-		if( !ReadWholeFile( fullNew.wstring(), newFile ) )
-			continue;
-		dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
-		fileInfo.newSize = newFile.size;
 
 		dung::MemoryBlock oldFile;
 		if( !ReadWholeFile( fullOld.wstring(), oldFile ) )
 			continue;
 		dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
 		fileInfo.oldSize = oldFile.size;
+
+		if( MatchName( config.oldSkipChanged_regex, fileInfo.name ) )
+			continue;
+
+		dung::MemoryBlock newFile;
+		if( !ReadWholeFile( fullNew.wstring(), newFile ) )
+			continue;
+		dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
+		fileInfo.newSize = newFile.size;
 
 		if( fileInfo.newSha1 != fileInfo.oldSha1 )
 		{
