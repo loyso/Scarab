@@ -15,7 +15,7 @@ namespace rab
 		String_t name;
 		
 		dung::Sha1 newSha1, oldSha1;
-		int newSize, oldSize;
+		size_t newSize, oldSize;
 		bool isDifferent;
 	};
 
@@ -37,5 +37,5 @@ namespace rab
 		FileInfos_t files_existInBoth;
 	};
 
-	void BuildFileTree( String_t const& pathToNew, String_t const& pathToOld, FolderInfo& rootFolder );
+	void BuildFileTree( Options const& options, Config const& config, FolderInfo& rootFolder );
 }

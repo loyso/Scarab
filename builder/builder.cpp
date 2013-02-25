@@ -29,12 +29,13 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("old_files", po::wvalue(&config.dst_files), "destination files to patch")
 		("old_ignore_folders", po::wvalue(&config.dst_ignore_folders), "skip destination folders")
 		("old_ignore_files", po::wvalue(&config.dst_ignore_files), "skip destination files")
-		("pack_files_using", po::wvalue(&config.pack_files_using), "choose pack method for source files: \"mask/method\"")
 		("old_ignore_changed", po::wvalue(&config.dst_ignore_changed), "destination files not to patch, if dst changed")
 		("old_preserve_removed", po::wvalue(&config.dst_preserve_removed), "destination files to preserve, if src removed")
-		("new_ignore_files", po::wvalue(&config.src_ignore_files), "skip source files")
-		("new_file_limit", po::wvalue(&config.src_file_limit)->default_value(0), "skip source files greater then the limit")		
+		("new_ignore_folders", po::wvalue(&config.newIgnoreFolders), "skip source folders")
+		("new_ignore_files", po::wvalue(&config.newIgnoreFiles), "skip source files")
+		("new_file_limit", po::wvalue(&config.newFileLimit)->default_value(0), "skip source files greater then the limit")		
 		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
+		("pack_files_using", po::wvalue(&config.pack_files_using), "choose pack method for source files: \"mask/method\"")
 		;
 
 	po::variables_map vm;

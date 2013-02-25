@@ -14,6 +14,9 @@ namespace dung
 		MemoryBlock( size_t size );
 		~MemoryBlock();
 
+		bool operator==( const MemoryBlock& other ) const;
+		bool operator!=( const MemoryBlock& other ) const;
+
 		Byte_t* pBlock;
 		size_t size;
 	};
@@ -25,6 +28,4 @@ namespace dung
 	bool WriteWholeFile( std::wstring const& fullPath, MemoryBlock& memoryBlock );
 	bool WriteWholeFile( std::string const& fullPath, MemoryBlock& memoryBlock );
 	bool WriteWholeFile( std::ofstream& out, MemoryBlock& memoryBlock );
-	
-	bool Equals( MemoryBlock const& block1, MemoryBlock const& block2 );
 }

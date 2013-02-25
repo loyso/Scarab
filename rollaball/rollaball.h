@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <regex>
 
 namespace zip
 {
@@ -13,8 +14,8 @@ namespace zip
 namespace rab
 {
 	typedef _tstring String_t;
-	typedef std::vector< String_t > ConfigValues_t;
 	typedef zip::ZipArchiveOutput PackageOutput_t;
+	typedef std::wregex Regex_t;
 
 	struct Options
 	{
@@ -26,20 +27,36 @@ namespace rab
 
 	struct Config
 	{
-		ConfigValues_t dst_folders;
-		ConfigValues_t dst_files;
-		ConfigValues_t dst_ignore_folders;
-		ConfigValues_t dst_ignore_files;
-		ConfigValues_t pack_files_using;
-		ConfigValues_t dst_ignore_changed;
-		ConfigValues_t dst_preserve_removed;
-		ConfigValues_t src_ignore_files;
-		int src_file_limit;
+		typedef std::vector< String_t > StringValues_t;
+		typedef std::vector< Regex_t > RegexValues_t;
+
+		StringValues_t dst_folders;
+		StringValues_t dst_files;
+		StringValues_t dst_ignore_folders;
+		StringValues_t dst_ignore_files;
+		StringValues_t dst_ignore_changed;
+		StringValues_t dst_preserve_removed;
+		StringValues_t newIgnoreFolders;
+		StringValues_t newIgnoreFiles;
+
+		void BuildRegexps();
+		RegexValues_t dst_folders_regex;
+		RegexValues_t dst_files_regex;
+		RegexValues_t dst_ignore_folders_regex;
+		RegexValues_t dst_ignore_files_regex;
+		RegexValues_t dst_ignore_changed_regex;
+		RegexValues_t dst_preserve_removed_regex;
+		RegexValues_t newIgnoreFolders_regex;
+		RegexValues_t newIgnoreFiles_regex;
+
+		StringValues_t pack_files_using;
+		size_t newFileLimit;
 		String_t packedExtension;
 	};
 
 	String_t DiffFileName( String_t const& fileName, Config const& config );
+	bool MatchName( Config::RegexValues_t const & filters, String_t const& name );
 
-	void ProcessData( Options const &options, Config const &config );
+	void ProcessData( Options const &options, Config&config );
 };
 

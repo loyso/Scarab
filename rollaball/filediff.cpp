@@ -53,29 +53,28 @@ void rab::BuildDiffFiles( Options const& options, Config const& config, Path_t c
 		Path_t fullTemp = options.pathToTemp / relativeTemp;
 
 		dung::MemoryBlock newFile;
-		dung::MemoryBlock oldFile;
-		if( ReadWholeFile( fullNew.wstring(), newFile ) && ReadWholeFile( fullOld.wstring(), oldFile ) )
-		{
-			dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
-			dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
+		if( !ReadWholeFile( fullNew.wstring(), newFile ) )
+			continue;
+		dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
+		fileInfo.newSize = newFile.size;
 
-			fileInfo.oldSize = oldFile.size;
-			fileInfo.newSize = newFile.size;
-			if( Equals( newFile, oldFile ) )
+		dung::MemoryBlock oldFile;
+		if( !ReadWholeFile( fullOld.wstring(), oldFile ) )
+			continue;
+		dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
+		fileInfo.oldSize = oldFile.size;
+
+		if( fileInfo.newSha1 != fileInfo.oldSha1 )
+		{
+			fileInfo.isDifferent = true;
+			fs::create_directories( fullTemp.parent_path() );
+			if( !EncodeAndWrite( newFile, oldFile, fullTemp, relativeTemp, output ) )
 			{
-				SCARAB_ASSERT( fileInfo.newSha1 == fileInfo.oldSha1 ); //TODO: rely on this.
-				fileInfo.isDifferent = false;
-			}
-			else
-			{
-				fileInfo.isDifferent = true;
-				fs::create_directories( fullTemp.parent_path() );
-				if( !EncodeAndWrite( newFile, oldFile, fullTemp, relativeTemp, output ) )
-				{
-					// TODO: report errors.
-				}
+				// TODO: report errors.
 			}
 		}
+		else
+			fileInfo.isDifferent = false;
 	}
 }
 

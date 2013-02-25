@@ -43,19 +43,22 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 		FileInfo const& fileInfo = **i;
 		dung::Action::Enum fileAction = fileInfo.isDifferent ? dung::Action::APPLY_DIFF : action;
 
+		if( fileAction == dung::Action::NEW && config.newFileLimit > 0 && fileInfo.newSize >= config.newFileLimit )
+			fileAction = dung::Action::NEW_BUT_NOT_INCLUDED;
+
 		output.stream << _T("file") << endl;
 		output.stream << _T("{") << endl;
 
 		output.stream << _T("\t") << _T("action=") << dung::ActionToString(fileAction) << endl;
 
-		if( fileInfo.newSize >= 0 && fileAction != dung::Action::NONE )
+		if( fileAction != dung::Action::DELETE && fileAction != dung::Action::NONE )
 		{
 			output.stream << _T("\t") << _T("new_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
 			output.stream << _T("\t") << _T("new_size=") << fileInfo.newSize << endl;
 			output.stream << _T("\t") << _T("new_sha1=") << quote << dung::SHA1ToWString(fileInfo.newSha1) << quote << endl;
 		}
 
-		if( fileInfo.oldSize >= 0 )
+		if( fileAction != dung::Action::NEW && fileAction != dung::Action::NEW_BUT_NOT_INCLUDED )
 		{
 			output.stream << _T("\t") << _T("old_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
 			output.stream << _T("\t") << _T("old_size=") << fileInfo.oldSize << endl;

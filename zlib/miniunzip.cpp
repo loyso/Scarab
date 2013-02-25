@@ -37,7 +37,6 @@
 
 #include "unzip.h"
 
-#define CASESENSITIVITY (0)
 #define MAXFILENAME (256)
 
 #ifdef WIN32
@@ -173,9 +172,11 @@ zip::ZipArchiveInput::~ZipArchiveInput()
 	delete[] m_errorMessage;
 }
 
-bool zip::ZipArchiveInput::Open( String_t const& archiveName )
+bool zip::ZipArchiveInput::Open( String_t const& archiveName, bool caseSensitive )
 {
 	m_archiveName = archiveName;
+	m_caseSensitive = caseSensitive;
+
 #ifdef USEWIN32IOAPI
 	zlib_filefunc64_def ffunc;
 #endif
@@ -199,7 +200,7 @@ bool zip::ZipArchiveInput::Open( String_t const& archiveName )
 bool zip::ZipArchiveInput::LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
 {
 	int err = UNZ_OK;
-	if (unzLocateFile(uf,fileName.c_str(),CASESENSITIVITY) != UNZ_OK)
+	if ( unzLocateFile( uf, fileName.c_str(), m_caseSensitive ) != UNZ_OK )
 	{
 		sprintf( m_errorMessage, "file %s not found in the zipfile\n", fileName.c_str() );
 		return false;
@@ -210,6 +211,11 @@ bool zip::ZipArchiveInput::LocateAndReadFile( String_t const& fileName, Byte_t*&
 
 bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
 {
+	String_t fileNameKey = fileName;
+	if( !m_caseSensitive )
+		for (int i = 0; fileNameKey.size(); ++i )
+			fileNameKey[i] = tolower( fileNameKey[i] );
+
 	NameToEntry_t::const_iterator keyValue = m_nameToEntry.find( fileName );
 	if( keyValue == m_nameToEntry.end() )
 	{
@@ -317,6 +323,10 @@ bool zip::ZipArchiveInput::Index()
 		err = unzGetCurrentFileInfo64(uf, NULL,	szCurrentFileName, sizeof(szCurrentFileName)-1,NULL,0,NULL,0);
 		if(err == UNZ_OK)
 		{
+			if( !m_caseSensitive )
+				for (int i = 0; szCurrentFileName[i]; ++i )
+					szCurrentFileName[i] = tolower( szCurrentFileName[i] );
+
 			unz_file_pos pos;
 			err = unzGetFilePos( uf, &pos );
 			if( err != UNZ_OK )

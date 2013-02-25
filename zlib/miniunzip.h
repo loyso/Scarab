@@ -14,7 +14,7 @@ namespace zip
 		ZipArchiveInput();
 		~ZipArchiveInput();
 
-		bool Open( String_t const& archiveName );
+		bool Open( String_t const& archiveName, bool caseSensitive );
 		void Close();
 
 		bool LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );
@@ -42,6 +42,7 @@ namespace zip
 		UnzipFile_t uf;
 
 		char* m_errorMessage;
+		bool m_caseSensitive;
 	};
 
 	int ZipCreateDirectory( const char* path );

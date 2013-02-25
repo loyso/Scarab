@@ -30,14 +30,16 @@ void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 		if( dung::ReadWholeFile( fullNew.wstring(), newFile ) )
 		{
 			dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
-
 			fileInfo.newSize = newFile.size;
 
-			fs::create_directories( fullTemp.parent_path() );
-			if( !fs::exists(fullTemp) )
-				dung::WriteWholeFile( fullTemp.wstring(), newFile );
+			if( config.newFileLimit == 0 || fileInfo.newSize < config.newFileLimit )
+			{
+				fs::create_directories( fullTemp.parent_path() );
+				if( !fs::exists(fullTemp) )
+					dung::WriteWholeFile( fullTemp.wstring(), newFile );
 
-			output.WriteFile( relativeTemp.generic_wstring(), newFile.pBlock, newFile.size );
+				output.WriteFile( relativeTemp.generic_wstring(), newFile.pBlock, newFile.size );
+			}
 		}
 	}
 }

@@ -20,12 +20,17 @@ dung::MemoryBlock::~MemoryBlock()
 	delete[] pBlock;
 }
 
-bool dung::Equals( MemoryBlock const& block1, MemoryBlock const& block2 )
+bool dung::MemoryBlock::operator==( const MemoryBlock& other ) const
 {
-	if( block1.size != block2.size )
+	if( other.size != other.size )
 		return false;
 
-	return memcmp( block1.pBlock, block2.pBlock, block1.size ) == 0;
+	return memcmp( other.pBlock, other.pBlock, other.size ) == 0;
+}
+
+bool dung::MemoryBlock::operator!=( const MemoryBlock& other ) const
+{
+	return !operator==( other );
 }
 
 bool dung::ReadWholeFile( std::wstring const& fullPath, MemoryBlock& memoryBlock )

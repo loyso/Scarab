@@ -9,7 +9,7 @@
 bool hatch::ProcessData( Options const& options, LogOutput_t& out )
 {
 	zip::ZipArchiveInput zipInput;
-	if( !zipInput.Open( options.pathToPackage ) )
+	if( !zipInput.Open( options.pathToPackage, false ) )
 	{
 		if( !options.quiet )
 			out << "Can't open zip archive " << options.pathToPackage << " zip error: " << zipInput.ErrorMessage() << std::endl;
