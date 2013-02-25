@@ -410,7 +410,7 @@ void dung::TextTokenizer::ParseNumber()
 
 	*pBuf++ = mhFirstChar;
 
-	for( ; m_pPos < pBufEnd && IsNumberChar( *m_pPos ); m_pPos++ )
+	for( ; m_pPos < m_pTextEnd && IsNumberChar( *m_pPos ); m_pPos++ )
 	{
 		if( pBuf < pBufEnd )
 			*pBuf++ = *m_pPos;
