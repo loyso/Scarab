@@ -16,6 +16,9 @@ bool hatch::ProcessData( Options const& options, LogOutput_t& out )
 		return false;
 	}
 
+	if( !options.quiet )
+		out << "Opened " << options.pathToPackage << std::endl;
+
 	dung::MemoryBlock registryContent;
 	const char registryFileName[] = "registry.txt";
 	if( !zipInput.ReadFile( registryFileName, registryContent.pBlock, registryContent.size ) )
@@ -38,7 +41,17 @@ bool hatch::ProcessData( Options const& options, LogOutput_t& out )
 		parser.Close();
 	}
 
+	if( !options.quiet )
+	{
+		out << "Parsed " << registryFileName << std::endl;
+		if( options.verbose )
+			out << registry.actions.size() << " actions in total." << std::endl;
+	}
+
 	bool result = ApplyActions( options, registry, zipInput, out );
+
+	if( result && !options.quiet )
+		out << "Successfully done!" << std::endl;
 
 	zipInput.Close();
 	
