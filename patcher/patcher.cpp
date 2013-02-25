@@ -15,11 +15,11 @@ int ParseCommandLine( int argc, _TCHAR** argv, hatch::Options& options )
 		("package,P", po::value(&options.pathToPackage)->required(), "path to package file")
 		("old,O", po::value(&options.pathToOld)->required(), "path to old content folder")
 		("quiet,Q", po::bool_switch(&options.quiet)->default_value(false), "quiet mode")
-		("reportFile,F", po::bool_switch(&options.reportFile)->default_value(false), "report each file")
+		("reportFile,q", po::bool_switch(&options.reportFile)->default_value(false), "report each file")
 		("verbose,V", po::bool_switch(&options.verbose)->default_value(false), "report everything")
-		("stopIfError,E", po::bool_switch(&options.stopIfError)->default_value(false), "stop the process on first error")
-		("checkOldSize,S", po::bool_switch(&options.checkOldSize)->default_value(false), "check old file size")
-		("checkOldSha1,1", po::bool_switch(&options.checkOldSha1)->default_value(false), "check old file sha1 hash")
+		("stopIfError,S", po::bool_switch(&options.stopIfError)->default_value(false), "stop the process on first error")
+		("checkOldSize,W", po::bool_switch(&options.checkOldSize)->default_value(false), "check old file size")
+		("checkOldSha1,C", po::bool_switch(&options.checkOldSha1)->default_value(false), "check old file sha1 hash")
 		;
 
 	po::variables_map vm;

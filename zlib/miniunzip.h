@@ -12,12 +12,15 @@ namespace zip
 	{
 	public:
 		ZipArchiveInput();
+		~ZipArchiveInput();
 
 		bool Open( String_t const& archiveName );
 		void Close();
 
 		bool LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );
 		bool ReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );
+
+		const char* ErrorMessage() const;
 
 	private:
 		bool Index();
@@ -37,6 +40,8 @@ namespace zip
 
 		typedef void* UnzipFile_t;
 		UnzipFile_t uf;
+
+		char* m_errorMessage;
 	};
 
 	int ZipCreateDirectory( const char* path );

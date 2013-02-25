@@ -143,11 +143,22 @@ bool zip::ZipCreateDirectories( const char *newdir )
 	return true;
 }
 
+namespace zip
+{
+	static const int MAX_ERROR_STRING = 4096;
+}
+
 zip::ZipArchiveInput::ZipArchiveInput()
 	: m_archiveName()
 	, uf()
 	, password()
 {
+	m_errorMessage = new char[ MAX_ERROR_STRING ];
+}
+
+zip::ZipArchiveInput::~ZipArchiveInput()
+{
+	delete[] m_errorMessage;
 }
 
 bool zip::ZipArchiveInput::Open( String_t const& archiveName )
@@ -166,11 +177,9 @@ bool zip::ZipArchiveInput::Open( String_t const& archiveName )
 
 	if (uf==NULL)
 	{
-		printf("Cannot open %s\n",m_archiveName.c_str());
+		sprintf( m_errorMessage, "Can't open %s\n", m_archiveName.c_str() );
 		return false;
 	}
-
-	printf("%s opened\n",m_archiveName.c_str());
 
 	return Index();
 }
@@ -178,9 +187,9 @@ bool zip::ZipArchiveInput::Open( String_t const& archiveName )
 bool zip::ZipArchiveInput::LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
 {
 	int err = UNZ_OK;
-	if (unzLocateFile(uf,fileName.c_str(),CASESENSITIVITY)!=UNZ_OK)
+	if (unzLocateFile(uf,fileName.c_str(),CASESENSITIVITY) != UNZ_OK)
 	{
-		printf("file %s not found in the zipfile\n",fileName.c_str());
+		sprintf( m_errorMessage, "file %s not found in the zipfile\n", fileName.c_str() );
 		return false;
 	}
 
@@ -191,7 +200,10 @@ bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryB
 {
 	NameToEntry_t::const_iterator keyValue = m_nameToEntry.find( fileName );
 	if( keyValue == m_nameToEntry.end() )
+	{
+		sprintf( m_errorMessage, "file %s not found in the zip index\n", fileName.c_str() );
 		return false;
+	}
 
 	ZipEntry const& zipEntry = keyValue->second;
 	unz_file_pos pos;
@@ -201,7 +213,7 @@ bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryB
 	int err = unzGoToFilePos( uf, &pos );
 	if( err != UNZ_OK )
 	{
-		printf("file %s not found in the index\n", fileName.c_str());
+		sprintf( m_errorMessage, "can't go to file %s\n", fileName.c_str());
 		return false;
 	}
 
@@ -218,33 +230,31 @@ bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& p
 	unz_file_info64 file_info;
 	uLong ratio=0;
 	err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
-
-	if (err!=UNZ_OK)
+	if ( err != UNZ_OK )
 	{
-		printf("error %d with zipfile in unzGetCurrentFileInfo\n",err);
+		sprintf( m_errorMessage, "error %d with file %s in unzGetCurrentFileInfo\n", err, fileName.c_str() );
 		return false;
 	}
 
 	size_t size_buf = (size_t)file_info.uncompressed_size;
-	void* buf = (void*)malloc(size_buf);
-	if (buf==NULL)
+	void* buf = malloc(size_buf);
+	if (buf == NULL)
 	{
-		printf("Error allocating memory\n");
+		sprintf( m_errorMessage, "Error allocating memory %d for file %s\n", size_buf, fileName.c_str() );
 		return false;
 	}
 
 	err = unzOpenCurrentFilePassword(uf,password);
-	if (err!=UNZ_OK)
+	if (err != UNZ_OK)
 	{
-		printf("error %d with zipfile in unzOpenCurrentFilePassword\n",err);
+		sprintf( m_errorMessage, "error %d with file %s in unzOpenCurrentFilePassword\n", err, fileName.c_str() );
+		return false;
 	}
 
-	printf(" extracting: %s\n", fileName.c_str());
-
 	int numRead = unzReadCurrentFile(uf,buf,size_buf);
-	if (numRead<0)
+	if( numRead < 0 )
 	{
-		printf("error %d with zipfile in unzReadCurrentFile\n",err);
+		sprintf( m_errorMessage, "error %d with file %s in unzReadCurrentFile\n", err, fileName.c_str() );
 		err = numRead;
 	}
 	else
@@ -255,7 +265,7 @@ bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& p
 		err = unzCloseCurrentFile (uf);
 		if (err!=UNZ_OK)
 		{
-			printf("error %d with zipfile in unzCloseCurrentFile\n",err);
+			sprintf( m_errorMessage, "error %d with file %s in unzCloseCurrentFile\n",err, fileName.c_str() );
 		}
 	}
 	else
@@ -275,6 +285,7 @@ bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& p
 void zip::ZipArchiveInput::Close()
 {
 	unzClose(uf);
+	m_nameToEntry.clear();
 }
 
 bool zip::ZipArchiveInput::Index()
@@ -282,6 +293,11 @@ bool zip::ZipArchiveInput::Index()
 	static const int UNZ_MAXFILENAMEINZIP = 256;
 
 	int err = unzGoToFirstFile(uf);
+	if( err != UNZ_OK )
+	{
+		sprintf( m_errorMessage, "Can't go to first file\n" );
+		return false;
+	}
 
 	while (err == UNZ_OK)
 	{
@@ -293,6 +309,7 @@ bool zip::ZipArchiveInput::Index()
 			err = unzGetFilePos( uf, &pos );
 			if( err != UNZ_OK )
 			{
+				sprintf( m_errorMessage, "Can't get file position for %s\n", szCurrentFileName );
 				return false;
 			}
 
@@ -302,10 +319,25 @@ bool zip::ZipArchiveInput::Index()
 			m_nameToEntry.insert( std::make_pair( szCurrentFileName, zipEntry ) );
 
 			err = unzGoToNextFile(uf);
+			if( err != UNZ_OK && err != UNZ_END_OF_LIST_OF_FILE )
+			{
+				sprintf( m_errorMessage, "Can't go to next file\n" );
+				return false;
+			}
+		}
+		else
+		{
+			sprintf( m_errorMessage, "Can't get file info\n" );
+			return false;
 		}
 	}
 
 	return err == UNZ_END_OF_LIST_OF_FILE;
+}
+
+const char* zip::ZipArchiveInput::ErrorMessage() const
+{
+	return m_errorMessage;
 }
 
 

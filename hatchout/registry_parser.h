@@ -5,6 +5,7 @@
 #include <dung/registry.h>
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace hatch
@@ -16,6 +17,7 @@ namespace hatch
 namespace hatch
 {
 	typedef std::string String_t;
+	typedef std::stringstream StringStream_t;
 
 	class RegistryParser
 	{
@@ -27,6 +29,7 @@ namespace hatch
 		void Close();
 
 		bool Parse( Registry& registry );
+		String_t ErrorMessage() const;
 
 	private:
 		bool ParseWordValue( String_t& value );
@@ -37,6 +40,8 @@ namespace hatch
 		bool SkipEndLines();
 
 		dung::TextTokenizer m_tokenizer;
+		
+		StringStream_t m_errorMessage;
 	};
 
 	struct Registry
