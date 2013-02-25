@@ -143,6 +143,18 @@ bool zip::ZipCreateDirectories( const char *newdir )
 	return true;
 }
 
+bool zip::FileSize( const char* path, size_t& size )
+{
+	FILE* fp = fopen( path, "rb");
+	if( fp == NULL )
+		return false;
+
+	fseek(fp, 0L, SEEK_END);
+	size = ftell(fp);
+	fclose( fp );
+	return true;
+}
+
 namespace zip
 {
 	static const int MAX_ERROR_STRING = 4096;

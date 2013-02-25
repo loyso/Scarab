@@ -45,5 +45,6 @@ namespace zip
 	};
 
 	int ZipCreateDirectory( const char* path );
-	bool ZipCreateDirectories( const char *path );
+	bool ZipCreateDirectories( const char* path );
+	bool FileSize( const char* path, size_t& size );
 }
