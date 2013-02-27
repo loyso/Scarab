@@ -3,7 +3,6 @@
 #include <dung/memoryblock.h>
 
 #include <zlib/miniunzip.h>
-#include <zlib/miniunzip.h>
 
 extern "C"
 {
@@ -126,25 +125,6 @@ bool hatch::ApplyDiff( Options const& options, RegistryAction const& action, zip
 
 	if( !CheckOldFileData( options, oldFile, action, out ) )
 		return false;
-
-	if( options.checkOldSize && oldFile.size != action.oldSize )
-	{
-		if( !options.quiet )
-			out << "Old file has wrong size. " << fullPathOld << " Real size=" << oldFile.size << " Registry size=" << action.oldSize << std::endl;
-		return false;
-	}
-
-	if( options.checkOldSha1 )
-	{
-		dung::Sha1 oldSha1;
-		dung::SHA1Compute( oldFile.pBlock, oldFile.size, oldSha1 );
-		if( oldSha1 != action.oldSha1 )
-		{
-			if( !options.quiet )
-				out << "Old file has wrong size. " << fullPathOld << " Real size=" << oldFile.size << " Registry size=" << action.oldSize << std::endl;
-			return false;
-		}
-	}
 
 	dung::MemoryBlock newFile( action.newSize );
 
