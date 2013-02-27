@@ -59,8 +59,8 @@ bool deltamax::DeltaMaxEncoder::EncodeDiffFile( const char* newFileName, const c
 	options.lpszLicenseKey = m_licenseKey;
 	options.lpUserData = this;
 
-	int result = DeltaMAXEncode( oldFileName, newFileName, diffFileName, &options );
-	if( result == DELTAMAX_ERR_OK )
+	m_result = DeltaMAXEncode( oldFileName, newFileName, diffFileName, &options );
+	if( m_result == DELTAMAX_ERR_OK )
 		return true;
 
 	return false;
@@ -83,8 +83,8 @@ bool deltamax::DeltaMaxDecoder::DecodeDiffFile( const char* newFileName, const c
 	options.lpszLicenseKey = m_licenseKey;
 	options.lpUserData = this;
 
-	int result = DeltaMAXDecode( oldFileName, newFileName, diffFileName, &options );
-	if( result == DELTAMAX_ERR_OK )
+	m_result = DeltaMAXDecode( oldFileName, newFileName, diffFileName, &options );
+	if( m_result == DELTAMAX_ERR_OK )
 		return true;
 
 	return false;
