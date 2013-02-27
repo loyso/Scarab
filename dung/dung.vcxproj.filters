@@ -13,5 +13,7 @@
     <ClInclude Include="memoryblock.h" />
     <ClInclude Include="tokenizer.h" />
     <ClInclude Include="registry.h" />
+    <ClInclude Include="diffdecoder.h" />
+    <ClInclude Include="diffencoder.h" />
   </ItemGroup>
 </Project>

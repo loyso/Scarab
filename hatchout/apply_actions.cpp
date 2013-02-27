@@ -181,7 +181,7 @@ bool hatch::ApplyAction( Options const& options, RegistryAction const& action, z
 	case dung::Action::NEW:
 		if( options.reportFile )
 			out << "Creating new file " << action.new_path << std::endl;
-		if( !CreateNewFile( options, action, false, zipInput, out ) )
+		if( !CreateNewFile( options, action, true, zipInput, out ) ) // Override it anyway.
 			return false;
 		break;
 

@@ -15,10 +15,17 @@ namespace fs = boost::filesystem;
 
 namespace rab
 {
-	void BuildRegexVector( Config::StringValues_t const& strings, Config::RegexValues_t& regexps );
 }
 
-void rab::ProcessData( Options const& options, Config& config )
+rab::RollABall::RollABall()
+{
+}
+
+rab::RollABall::~RollABall()
+{
+}
+
+void rab::RollABall::ProcessData( Options const& options, Config& config, DiffEncoders const& diffEncoders )
 {
 	config.BuildRegexps();
 
@@ -29,7 +36,7 @@ void rab::ProcessData( Options const& options, Config& config )
 	zip::ZipArchiveOutput zipOut( options.packageFile, true, zip::CompressionLevel::NO_COMPRESSION );
 
 	BuildTempCopies( options, config, *pRootFolder, zipOut );
-	BuildDiffs( options, config, *pRootFolder, zipOut );
+	BuildDiffs( options, config, diffEncoders, *pRootFolder, zipOut );
 	GatherSha1( options, config, *pRootFolder );
 
 	WriteRegistry( options, config, *pRootFolder, zipOut );	
@@ -39,6 +46,7 @@ void rab::ProcessData( Options const& options, Config& config )
 	delete pRootFolder;
 	pRootFolder = NULL;
 }
+
 
 rab::String_t rab::DiffFileName( String_t const& fileName, Config const& config )
 {

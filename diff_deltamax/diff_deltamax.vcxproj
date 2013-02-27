@@ -11,25 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dung.cpp" />
-    <ClCompile Include="memoryblock.cpp" />
-    <ClCompile Include="registry.cpp" />
-    <ClCompile Include="sha1.cpp" />
-    <ClCompile Include="tokenizer.cpp" />
+    <ClCompile Include="diff_deltamax.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="diffdecoder.h" />
-    <ClInclude Include="diffencoder.h" />
-    <ClInclude Include="dung.h" />
-    <ClInclude Include="memoryblock.h" />
-    <ClInclude Include="registry.h" />
-    <ClInclude Include="sha1.h" />
-    <ClInclude Include="tokenizer.h" />
+    <ClInclude Include="diff_deltamax.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{DA69A041-D12C-447C-BF78-C7E11EC33A49}</ProjectGuid>
+    <ProjectGuid>{605D7E8A-72E2-44EF-A1A2-99D6D8796A9F}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>dung</RootNamespace>
+    <RootNamespace>diff_deltamax</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -89,7 +79,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

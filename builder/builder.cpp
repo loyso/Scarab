@@ -4,13 +4,24 @@
 #include <boost/program_options.hpp>
 #include <boost/locale.hpp>
 #include <boost/filesystem.hpp>
+namespace po = boost::program_options;
 
 #include <rollaball/rollaball.h>
+#include <rollaball/filediff.h>
 
-int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Config& config )
+#include <diff_deltamax/diff_deltamax.h>
+
+struct EncodersConfig
 {
-	namespace po = boost::program_options;
+	rab::Config::StringValues_t deltaMax_packFiles;
+	std::string deltaMax_userName;
+	std::string deltaMax_licenseKey;
 
+	rab::Config::StringValues_t xdelta_packFiles;
+};
+
+int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Config& config, EncodersConfig& encodersConfig )
+{
 	po::options_description command_line_options("Command line options");
 	command_line_options.add_options()
 		("help,H", "produce help message")
@@ -36,8 +47,14 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("new_override_files", po::wvalue(&config.newOverrideFiles), "force override new files")
 		("new_file_limit", po::wvalue(&config.newFileLimit)->default_value(0), "skip source files greater then the limit")		
 		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
-		("pack_files_using", po::wvalue(&config.pack_files_using), "choose pack method for source files: \"mask/method\"")
 		;
+
+	// Expose DeltaMAX options.	
+	config_file_options.add_options()
+		("deltamax.pack_files", po::wvalue(&encodersConfig.deltaMax_packFiles), "files to pack with DeltaMAX")
+		("deltamax.user_name", po::value(&encodersConfig.deltaMax_userName), "registered user name")
+		("deltamax.license_key", po::value(&encodersConfig.deltaMax_licenseKey), "license key string")
+	;
 
 	po::variables_map vm;
 	po::store(po::wcommand_line_parser(argc, argv).options(command_line_options).run(), vm);
@@ -81,14 +98,22 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	rab::Options options;
 	rab::Config config;
+	rab::DiffEncoders diffEncoders;
 
 	try
 	{
-		result = ParseCommandLine( argc, argv, options, config );
+		EncodersConfig encodersConfig;
+		result = ParseCommandLine( argc, argv, options, config, encodersConfig );
 		if( result )
 			return result;
 
-		rab::ProcessData( options, config );
+		rab::RollABall rollABall;
+#if DELTAMAX
+		// Plug in DeltaMAX encoder.
+		deltamax::DeltaMaxEncoder deltaMaxEncoder( encodersConfig.deltaMax_userName.c_str(), encodersConfig.deltaMax_licenseKey.c_str() );
+		diffEncoders.AddExternalEncoder( deltaMaxEncoder, "deltamax", encodersConfig.deltaMax_packFiles );
+#endif
+		rollABall.ProcessData( options, config, diffEncoders );
 	}
 	catch(std::exception& e) {
 		std::cerr << e.what() << "\n";

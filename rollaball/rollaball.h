@@ -1,6 +1,7 @@
 #pragma once
 
 #include <dung/dung.h>
+#include <dung/diffencoder.h>
 
 #include <string>
 #include <vector>
@@ -9,6 +10,11 @@
 namespace zip
 {
 	class ZipArchiveOutput;
+}
+
+namespace rab
+{
+	class DiffEncoders;
 }
 
 namespace rab
@@ -51,14 +57,46 @@ namespace rab
 		RegexValues_t newIgnoreFiles_regex;
 		RegexValues_t newOverrideFiles_regex;
 
-		StringValues_t pack_files_using;
 		size_t newFileLimit;
 		String_t packedExtension;
 	};
 
 	String_t DiffFileName( String_t const& fileName, Config const& config );
+
+	void BuildRegexVector( Config::StringValues_t const& strings, Config::RegexValues_t& regexps );
 	bool MatchName( Config::RegexValues_t const & filters, String_t const& name );
 
-	void ProcessData( Options const &options, Config&config );
+	class RollABall
+	{
+	public:
+		RollABall();
+		~RollABall();
+
+		void AddEncoder( dung::DiffEncoder_i& diffEncoder, const char* encoderName, Config::StringValues_t const& packFiles );
+		void AddExternalEncoder( dung::DiffEncoderExternal_i& diffEncoder, const char* encoderName, Config::StringValues_t const& packFiles );
+
+		void ProcessData( Options const &options, Config&config, DiffEncoders const& diffEncoders );
+	
+	private:
+		struct EncoderEntry
+		{
+			const char* m_encoderName;
+			Config::RegexValues_t m_packFiles;
+			dung::DiffEncoder_i* m_pDiffEncoder;
+		};
+
+		struct ExternalEncoderEntry
+		{
+			const char* m_encoderName;
+			Config::RegexValues_t m_packFiles;
+			dung::DiffEncoderExternal_i* m_pDiffEncoder;
+		};
+
+		typedef std::vector< EncoderEntry* > DiffEncoders_t;
+		DiffEncoders_t m_diffEncoders;
+
+		typedef std::vector< ExternalEncoderEntry* > DiffExternalEncoders_t;
+		DiffExternalEncoders_t m_diffEncodersExternal;
+	};
 };
 
