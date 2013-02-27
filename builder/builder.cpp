@@ -49,12 +49,14 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
 		;
 
+#if DELTAMAX
 	// Expose DeltaMAX options.	
 	config_file_options.add_options()
 		("deltamax.pack_files", po::wvalue(&encodersConfig.deltaMax_packFiles), "files to pack with DeltaMAX")
 		("deltamax.user_name", po::value(&encodersConfig.deltaMax_userName), "registered user name")
 		("deltamax.license_key", po::value(&encodersConfig.deltaMax_licenseKey), "license key string")
 	;
+#endif // DELTAMAX
 
 	po::variables_map vm;
 	po::store(po::wcommand_line_parser(argc, argv).options(command_line_options).run(), vm);
@@ -110,7 +112,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		rab::RollABall rollABall;
 #if DELTAMAX
 		// Plug in DeltaMAX encoder.
-		deltamax::DeltaMaxEncoder deltaMaxEncoder( encodersConfig.deltaMax_userName.c_str(), encodersConfig.deltaMax_licenseKey.c_str() );
+		deltamax::DeltaMaxEncoder deltaMaxEncoder;
+		deltaMaxEncoder.SetUserLicense( encodersConfig.deltaMax_userName.c_str(), encodersConfig.deltaMax_licenseKey.c_str() );
 		diffEncoders.AddExternalEncoder( deltaMaxEncoder, "deltamax", encodersConfig.deltaMax_packFiles );
 #endif
 		rollABall.ProcessData( options, config, diffEncoders );

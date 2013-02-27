@@ -6,7 +6,15 @@
 #include "registry_parser.h"
 #include "apply_actions.h"
 
-bool hatch::ProcessData( Options const& options, LogOutput_t& out )
+hatch::HatchOut::HatchOut()
+{
+}
+
+hatch::HatchOut::~HatchOut()
+{
+}
+
+bool hatch::HatchOut::ProcessData( Options const& options, DiffDecoders const& diffDecoders, LogOutput_t& out )
 {
 	zip::ZipArchiveInput zipInput;
 	if( !zipInput.Open( options.pathToPackage, false ) )
@@ -48,7 +56,7 @@ bool hatch::ProcessData( Options const& options, LogOutput_t& out )
 			out << registry.actions.size() << " actions in total." << std::endl;
 	}
 
-	bool result = ApplyActions( options, registry, zipInput, out );
+	bool result = ApplyActions( options, diffDecoders, registry, zipInput, out );
 
 	if( result && !options.quiet )
 		out << "Successfully done!" << std::endl;

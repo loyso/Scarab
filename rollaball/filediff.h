@@ -2,6 +2,12 @@
 
 #include "rollaball.h"
 
+namespace dung
+{
+	class DiffEncoder_i;
+	class DiffEncoderExternal_i;
+}
+
 namespace rab
 {
 	struct FolderInfo;

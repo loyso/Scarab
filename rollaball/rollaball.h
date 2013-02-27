@@ -1,7 +1,6 @@
 #pragma once
 
 #include <dung/dung.h>
-#include <dung/diffencoder.h>
 
 #include <string>
 #include <vector>
@@ -72,31 +71,7 @@ namespace rab
 		RollABall();
 		~RollABall();
 
-		void AddEncoder( dung::DiffEncoder_i& diffEncoder, const char* encoderName, Config::StringValues_t const& packFiles );
-		void AddExternalEncoder( dung::DiffEncoderExternal_i& diffEncoder, const char* encoderName, Config::StringValues_t const& packFiles );
-
 		void ProcessData( Options const &options, Config&config, DiffEncoders const& diffEncoders );
-	
-	private:
-		struct EncoderEntry
-		{
-			const char* m_encoderName;
-			Config::RegexValues_t m_packFiles;
-			dung::DiffEncoder_i* m_pDiffEncoder;
-		};
-
-		struct ExternalEncoderEntry
-		{
-			const char* m_encoderName;
-			Config::RegexValues_t m_packFiles;
-			dung::DiffEncoderExternal_i* m_pDiffEncoder;
-		};
-
-		typedef std::vector< EncoderEntry* > DiffEncoders_t;
-		DiffEncoders_t m_diffEncoders;
-
-		typedef std::vector< ExternalEncoderEntry* > DiffExternalEncoders_t;
-		DiffExternalEncoders_t m_diffEncodersExternal;
 	};
 };
 

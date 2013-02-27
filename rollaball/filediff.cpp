@@ -3,6 +3,8 @@
 #include "filetree.h"
 
 #include <dung/memoryblock.h>
+#include <dung/diffencoder.h>
+
 #include <zlib/minizip.h>
 
 #include <algorithm>

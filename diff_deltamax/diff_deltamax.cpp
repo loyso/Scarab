@@ -26,10 +26,28 @@ namespace deltamax
 {
 }
 
-deltamax::DeltaMaxEncoder::DeltaMaxEncoder( const char* userName, const char* licenseKey )
-	: m_userName( userName )
-	, m_licenseKey( licenseKey )
+
+deltamax::DeltaMax::DeltaMax()
+	: m_userName()
+	, m_licenseKey()
 	, m_result( DELTAMAX_ERR_OK )
+{
+}
+
+void deltamax::DeltaMax::SetUserLicense( const char* userName, const char* licenseKey )
+{
+	m_userName = userName;
+	m_licenseKey = licenseKey;
+}
+
+void deltamax::DeltaMax::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
+{
+	const char* errorString = DeltaMAXGetErrorString( m_result );
+	strncpy( errorMessage, errorString, bufferSize-1 );
+}
+
+
+deltamax::DeltaMaxEncoder::DeltaMaxEncoder()
 {
 }
 
@@ -50,8 +68,31 @@ bool deltamax::DeltaMaxEncoder::EncodeDiffFile( const char* newFileName, const c
 
 void deltamax::DeltaMaxEncoder::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
 {
-	const char* errorString = DeltaMAXGetErrorString( m_result );
-	strncpy( errorMessage, errorString, bufferSize-1 );
+	DeltaMax::GetErrorMessage( errorMessage, bufferSize );
+}
+
+deltamax::DeltaMaxDecoder::DeltaMaxDecoder()
+{
+}
+
+bool deltamax::DeltaMaxDecoder::DecodeDiffFile( const char* newFileName, const char* oldFileName, const char* diffFileName )
+{
+	DELTAMAX_DECODE_OPTIONS options;
+	DeltaMAXInitDecodeOptions( &options );
+	options.lpszLicensedTo = m_userName;
+	options.lpszLicenseKey = m_licenseKey;
+	options.lpUserData = this;
+
+	int result = DeltaMAXDecode( oldFileName, newFileName, diffFileName, &options );
+	if( result == DELTAMAX_ERR_OK )
+		return true;
+
+	return false;
+}
+
+void deltamax::DeltaMaxDecoder::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
+{
+	DeltaMax::GetErrorMessage( errorMessage, bufferSize );
 }
 
 #endif // DELTAMAX

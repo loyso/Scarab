@@ -17,10 +17,10 @@ namespace hatch
 {
 	bool CreateNewFile( Options const& options, RegistryAction const& action, bool overrideFile, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
 	bool DeleteOldFile( Options const& options, RegistryAction const& action, LogOutput_t& out );
-	bool ApplyDiff( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
+	bool ApplyDiff( Options const& options, DiffDecoders const& diffDecoders, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
 	
 	bool CheckOldFileData( Options const& options, dung::MemoryBlock const& oldFile, RegistryAction const& action, LogOutput_t& out );
-	bool ApplyAction( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
+	bool ApplyAction( Options const& options, DiffDecoders const& diffDecoders, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
 
 	String_t FullPath( Options const& options, String_t const& relativePath )
 	{
@@ -116,7 +116,7 @@ bool hatch::CheckOldFileData( Options const& options, dung::MemoryBlock const& o
 	return true;
 }
 
-bool hatch::ApplyDiff( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
+bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
 {
 	dung::MemoryBlock diffBlock;
 	if( !zipInput.ReadFile( action.diff_path, diffBlock.pBlock, diffBlock.size ) )
@@ -174,7 +174,7 @@ bool hatch::DeleteOldFile( Options const& options, RegistryAction const& action,
 	return result;
 }
 
-bool hatch::ApplyAction( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
+bool hatch::ApplyAction( Options const& options, DiffDecoders const& diffDecoders, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
 {
 	switch( action.action )
 	{
@@ -206,7 +206,7 @@ bool hatch::ApplyAction( Options const& options, RegistryAction const& action, z
 	case dung::Action::APPLY_DIFF:
 		if( options.reportFile )
 			out << "Applying difference " << action.diff_path << " to " << action.old_path << std::endl;
-		if( !ApplyDiff( options, action, zipInput, out ) )
+		if( !ApplyDiff( options, diffDecoders, action, zipInput, out ) )
 			return false;
 		break;
 
@@ -227,7 +227,7 @@ bool hatch::ApplyAction( Options const& options, RegistryAction const& action, z
 	return true;
 }
 
-bool hatch::ApplyActions( Options const& options, Registry const& registry, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
+bool hatch::ApplyActions( Options const& options, DiffDecoders const& diffDecoders, Registry const& registry, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
 {
 	int numErrors = 0;
 
@@ -235,7 +235,7 @@ bool hatch::ApplyActions( Options const& options, Registry const& registry, zip:
 	{
 		RegistryAction const& action = **i;
 
-		if( !ApplyAction( options, action, zipInput, out ) )
+		if( !ApplyAction( options, diffDecoders, action, zipInput, out ) )
 		{
 			if( options.stopIfError )
 				return false;
@@ -251,4 +251,41 @@ bool hatch::ApplyActions( Options const& options, Registry const& registry, zip:
 		out << "FAILED. " << numErrors << " errors occured." << std::endl;
 
 	return false;
+}
+
+
+hatch::DiffDecoders::DiffDecoders()
+{
+}
+
+hatch::DiffDecoders::~DiffDecoders()
+{	
+}
+
+void hatch::DiffDecoders::AddDecoder( dung::DiffDecoder_i& diffDecoder, const char* decoderName )
+{
+	m_nameToDecoder.insert( std::make_pair( String_t(decoderName), &diffDecoder ) );
+}
+
+void hatch::DiffDecoders::AddExternalDecoder( dung::DiffDecoderExternal_i& diffDecoder, const char* decoderName )
+{
+	m_nameToDecoderExternal.insert( std::make_pair( String_t(decoderName), &diffDecoder ) );
+}
+
+dung::DiffDecoder_i* hatch::DiffDecoders::FindDecoder( String_t const& decoderName ) const
+{
+	NameToDecoder_t::const_iterator i = m_nameToDecoder.find( decoderName );
+	if( i == m_nameToDecoder.end() )
+		return NULL;
+
+	return i->second;
+}
+
+dung::DiffDecoderExternal_i* hatch::DiffDecoders::FindExternalDecoder( String_t const& decoderName ) const
+{
+	NameToDecoderExternal_t::const_iterator i = m_nameToDecoderExternal.find( decoderName );
+	if( i == m_nameToDecoderExternal.end() )
+		return NULL;
+
+	return i->second;
 }

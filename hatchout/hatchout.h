@@ -6,6 +6,11 @@
 
 namespace hatch
 {
+	class DiffDecoders;
+}
+
+namespace hatch
+{
 	typedef std::string String_t;
 	typedef std::ostream LogOutput_t;
 
@@ -22,5 +27,12 @@ namespace hatch
 		bool checkOldSha1;
 	};
 
-	bool ProcessData( Options const& options, LogOutput_t& out );
+	class HatchOut
+	{
+	public:
+		HatchOut();
+		~HatchOut();
+
+		bool ProcessData( Options const& options, DiffDecoders const& diffDecoders, LogOutput_t& out );
+	};
 }
