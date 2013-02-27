@@ -85,9 +85,12 @@ void rab::BuildThreeSets( Config const& config, StringSet_t& newSet, StringSet_t
 		bool overrideFile = MatchName( config.newOverrideFiles_regex, name );
 
 		StringSet_t::iterator f = oldSet.find( name );
-		if( f != oldSet.end() && !overrideFile )
+		if( f != oldSet.end() )
 		{
-			existInBoth.push_back( name );
+			if( overrideFile )
+				newOnly.push_back( name );
+			else
+				existInBoth.push_back( name );
 			oldSet.erase( f );
 		}
 		else
