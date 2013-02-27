@@ -33,6 +33,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("old_preserve_removed", po::wvalue(&config.oldPreserveRemoved), "destination files to preserve, if src removed")
 		("new_ignore_folders", po::wvalue(&config.newIgnoreFolders), "skip source folders")
 		("new_ignore_files", po::wvalue(&config.newIgnoreFiles), "skip source files")
+		("new_override_files", po::wvalue(&config.newOverrideFiles), "force override new files")
 		("new_file_limit", po::wvalue(&config.newFileLimit)->default_value(0), "skip source files greater then the limit")		
 		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
 		("pack_files_using", po::wvalue(&config.pack_files_using), "choose pack method for source files: \"mask/method\"")
