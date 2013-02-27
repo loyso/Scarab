@@ -16,7 +16,7 @@ namespace rab
 
 	void BuildFilesAndFoldersForPath( Config const& config, Path_t const& path, StringSet_t& files, StringSet_t& folders, bool newPath );
 
-	void BuildThreeSets( StringSet_t& newSet, StringSet_t& oldSet, 
+	void BuildThreeSets( Config const& config, StringSet_t& newSet, StringSet_t& oldSet, 
 		VectorString_t& existInBoth, VectorString_t& newOnly, VectorString_t& oldOnly );
 
 	void CreateFilesInTree( VectorString_t const& v, FolderInfo::FileInfos_t& fileInfos );
@@ -71,7 +71,7 @@ void rab::BuildFilesAndFoldersForPath( Config const& config, Path_t const& path,
 	}
 }
 
-void rab::BuildThreeSets( StringSet_t& newSet, StringSet_t& oldSet, 
+void rab::BuildThreeSets( Config const& config, StringSet_t& newSet, StringSet_t& oldSet, 
 	VectorString_t& existInBoth, VectorString_t& newOnly, VectorString_t& oldOnly )
 {
 	existInBoth.clear();
@@ -81,8 +81,11 @@ void rab::BuildThreeSets( StringSet_t& newSet, StringSet_t& oldSet,
 	for( StringSet_t::iterator i = newSet.begin(); i != newSet.end(); ++i )
 	{
 		const String_t& name = *i;
+
+		bool overrideFile = MatchName( config.newOverrideFiles_regex, name );
+
 		StringSet_t::iterator f = oldSet.find( name );
-		if( f != oldSet.end() )
+		if( f != oldSet.end() && !overrideFile )
 		{
 			existInBoth.push_back( name );
 			oldSet.erase( f );
@@ -142,7 +145,7 @@ void rab::BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path
 	// files
 	{
 		VectorString_t existInBoth, newOnly, oldOnly;
-		BuildThreeSets( newFiles, oldFiles, existInBoth, newOnly, oldOnly );
+		BuildThreeSets( config, newFiles, oldFiles, existInBoth, newOnly, oldOnly );
 
 		CreateFilesInTree( existInBoth, folderInfo.files_existInBoth );
 		CreateFilesInTree( newOnly, folderInfo.files_newOnly );
@@ -151,7 +154,7 @@ void rab::BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path
 	// folders
 	{
 		VectorString_t existInBoth, newOnly, oldOnly;
-		BuildThreeSets( newFolders, oldFolders, existInBoth, newOnly, oldOnly );
+		BuildThreeSets( config, newFolders, oldFolders, existInBoth, newOnly, oldOnly );
 
 		CreateFoldersInTree( existInBoth, folderInfo.folders_existInBoth );
 		CreateFoldersInTree( newOnly, folderInfo.folders_newOnly );

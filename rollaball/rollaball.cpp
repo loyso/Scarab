@@ -78,4 +78,5 @@ void rab::Config::BuildRegexps()
 	BuildRegexVector( oldPreserveRemoved, oldPreserveRemoved_regex );
 	BuildRegexVector( newIgnoreFolders, newIgnoreFolders_regex );
 	BuildRegexVector( newIgnoreFiles, newIgnoreFiles_regex );
+	BuildRegexVector( newOverrideFiles, newOverrideFiles_regex );
 }

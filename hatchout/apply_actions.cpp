@@ -15,7 +15,7 @@ extern "C"
 
 namespace hatch
 {
-	bool CreateNewFile( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
+	bool CreateNewFile( Options const& options, RegistryAction const& action, bool overrideFile, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
 	bool DeleteOldFile( Options const& options, RegistryAction const& action, LogOutput_t& out );
 	bool ApplyDiff( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
 	
@@ -44,8 +44,21 @@ namespace hatch
 	}
 }
 
-bool hatch::CreateNewFile( Options const& options, RegistryAction const& action, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
+bool hatch::CreateNewFile( Options const& options, RegistryAction const& action, bool overrideFile, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
 {
+	String_t fullPathNew = FullPath( options, action.new_path );
+
+	if( !overrideFile )
+	{
+		size_t existFileSize;
+		if( zip::FileSize( fullPathNew.c_str(), existFileSize ) )
+		{
+			if( !options.quiet )
+				out << "Can't create new file " << action.new_path << ". File already exists." << std::endl;
+			return false;
+		}
+	}
+
 	dung::MemoryBlock memoryBlock;
 	if( !zipInput.ReadFile( action.new_path, memoryBlock.pBlock, memoryBlock.size ) )
 	{
@@ -55,7 +68,6 @@ bool hatch::CreateNewFile( Options const& options, RegistryAction const& action,
 	}
 
 	String_t dirPath;
-	String_t fullPathNew = FullPath( options, action.new_path );
 	if( !ParentPath( fullPathNew, dirPath ) )
 	{
 		if( !options.quiet )
@@ -169,7 +181,14 @@ bool hatch::ApplyAction( Options const& options, RegistryAction const& action, z
 	case dung::Action::NEW:
 		if( options.reportFile )
 			out << "Creating new file " << action.new_path << std::endl;
-		if( !CreateNewFile( options, action, zipInput, out ) )
+		if( !CreateNewFile( options, action, false, zipInput, out ) )
+			return false;
+		break;
+
+	case dung::Action::OVERRIDE:
+		if( options.reportFile )
+			out << "Overriding with new file " << action.new_path << std::endl;
+		if( !CreateNewFile( options, action, true, zipInput, out ) )
 			return false;
 		break;
 

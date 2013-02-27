@@ -38,6 +38,7 @@ namespace rab
 		StringValues_t oldPreserveRemoved;
 		StringValues_t newIgnoreFolders;
 		StringValues_t newIgnoreFiles;
+		StringValues_t newOverrideFiles;
 
 		void BuildRegexps();
 		RegexValues_t includeFolders_regex;
@@ -48,6 +49,7 @@ namespace rab
 		RegexValues_t oldPreserveRemoved_regex;
 		RegexValues_t newIgnoreFolders_regex;
 		RegexValues_t newIgnoreFiles_regex;
+		RegexValues_t newOverrideFiles_regex;
 
 		StringValues_t pack_files_using;
 		size_t newFileLimit;
