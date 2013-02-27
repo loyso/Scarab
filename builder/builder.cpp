@@ -114,7 +114,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		// Plug in DeltaMAX encoder.
 		deltamax::DeltaMaxEncoder deltaMaxEncoder;
 		deltaMaxEncoder.SetUserLicense( encodersConfig.deltaMax_userName.c_str(), encodersConfig.deltaMax_licenseKey.c_str() );
-		diffEncoders.AddExternalEncoder( deltaMaxEncoder, "deltamax", encodersConfig.deltaMax_packFiles );
+		diffEncoders.AddExternalEncoder( deltaMaxEncoder, _T("deltamax"), encodersConfig.deltaMax_packFiles );
 #endif
 		rollABall.ProcessData( options, config, diffEncoders );
 	}

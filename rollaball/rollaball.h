@@ -21,6 +21,7 @@ namespace rab
 	typedef _tstring String_t;
 	typedef zip::ZipArchiveOutput PackageOutput_t;
 	typedef std::wregex Regex_t;
+	typedef _tstring DiffMethod_t;
 
 	struct Options
 	{

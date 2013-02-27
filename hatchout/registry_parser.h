@@ -67,5 +67,6 @@ namespace hatch
 		String_t diff_path;
 		String_t new_path;
 		String_t old_path;
+		String_t diff_method; // xdelta, deltamax etc
 	};
 }

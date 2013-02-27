@@ -22,23 +22,23 @@ namespace rab
 		DiffEncoders();
 		~DiffEncoders();
 
-		void AddEncoder( dung::DiffEncoder_i& diffEncoder, const char* encoderName, Config::StringValues_t const& packFiles );
-		void AddExternalEncoder( dung::DiffEncoderExternal_i& diffEncoder, const char* encoderName, Config::StringValues_t const& packFiles );
+		void AddEncoder( dung::DiffEncoder_i& diffEncoder, DiffMethod_t const& encoderName, Config::StringValues_t const& packFiles );
+		void AddExternalEncoder( dung::DiffEncoderExternal_i& diffEncoder, DiffMethod_t const& encoderName, Config::StringValues_t const& packFiles );
 
-		dung::DiffEncoder_i* FindEncoder( String_t const& fileName ) const;
-		dung::DiffEncoderExternal_i* FindExternalEncoder( String_t const& fileName ) const;
+		dung::DiffEncoder_i* FindEncoder( String_t const& fileName, DiffMethod_t& encoderName ) const;
+		dung::DiffEncoderExternal_i* FindExternalEncoder( String_t const& fileName, DiffMethod_t& encoderName ) const;
 
 	private:
 		struct EncoderEntry
 		{
-			const char* m_encoderName;
+			DiffMethod_t m_encoderName;
 			Config::RegexValues_t m_packFiles;
 			dung::DiffEncoder_i* m_pDiffEncoder;
 		};
 
 		struct ExternalEncoderEntry
 		{
-			const char* m_encoderName;
+			DiffMethod_t m_encoderName;
 			Config::RegexValues_t m_packFiles;
 			dung::DiffEncoderExternal_i* m_pDiffEncoder;
 		};

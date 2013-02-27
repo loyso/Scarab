@@ -79,13 +79,13 @@ bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncod
 		fileInfo.isDifferent = true;
 		fs::create_directories( fullTemp.parent_path() );
 
- 		dung::DiffEncoder_i* pEncoder = diffEncoders.FindEncoder( fileInfo.name );
+ 		dung::DiffEncoder_i* pEncoder = diffEncoders.FindEncoder( fileInfo.name, fileInfo.diffMethod );
 		if( pEncoder != NULL )
 		{
 		}
 		else
 		{
-			dung::DiffEncoderExternal_i* pExternalEncoder = diffEncoders.FindExternalEncoder( fileInfo.name );
+			dung::DiffEncoderExternal_i* pExternalEncoder = diffEncoders.FindExternalEncoder( fileInfo.name, fileInfo.diffMethod );
 			if( pExternalEncoder != NULL )
 			{
 				if( !pExternalEncoder->EncodeDiffFile( fullNew.generic_string().c_str(), fullOld.generic_string().c_str(), fullTemp.generic_string().c_str() ) )
@@ -101,8 +101,12 @@ bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncod
 
 				output.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size );
 			}
-			else if( !EncodeAndWrite( newFile, oldFile, fullTemp, relativeTemp, output ) )
-				return false;
+			else
+			{
+				if( !EncodeAndWrite( newFile, oldFile, fullTemp, relativeTemp, output ) )
+					return false;
+				fileInfo.diffMethod = _T("xdelta");
+			}				
 		}
 	}
 	else
@@ -155,7 +159,7 @@ rab::DiffEncoders::~DiffEncoders()
 	DeleteContainer( m_diffEncodersExternal );
 }
 
-void rab::DiffEncoders::AddEncoder( dung::DiffEncoder_i& diffEncoder, const char* encoderName, Config::StringValues_t const& packFiles )
+void rab::DiffEncoders::AddEncoder( dung::DiffEncoder_i& diffEncoder, DiffMethod_t const& encoderName, Config::StringValues_t const& packFiles )
 {
 	EncoderEntry* pEncoderEntry = SCARAB_NEW EncoderEntry;
 
@@ -166,7 +170,7 @@ void rab::DiffEncoders::AddEncoder( dung::DiffEncoder_i& diffEncoder, const char
 	m_diffEncoders.push_back( pEncoderEntry );
 }
 
-void rab::DiffEncoders::AddExternalEncoder( dung::DiffEncoderExternal_i& diffEncoder, const char* encoderName, Config::StringValues_t const& packFiles )
+void rab::DiffEncoders::AddExternalEncoder( dung::DiffEncoderExternal_i& diffEncoder, DiffMethod_t const& encoderName, Config::StringValues_t const& packFiles )
 {
 	ExternalEncoderEntry* pEncoderEntry = SCARAB_NEW ExternalEncoderEntry;
 
@@ -177,25 +181,31 @@ void rab::DiffEncoders::AddExternalEncoder( dung::DiffEncoderExternal_i& diffEnc
 	m_diffEncodersExternal.push_back( pEncoderEntry );
 }
 
-dung::DiffEncoder_i* rab::DiffEncoders::FindEncoder( String_t const& fileName ) const
+dung::DiffEncoder_i* rab::DiffEncoders::FindEncoder( String_t const& fileName, DiffMethod_t& encoderName ) const
 {
 	for( DiffEncoders_t::const_iterator i = m_diffEncoders.begin(); i != m_diffEncoders.end(); ++i )
 	{
 		EncoderEntry const& encoderEntry = **i;
 		if( MatchName( encoderEntry.m_packFiles, fileName ) )
+		{
+			encoderName = encoderEntry.m_encoderName;
 			return encoderEntry.m_pDiffEncoder;
+		}
 	}
 
 	return NULL;
 }
 
-dung::DiffEncoderExternal_i* rab::DiffEncoders::FindExternalEncoder( String_t const& fileName ) const
+dung::DiffEncoderExternal_i* rab::DiffEncoders::FindExternalEncoder( String_t const& fileName, DiffMethod_t& encoderName ) const
 {
 	for( DiffExternalEncoders_t::const_iterator i = m_diffEncodersExternal.begin(); i != m_diffEncodersExternal.end(); ++i )
 	{
 		ExternalEncoderEntry const& encoderEntry = **i;
 		if( MatchName( encoderEntry.m_packFiles, fileName ) )
+		{
+			encoderName = encoderEntry.m_encoderName;
 			return encoderEntry.m_pDiffEncoder;
+		}
 	}
 
 	return NULL;

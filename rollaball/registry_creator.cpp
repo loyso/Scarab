@@ -75,7 +75,10 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 		}
 
 		if( fileAction == dung::Action::APPLY_DIFF )
+		{
 			output.stream << _T("\t") << _T("diff_path=") << quote << ( relativePath / DiffFileName(fileInfo.name, config) ).generic_wstring() << quote << endl;
+			output.stream << _T("\t") << _T("diff_method=") << fileInfo.diffMethod << endl;
+		}
 
 		output.stream << _T("}") << endl;
 	}

@@ -16,6 +16,8 @@ namespace rab
 		
 		dung::Sha1 newSha1, oldSha1;
 		size_t newSize, oldSize;
+
+		DiffMethod_t diffMethod;
 		bool isDifferent;
 	};
 

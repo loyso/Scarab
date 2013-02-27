@@ -1,6 +1,7 @@
 #include "apply_actions.h"
 
 #include <dung/memoryblock.h>
+#include <dung/diffdecoder.h>
 
 #include <zlib/miniunzip.h>
 
@@ -27,6 +28,11 @@ namespace hatch
 		return options.pathToOld + "/" + relativePath;
 	}
 
+	String_t TempPath( Options const& options, String_t const& relativePath )
+	{
+		return options.pathToOld + "/" + relativePath + ".tmp";
+	}
+
 	bool ParentPath( String_t const& path, String_t& parentPath )
 	{
 		size_t lastSlash = 0;
@@ -41,6 +47,11 @@ namespace hatch
 
 		parentPath = path.substr( 0, lastSlash );
 		return true;
+	}
+
+	bool DeleteFile( const char* path )
+	{
+		return !::remove( path );
 	}
 }
 
@@ -138,24 +149,66 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 	if( !CheckOldFileData( options, oldFile, action, out ) )
 		return false;
 
-	dung::MemoryBlock newFile( action.newSize );
-
-	size_t size;
-	int ret = xd3_decode_memory( diffBlock.pBlock, diffBlock.size, oldFile.pBlock, oldFile.size, newFile.pBlock, &size, newFile.size, 0 );
-	if( ret != 0 )
+	dung::DiffDecoder_i* pDecoder = diffDecoders.FindDecoder( action.diff_method );
+	if( pDecoder != NULL )
 	{
-		if( !options.quiet )
-			out << "Can't decode file " << action.diff_path << " error code=" << ret << std::endl;
-		return false;
 	}
-
-	SCARAB_ASSERT( size == action.newSize );
-
-	if( !WriteWholeFile( fullPathOld, newFile ) )
+	else
 	{
-		if( !options.quiet )
-			out << "Can't write file " << fullPathOld << std::endl;
-		return false;
+		dung::DiffDecoderExternal_i* pExternalDecoder = diffDecoders.FindExternalDecoder( action.diff_method );
+		if( pExternalDecoder != NULL )
+		{
+			String_t oldTempPath = TempPath( options, action.old_path );
+			if( !WriteWholeFile( oldTempPath, oldFile ) )
+			{
+				if( !options.quiet )
+					out << "Can't write file " << oldTempPath << std::endl;
+				return false;
+			}
+
+			String_t diffTempPath = TempPath( options, action.diff_path );
+			if( !WriteWholeFile( diffTempPath, diffBlock ) )
+			{
+				if( !options.quiet )
+					out << "Can't write file " << diffTempPath << std::endl;
+				DeleteFile( oldTempPath.c_str() );
+				return false;
+			}
+
+			bool result = pExternalDecoder->DecodeDiffFile( fullPathOld.c_str(), oldTempPath.c_str(), diffTempPath.c_str() );
+			if( !result )
+			{
+				char errorMessage[ 256 ];
+				pExternalDecoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+			}
+
+			DeleteFile( oldTempPath.c_str() );
+			DeleteFile( diffTempPath.c_str() );
+
+			return result;
+		}
+		else // xdelta
+		{
+			dung::MemoryBlock newFile( action.newSize );
+
+			size_t size;
+			int ret = xd3_decode_memory( diffBlock.pBlock, diffBlock.size, oldFile.pBlock, oldFile.size, newFile.pBlock, &size, newFile.size, 0 );
+			if( ret != 0 )
+			{
+				if( !options.quiet )
+					out << "Can't decode file " << action.diff_path << " error code=" << ret << std::endl;
+				return false;
+			}
+
+			SCARAB_ASSERT( size == action.newSize );
+
+			if( !WriteWholeFile( fullPathOld, newFile ) )
+			{
+				if( !options.quiet )
+					out << "Can't write file " << fullPathOld << std::endl;
+				return false;
+			}
+		}
 	}
 
 	return true;
@@ -164,7 +217,7 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 bool hatch::DeleteOldFile( Options const& options, RegistryAction const& action, LogOutput_t& out )
 {
 	String_t fullPath = FullPath( options, action.old_path );
-	bool result = !::remove( fullPath.c_str() );
+	bool result = DeleteFile( fullPath.c_str() );
 	if( !result )
 	{
 		if( !options.quiet )

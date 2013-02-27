@@ -199,6 +199,14 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 					return false;
 				}
 			}
+			else if( Cmp( "diff_method", key ) )
+			{
+				if( !ParseWordValue( action.diff_method ) )
+				{
+					m_errorMessage << "for diff_method";
+					return false;
+				}
+			}
 			else if( Cmp( "old_sha1", key ) )
 			{
 				String_t value;
