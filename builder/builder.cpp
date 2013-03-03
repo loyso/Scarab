@@ -61,7 +61,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 	po::variables_map vm;
 	po::store(po::wcommand_line_parser(argc, argv).options(command_line_options).run(), vm);
 
-	if (vm.count("help")) 
+	if (argc == 1 || vm.count("help")) 
 	{
 		std::cout << command_line_options << "\n";
 		std::cout << config_file_options << "\n";

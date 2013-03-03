@@ -42,7 +42,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, hatch::Options& options, Decoders
 	po::variables_map vm;
 	po::store(po::wcommand_line_parser(argc, argv).options(command_line_options).run(), vm);
 
-	if (vm.count("help")) 
+	if (argc == 1 || vm.count("help")) 
 		std::cout << command_line_options << "\n";
 
 	po::notify(vm);    
