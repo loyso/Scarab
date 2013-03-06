@@ -31,10 +31,13 @@ namespace rab
 		String_t configFile;
 		String_t packageFile;
 		bool quiet;
+		bool produceTemp;
 	};
 
 	struct Config
 	{
+		Config();
+
 		typedef std::vector< String_t > StringValues_t;
 		typedef std::vector< Regex_t > RegexValues_t;
 
@@ -61,6 +64,8 @@ namespace rab
 
 		size_t newFileLimit;
 		String_t packedExtension;
+
+		int zipCompressionLevel;
 	};
 
 	String_t DiffFileName( String_t const& fileName, Config const& config );

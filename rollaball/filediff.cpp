@@ -15,7 +15,8 @@ namespace rab
 {
 	typedef fs::path Path_t;
 
-	bool CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, Path_t const& fullNew, Path_t const& fullOld, Path_t const& fullTemp, Path_t const& relativeTemp, 
+	bool CreateDiffFile( Options const& options, DiffEncoders const &diffEncoders, FileInfo& fileInfo, 
+		Path_t const& fullNew, Path_t const& fullOld, Path_t const& relativeTemp, 
 		dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, PackageOutput_t &package, LogOutput_t& out );
 
 	bool BuildDiffFile( Options const& options, Config const& config, DiffEncoders const& diffEncoders,
@@ -28,13 +29,22 @@ namespace rab
 		Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FolderInfo::FolderInfos_t const& folderInfos );
 }
 
-bool rab::CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, Path_t const& fullNew, Path_t const& fullOld, Path_t const& fullTemp, Path_t const& relativeTemp, 
+bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncoders, FileInfo& fileInfo, 
+	Path_t const& fullNew, Path_t const& fullOld, Path_t const& relativeTemp, 
 	dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, PackageOutput_t &package, LogOutput_t& out )
 {
+	Path_t fullTemp = relativeTemp.filename();
+
+	if( options.produceTemp )
+	{
+		fullTemp = options.pathToTemp / relativeTemp;
+		fs::create_directories( fullTemp.parent_path() );
+	}
+
 	dung::DiffEncoder_i* pEncoder = diffEncoders.FindEncoder( fileInfo.name, fileInfo.diffMethod );
 	if( pEncoder != NULL )
 	{		
-		out << "Encoding " << fileInfo.diffMethod << " diff file " << fullTemp.generic_wstring() << std::endl;
+		out << "Encoding " << fileInfo.diffMethod << " diff file " << relativeTemp.generic_wstring() << std::endl;
 		
 		void* pDiffBlock = NULL;
 		size_t diffSize = 0;
@@ -48,10 +58,13 @@ bool rab::CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, 
 
 		dung::MemoryBlock deltaFile( pDiffBlock, diffSize );
 
-		if( !WriteWholeFile( fullTemp.wstring(), deltaFile ) )
+		if( options.produceTemp )
 		{
-			out << "Can't write file " << fullTemp.generic_wstring() << std::endl;
-			return false;
+			if( !WriteWholeFile( fullTemp.wstring(), deltaFile ) )
+			{
+				out << "Can't write file " << fullTemp.generic_wstring() << std::endl;
+				return false;
+			}
 		}
 
 		if( !package.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size ) )
@@ -65,7 +78,7 @@ bool rab::CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, 
 		dung::DiffEncoderExternal_i* pExternalEncoder = diffEncoders.FindExternalEncoder( fileInfo.name, fileInfo.diffMethod );
 		if( pExternalEncoder != NULL )
 		{
-			out << "Encoding " << fileInfo.diffMethod << " diff file " << fullTemp.generic_wstring() << std::endl;
+			out << "Encoding " << fileInfo.diffMethod << " diff file " << relativeTemp.generic_wstring() << std::endl;
 			if( !pExternalEncoder->EncodeDiffFile( fullNew.generic_string().c_str(), fullOld.generic_string().c_str(), fullTemp.generic_string().c_str() ) )
 			{
 				char errorMessage[ 256 ];
@@ -80,6 +93,9 @@ bool rab::CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, 
 				out << "Can't read file " << fullTemp.generic_wstring() << std::endl;
 				return false;
 			}
+
+			if( !options.produceTemp )
+				fs::remove( fullTemp );
 
 			if( !package.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size ) )
 			{
@@ -103,7 +119,6 @@ bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncod
 	Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
 	Path_t fullOld = options.pathToOld / relativePath / fileInfo.name;
 	Path_t relativeTemp = relativePath / DiffFileName(fileInfo.name, config);
-	Path_t fullTemp = options.pathToTemp / relativeTemp;
 
 	dung::MemoryBlock oldFile;
 	if( !ReadWholeFile( fullOld.wstring(), oldFile ) )
@@ -133,9 +148,8 @@ bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncod
 	if( fileInfo.newSha1 != fileInfo.oldSha1 )
 	{
 		fileInfo.isDifferent = true;
-		fs::create_directories( fullTemp.parent_path() );
-
-		result &= CreateDiffFile( diffEncoders, fileInfo, fullNew, fullOld, fullTemp, relativeTemp, newFile, oldFile, package, out );
+		
+		result &= CreateDiffFile( options, diffEncoders, fileInfo, fullNew, fullOld, relativeTemp, newFile, oldFile, package, out );
 	}
 	else
 		fileInfo.isDifferent = false;
@@ -252,4 +266,9 @@ dung::DiffEncoderExternal_i* rab::DiffEncoders::FindExternalEncoder( String_t co
 	}
 
 	return NULL;
+}
+
+bool rab::DiffEncoders::Empty() const
+{
+	return m_diffEncoders.empty() && m_diffEncodersExternal.empty();
 }

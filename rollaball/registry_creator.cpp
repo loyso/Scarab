@@ -7,9 +7,13 @@
 #include <zlib/minizip.h>
 
 #include <fstream>
+#include <sstream>
 
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
+
+#include <boost/locale.hpp>
+namespace loc = boost::locale;
 
 namespace rab
 {
@@ -108,37 +112,39 @@ bool rab::WriteRegistry( Options const& options, Config const& config, FolderInf
 {
 	out << "Creating registry file..." << std:: endl;
 
-	std::wofstream file ( dung::WREGISTRY_FILENAME, std::ios::out|std::ios::trunc );
-	if( !file.is_open() )
-	{
-		out << "Can't create " << dung::WREGISTRY_FILENAME << std::endl;
-		return false;
-	}
-
-	OutputContext os( file, out );
+	std::wostringstream stringStream;
+	OutputContext outputContext( stringStream, out );
 
 	if( !options.newVersion.empty() )
-		os.stream << _T("new_version=") << quote << options.newVersion << quote << endl;
+		outputContext.stream << _T("new_version=") << quote << options.newVersion << quote << endl;
 	
 	if( !options.oldVersion.empty() )
-		os.stream << _T("old_version=") << quote << options.oldVersion << quote << endl;
+		outputContext.stream << _T("old_version=") << quote << options.oldVersion << quote << endl;
 
 	Path_t relativePath;
-	WriteRegistryFolders( options, config, FolderInfo::FolderInfos_t( 1, &rootFolder ), relativePath, os );
+	WriteRegistryFolders( options, config, FolderInfo::FolderInfos_t( 1, &rootFolder ), relativePath, outputContext );
 
-	file.close();
+	std::wstring fileContent = stringStream.str();
+	std::string fileContentUtf8 = loc::conv::utf_to_utf<char>( fileContent );
 
-	dung::MemoryBlock registryFileContent;
-	if( !dung::ReadWholeFile( dung::WREGISTRY_FILENAME, registryFileContent ) )
-	{
-		out << "Can't read file " << dung::WREGISTRY_FILENAME << std::endl;
-		return false;
-	}
-
-	if( !package.WriteFile( dung::WREGISTRY_FILENAME, registryFileContent.pBlock, registryFileContent.size ) )
+	if( !package.WriteFile( dung::WREGISTRY_FILENAME, fileContentUtf8.c_str(), fileContentUtf8.size() ) )
 	{
 		out << "Can't write file " << dung::WREGISTRY_FILENAME << " to package" << std::endl;
 		return false;
+	}
+
+	if( options.produceTemp )
+	{
+		std::ofstream file ( dung::WREGISTRY_FILENAME, std::ios::out|std::ios::binary|std::ios::trunc );
+		if( !file.is_open() )
+		{
+			out << "Can't create " << dung::WREGISTRY_FILENAME << std::endl;
+			return false;
+		}
+
+		file.write( fileContentUtf8.c_str(), fileContentUtf8.size() );
+
+		file.close();
 	}
 
 	return true;

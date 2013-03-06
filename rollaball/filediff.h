@@ -28,6 +28,8 @@ namespace rab
 		dung::DiffEncoder_i* FindEncoder( String_t const& fileName, DiffMethod_t& encoderName ) const;
 		dung::DiffEncoderExternal_i* FindExternalEncoder( String_t const& fileName, DiffMethod_t& encoderName ) const;
 
+		bool Empty() const;
+
 	private:
 		struct EncoderEntry
 		{

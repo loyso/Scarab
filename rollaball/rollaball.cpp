@@ -29,6 +29,12 @@ bool rab::RollABall::ProcessData( Options const& options, Config& config, DiffEn
 {
 	bool result = true;
 
+	if( diffEncoders.Empty() )
+	{
+		out << "No encoders added!" << std::endl;
+		return false;
+	}
+
 	out << "Building optimized regular expressions..." << std::endl;
 	config.BuildRegexps();
 
@@ -36,7 +42,7 @@ bool rab::RollABall::ProcessData( Options const& options, Config& config, DiffEn
 	BuildFileTree( options, config, rootFolder, out );
 
 	zip::ZipArchiveOutput zipOut;
-	if( !zipOut.Open( options.packageFile, true, zip::CompressionLevel::NO_COMPRESSION ) )
+	if( !zipOut.Open( options.packageFile, true, config.zipCompressionLevel ) )
 	{
 		out << "Can't open zip archive " << options.packageFile << " zip error: " << zipOut.ErrorMessage() << std::endl;
 		return false;
@@ -89,6 +95,12 @@ void rab::BuildRegexVector( Config::StringValues_t const& strings, Config::Regex
 		Regex_t regexp( value, std::regex::icase | std::regex::optimize | std::regex::ECMAScript );
 		regexps.push_back( regexp );
 	}
+}
+
+rab::Config::Config()
+	: newFileLimit( 0 )
+	, zipCompressionLevel( 0 )
+{
 }
 
 void rab::Config::BuildRegexps()

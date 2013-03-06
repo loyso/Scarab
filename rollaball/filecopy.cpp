@@ -45,12 +45,15 @@ bool rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 
 		if( config.newFileLimit == 0 || fileInfo.newSize < config.newFileLimit )
 		{
-			fs::create_directories( fullTemp.parent_path() );
-
-			if( !dung::WriteWholeFile( fullTemp.wstring(), newFile ) )
+			if( options.produceTemp )
 			{
-				out << "Can't write whole file " << fullTemp.wstring() << std::endl;
-				errors++;
+				fs::create_directories( fullTemp.parent_path() );
+
+				if( !dung::WriteWholeFile( fullTemp.wstring(), newFile ) )
+				{
+					out << "Can't write whole file " << fullTemp.wstring() << std::endl;
+					errors++;
+				}
 			}
 
 			if( !zipOut.WriteFile( relativeTemp.generic_wstring(), newFile.pBlock, newFile.size ) )
@@ -93,7 +96,7 @@ bool rab::BuildTempCopies( Options const& options, Config const& config, FolderI
 
 	Path_t relativePath;
 
-	out << "Building whole file copies in " << options.pathToTemp << " folder..." << std::endl;
+	out << "Building whole file copies (new files)..." << std::endl;
 	result &= BuildTempCopiesFiles( options, config, relativePath, rootFolder.files_newOnly, zipOut, out );
 
 	result &= BuildTempCopiesFolders( options, config, relativePath, rootFolder.folders_newOnly, zipOut, out );
