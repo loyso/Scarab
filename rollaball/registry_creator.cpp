@@ -106,6 +106,8 @@ void rab::WriteRegistryFolders( Options const& options, Config const& config, Fo
 
 bool rab::WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, PackageOutput_t& package, LogOutput_t& out )
 {
+	out << "Creating registry file..." << std:: endl;
+
 	std::wofstream file ( dung::WREGISTRY_FILENAME, std::ios::out|std::ios::trunc );
 	if( !file.is_open() )
 	{
