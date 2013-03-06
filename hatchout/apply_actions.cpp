@@ -171,8 +171,8 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 				pExternalDecoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
 			}
 
-			DeleteFile( oldTempPath.c_str() );
-			DeleteFile( diffTempPath.c_str() );
+			hatch::DeleteFile( oldTempPath.c_str() );
+			hatch::DeleteFile( diffTempPath.c_str() );
 
 			return result;
 		}

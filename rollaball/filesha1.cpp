@@ -70,7 +70,7 @@ bool rab::GatherSha1( Options const& options, Config const& config, FolderInfo c
 
 	Path_t relativePath;
 
-	out << "Gathering SHA1 digests for files in old directory" << std:: endl;
+	out << "Gathering SHA1 digests for files in old directory..." << std:: endl;
 	result &= GatherSha1Files( options, config, relativePath, rootFolder.files_oldOnly, out );
 
 	result &= GatherSha1Folders( options, config, relativePath, rootFolder.folders_oldOnly, out );
