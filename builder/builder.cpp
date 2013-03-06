@@ -55,7 +55,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("new_override_files", po::wvalue(&config.newOverrideFiles), "force override new files")
 		("new_file_limit", po::wvalue(&config.newFileLimit)->default_value(0), "skip source files greater then the limit")		
 		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
-		("zip.compression", po::wvalue(&config.zipCompressionLevel)->default_value(0), "1 through 9 (0 corresponds to the NO_COMPRESSION")		
+		("zip.compression", po::wvalue(&config.zipCompressionLevel)->default_value(0), "1 through 9 (0 corresponds to STORE)")		
 		;
 
 #if SCARAB_DELTAMAX
@@ -80,7 +80,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("xdelta.adler32", po::bool_switch(&encodersConfig.xdelta_config.adler32)->default_value(false), "enable checksum computation in the encoder")
 		("xdelta.adler32_nover", po::bool_switch(&encodersConfig.xdelta_config.adler32_nover)->default_value(false), "disable checksum verification in the decoder")
 		("xdelta.be_greedy", po::bool_switch(&encodersConfig.xdelta_config.beGreedy)->default_value(false), "disable the '1.5-pass algorithm', instead use greedy matching. Greedy is off by default.")
-		("xdelta.compression", po::value(&encodersConfig.xdelta_config.compression)->default_value(0), "1 through 9 (0 corresponds to the NOCOMPRESS flag, and is independent of compression level")
+		("xdelta.compression", po::value(&encodersConfig.xdelta_config.compression)->default_value(0), "1 through 9 (0 corresponds to the NOCOMPRESS flag, and is independent of compression level)")
 		;
 #endif // SCARAB_XDELTA
 
