@@ -7,6 +7,7 @@
 #include <hatchout/apply_actions.h>
 
 #include <diffmethods/diff_deltamax.h>
+#include <diffmethods/diff_xdelta.h>
 
 struct DecodersConfig
 {
@@ -71,12 +72,19 @@ int _tmain(int argc, _TCHAR* argv[])
 			return result;
 
 		hatch::HatchOut hatchOut;
+
+#if SCARAB_XDELTA
+		// Plug in Xdelta decoder.
+		xdelta::XdeltaDecoder xdeltaDecoder;
+		diffDecoders.AddDecoder( xdeltaDecoder, "xdelta" );
+#endif // SCARAB_XDELTA
+
 #if SCARAB_DELTAMAX
-		// Plug in DeltaMAX encoder.
+		// Plug in DeltaMAX decoder.
 		deltamax::DeltaMaxDecoder deltaMaxDecoder;
 		deltaMaxDecoder.SetUserLicense( decodersConfig.deltaMax_userName.c_str(), decodersConfig.deltaMax_licenseKey.c_str() );
 		diffDecoders.AddExternalDecoder( deltaMaxDecoder, "deltamax" );
-#endif
+#endif // SCARAB_DELTAMAX
 
 		std::ostream nil_out( SCARAB_NEW dung::nil_buf );
 

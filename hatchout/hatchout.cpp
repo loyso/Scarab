@@ -16,6 +16,12 @@ hatch::HatchOut::~HatchOut()
 
 bool hatch::HatchOut::ProcessData( Options const& options, DiffDecoders const& diffDecoders, LogOutput_t& out )
 {
+	if( diffDecoders.Empty() )
+	{
+		out << "No decoders added!" << std::endl;
+		return false;
+	}
+
 	zip::ZipArchiveInput zipInput;
 	if( !zipInput.Open( options.pathToPackage, false ) )
 	{

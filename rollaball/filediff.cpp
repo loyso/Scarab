@@ -46,17 +46,14 @@ bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncode
 	{		
 		out << "Encoding " << fileInfo.diffMethod << " diff file " << relativeTemp.generic_wstring() << std::endl;
 		
-		void* pDiffBlock = NULL;
-		size_t diffSize = 0;
-		if( !pEncoder->EncodeDiffMemoryBlock( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, pDiffBlock, diffSize ) )
+		dung::MemoryBlock deltaFile;
+		if( !pEncoder->EncodeDiffMemoryBlock( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, deltaFile.size ) )
 		{
 			char errorMessage[ 256 ];
 			pEncoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
 			out << "Encoding error " << errorMessage << std::endl;
 			return false;
 		}
-
-		dung::MemoryBlock deltaFile( pDiffBlock, diffSize );
 
 		if( options.produceTemp )
 		{

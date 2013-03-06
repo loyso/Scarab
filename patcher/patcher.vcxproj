@@ -23,9 +23,6 @@
     <ProjectReference Include="..\hatchout\hatchout.vcxproj">
       <Project>{74c2ad2e-d568-46f7-9e81-8a9ab5e9854f}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\xdelta\xdelta.vcxproj">
-      <Project>{8f9d37b5-b78e-4816-be61-aef679dbf3bc}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\zlib\zlib.vcxproj">
       <Project>{860b9860-d258-409c-bf4a-336542b3439f}</Project>
     </ProjectReference>
@@ -80,7 +77,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\deltamax\Include</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\deltamax\Include;$(SolutionDir)output\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,7 +99,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <IgnoreSpecificDefaultLibraries>libcpmtd.lib</IgnoreSpecificDefaultLibraries>
       <LargeAddressAware>true</LargeAddressAware>
-      <AdditionalLibraryDirectories>$(SolutionDir)\external\deltamax\Include</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\external\deltamax\Include;$(SolutionDir)output\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

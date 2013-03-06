@@ -9,9 +9,10 @@
 #	define _T(x) L ## x
 #	define TCHAR wchar_t
 #else
+#	undef UNICODE
+#	undef _T
 #	define _T(x) x
 #	define TCHAR char
-#	undef UNICODE
 #endif
 
 #define _CRT_SECURE_NO_WARNINGS

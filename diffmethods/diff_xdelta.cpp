@@ -29,7 +29,7 @@ xdelta::XdeltaEncoder::~XdeltaEncoder()
 {
 }
 
-bool xdelta::XdeltaEncoder::EncodeDiffMemoryBlock( const void* newBlock, size_t newSize, const void* oldBlock, size_t oldSize, void*& diffBlock, size_t& diffSize )
+bool xdelta::XdeltaEncoder::EncodeDiffMemoryBlock( const dung::Byte_t* newBlock, size_t newSize, const dung::Byte_t* oldBlock, size_t oldSize, dung::Byte_t*& diffBlock, size_t& diffSize )
 {
 	const size_t reservedSize = max( newSize, 1024 );
 
@@ -37,7 +37,7 @@ bool xdelta::XdeltaEncoder::EncodeDiffMemoryBlock( const void* newBlock, size_t 
 	diffSize = 0;
 
 	int flags = MakeFlags( m_config );
-	m_errorCode = xd3_encode_memory( (uint8_t*)newBlock, newSize, (uint8_t*)oldBlock, oldSize, (uint8_t*)diffBlock, &diffSize, reservedSize, flags );
+	m_errorCode = xd3_encode_memory( newBlock, newSize, oldBlock, oldSize, diffBlock, &diffSize, reservedSize, flags );
 
 	return m_errorCode == 0;
 }
@@ -68,6 +68,35 @@ int xdelta::XdeltaEncoder::MakeFlags( Config const& config )
 	if( config.compression != 0 ) flags |= ( ( config.compression << XD3_COMPLEVEL_SHIFT ) & XD3_COMPLEVEL_MASK );
 
 	return flags;
+}
+
+
+xdelta::XdeltaDecoder::XdeltaDecoder()
+	: m_errorCode()
+{
+}
+
+xdelta::XdeltaDecoder::~XdeltaDecoder()
+{
+}
+
+bool xdelta::XdeltaDecoder::DecodeDiffMemoryBlock( const dung::Byte_t* oldBlock, size_t oldSize, const dung::Byte_t* diffBlock, size_t diffSize, dung::Byte_t*& newBlock, size_t& newSize )
+{
+	size_t reservedSize = newSize;
+
+	newBlock = SCARAB_NEW dung::Byte_t[ reservedSize ];
+
+	m_errorCode = xd3_decode_memory( diffBlock, diffSize, oldBlock, oldSize, newBlock, &newSize, reservedSize, 0 );
+
+	SCARAB_ASSERT( reservedSize == newSize );
+
+	return m_errorCode == 0;
+}
+
+void xdelta::XdeltaDecoder::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
+{
+	if( m_errorCode != 0 )
+		sprintf( errorMessage, "Can't decode memory with xdelta. Error code: %d", m_errorCode );
 }
 
 #endif // SCARAB_XDELTA

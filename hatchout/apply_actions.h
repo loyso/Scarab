@@ -30,6 +30,8 @@ namespace hatch
 		dung::DiffDecoder_i* FindDecoder( String_t const& decoderName ) const;
 		dung::DiffDecoderExternal_i* FindExternalDecoder( String_t const& decoderName ) const;
 
+		bool Empty() const;
+
 	private:
 		typedef std::unordered_map< String_t, dung::DiffDecoder_i* > NameToDecoder_t;
 		NameToDecoder_t m_nameToDecoder;

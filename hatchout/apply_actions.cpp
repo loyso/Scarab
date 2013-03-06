@@ -5,15 +5,6 @@
 
 #include <zlib/miniunzip.h>
 
-extern "C"
-{
-#include <external/xdelta/xdelta3.h>
-#undef NEW
-#undef DELETE
-#undef MOVE
-}
-
-
 namespace hatch
 {
 	bool CreateNewFile( Options const& options, RegistryAction const& action, bool overrideFile, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
@@ -143,6 +134,28 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 	dung::DiffDecoder_i* pDecoder = diffDecoders.FindDecoder( action.diff_method );
 	if( pDecoder != NULL )
 	{
+		dung::MemoryBlock newFile;
+		newFile.size = action.newSize;
+
+		bool result = pDecoder->DecodeDiffMemoryBlock( oldFile.pBlock, oldFile.size, diffBlock.pBlock, diffBlock.size, newFile.pBlock, newFile.size );
+		if( newFile.size != action.newSize )
+			result = false;
+		if( !result )
+		{
+			char errorMessage[ 256 ];
+			pDecoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+			out << "Can't decode with " << action.diff_method << " for file " << action.diff_path << " " << errorMessage << std::endl;
+		}
+		else
+		{
+			if( !WriteWholeFile( fullPathOld, newFile ) )
+			{
+				out << "Can't write file " << fullPathOld << std::endl;
+				result = false;
+			}
+		}
+
+		return result;
 	}
 	else
 	{
@@ -160,7 +173,7 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 			if( !WriteWholeFile( diffTempPath, diffBlock ) )
 			{
 				out << "Can't write file " << diffTempPath << std::endl;
-				DeleteFile( oldTempPath.c_str() );
+				hatch::DeleteFile( oldTempPath.c_str() );
 				return false;
 			}
 
@@ -169,6 +182,7 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 			{
 				char errorMessage[ 256 ];
 				pExternalDecoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+				out << "Can't decode with " << action.diff_method << " for file " << action.diff_path << " " << errorMessage << std::endl;
 			}
 
 			hatch::DeleteFile( oldTempPath.c_str() );
@@ -176,25 +190,10 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 
 			return result;
 		}
-		else // xdelta
+		else
 		{
-			dung::MemoryBlock newFile( action.newSize );
-
-			size_t size;
-			int ret = xd3_decode_memory( diffBlock.pBlock, diffBlock.size, oldFile.pBlock, oldFile.size, newFile.pBlock, &size, newFile.size, 0 );
-			if( ret != 0 )
-			{
-				out << "Can't decode file " << action.diff_path << " error code=" << ret << std::endl;
-				return false;
-			}
-
-			SCARAB_ASSERT( size == action.newSize );
-
-			if( !WriteWholeFile( fullPathOld, newFile ) )
-			{
-				out << "Can't write file " << fullPathOld << std::endl;
-				return false;
-			}
+			out << "Can't find decoder " << action.diff_method << " for file " << action.diff_path << std::endl;
+			return false;
 		}
 	}
 
@@ -324,4 +323,9 @@ dung::DiffDecoderExternal_i* hatch::DiffDecoders::FindExternalDecoder( String_t 
 		return NULL;
 
 	return i->second;
+}
+
+bool hatch::DiffDecoders::Empty() const
+{
+	return m_nameToDecoder.empty() && m_nameToDecoderExternal.empty();
 }
