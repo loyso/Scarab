@@ -6,7 +6,7 @@
 #include <hatchout/hatchout.h>
 #include <hatchout/apply_actions.h>
 
-#include <diff_deltamax/diff_deltamax.h>
+#include <diffmethods/diff_deltamax.h>
 
 struct DecodersConfig
 {

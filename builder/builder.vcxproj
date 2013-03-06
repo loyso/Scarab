@@ -14,7 +14,7 @@
     <ClCompile Include="builder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\diff_deltamax\diff_deltamax.vcxproj">
+    <ProjectReference Include="..\diffmethods\diffmethods.vcxproj">
       <Project>{605d7e8a-72e2-44ef-a1a2-99d6d8796a9f}</Project>
       <Private>true</Private>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>

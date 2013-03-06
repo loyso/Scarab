@@ -9,7 +9,7 @@ namespace po = boost::program_options;
 #include <rollaball/rollaball.h>
 #include <rollaball/filediff.h>
 
-#include <diff_deltamax/diff_deltamax.h>
+#include <diffmethods/diff_deltamax.h>
 
 struct EncodersConfig
 {

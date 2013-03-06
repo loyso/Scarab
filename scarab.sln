@@ -25,7 +25,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dung", "dung\dung.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "zlib\zlib.vcxproj", "{860B9860-D258-409C-BF4A-336542B3439F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "diff_deltamax", "diff_deltamax\diff_deltamax.vcxproj", "{605D7E8A-72E2-44EF-A1A2-99D6D8796A9F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "diffmethods", "diffmethods\diffmethods.vcxproj", "{605D7E8A-72E2-44EF-A1A2-99D6D8796A9F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
