@@ -25,26 +25,41 @@ rab::RollABall::~RollABall()
 {
 }
 
-void rab::RollABall::ProcessData( Options const& options, Config& config, DiffEncoders const& diffEncoders )
+bool rab::RollABall::ProcessData( Options const& options, Config& config, DiffEncoders const& diffEncoders, LogOutput_t& out )
 {
+	bool result = true;
+
+	out << "Building optimized regular expressions..." << std::endl;
 	config.BuildRegexps();
 
-	FolderInfo* pRootFolder = SCARAB_NEW FolderInfo();
+	FolderInfo rootFolder;
+	BuildFileTree( options, config, rootFolder, out );
 
-	BuildFileTree( options, config, *pRootFolder );
+	zip::ZipArchiveOutput zipOut;
+	if( !zipOut.Open( options.packageFile, true, zip::CompressionLevel::NO_COMPRESSION ) )
+	{
+		out << "Can't open zip archive " << options.packageFile << " zip error: " << zipOut.ErrorMessage() << std::endl;
+		return false;
+	}
 
-	zip::ZipArchiveOutput zipOut( options.packageFile, true, zip::CompressionLevel::NO_COMPRESSION );
+	result &= BuildTempCopies( options, config, rootFolder, zipOut, out );
+	result &= BuildDiffs( options, config, diffEncoders, rootFolder, zipOut, out );
+	result &= GatherSha1( options, config, rootFolder, out );
 
-	BuildTempCopies( options, config, *pRootFolder, zipOut );
-	BuildDiffs( options, config, diffEncoders, *pRootFolder, zipOut );
-	GatherSha1( options, config, *pRootFolder );
+	result &= WriteRegistry( options, config, rootFolder, zipOut, out );	
 
-	WriteRegistry( options, config, *pRootFolder, zipOut );	
+	if( !zipOut.Close() )
+	{
+		out << "Can't close zip archive " << options.packageFile << " zip error: " << zipOut.ErrorMessage() << std::endl;
+		result = false;
+	}
 
-	zipOut.Close();
+	if( result )
+		out << "Successfully done!" << std::endl;
+	else
+		out << "FAILED." << std::endl;
 
-	delete pRootFolder;
-	pRootFolder = NULL;
+	return result;
 }
 
 

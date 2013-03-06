@@ -20,21 +20,24 @@ namespace rab
 {
 	typedef fs::path Path_t;
 
-	bool EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp,
-		Path_t const& relativeTemp, PackageOutput_t& output );
+	bool EncodeAndWriteBlock( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp,
+		Path_t const& relativeTemp, PackageOutput_t& package, LogOutput_t& out );
+
+	bool CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, Path_t const& fullNew, Path_t const& fullOld, Path_t const& fullTemp, Path_t const& relativeTemp, 
+		dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, PackageOutput_t &package, LogOutput_t& out );
 
 	bool BuildDiffFile( Options const& options, Config const& config, DiffEncoders const& diffEncoders,
-		Path_t const& relativePath, PackageOutput_t& output, FileInfo& fileInfo );
+		Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FileInfo& fileInfo );
 
-	void BuildDiffFiles( Options const& options, Config const& config, DiffEncoders const& diffEncoders,
-		Path_t const& relativePath, PackageOutput_t& output, FolderInfo::FileInfos_t const& fileInfos );
+	bool BuildDiffFiles( Options const& options, Config const& config, DiffEncoders const& diffEncoders,
+		Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FolderInfo::FileInfos_t const& fileInfos );
 	
-	void BuildDiffFolders( Options const& options, Config const& config, DiffEncoders const& diffEncoders, 
-		Path_t const& relativePath, PackageOutput_t& output, FolderInfo::FolderInfos_t const& folderInfos );
+	bool BuildDiffFolders( Options const& options, Config const& config, DiffEncoders const& diffEncoders, 
+		Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FolderInfo::FolderInfos_t const& folderInfos );
 }
 
-bool rab::EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp,
-	Path_t const& relativeTemp, PackageOutput_t& output )
+bool rab::EncodeAndWriteBlock( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp,
+	Path_t const& relativeTemp, PackageOutput_t& package, LogOutput_t& out )
 {
 	const size_t reservedSize = max( newFile.size, 1024 );
 	dung::MemoryBlock deltaFile( reservedSize );
@@ -42,17 +45,76 @@ bool rab::EncodeAndWrite( dung::MemoryBlock const& newFile, dung::MemoryBlock co
 
 	int ret = xd3_encode_memory( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, &deltaFile.size, reservedSize, 0 );
 	if( ret != 0 )
+	{
+		out << "Can't encode memory with xdelta. Error code: " << ret << std::endl;
 		return false;
+	}
 
-	WriteWholeFile( fullTemp.wstring(), deltaFile );
+	if( !WriteWholeFile( fullTemp.wstring(), deltaFile ) )
+	{
+		out << "Can't write file " << fullTemp.generic_wstring() << std::endl;
+		return false;
+	}
 
-	output.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size );
+	if( !package.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size ) )
+	{
+		out << "Can't write file " << relativeTemp.generic_wstring() << " to package. Size=" << deltaFile.size << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
+
+bool rab::CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, Path_t const& fullNew, Path_t const& fullOld, Path_t const& fullTemp, Path_t const& relativeTemp, 
+	dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, PackageOutput_t &package, LogOutput_t& out )
+{
+	dung::DiffEncoder_i* pEncoder = diffEncoders.FindEncoder( fileInfo.name, fileInfo.diffMethod );
+	if( pEncoder != NULL )
+	{
+	}
+	else
+	{
+		dung::DiffEncoderExternal_i* pExternalEncoder = diffEncoders.FindExternalEncoder( fileInfo.name, fileInfo.diffMethod );
+		if( pExternalEncoder != NULL )
+		{
+			out << "Encoding " << fileInfo.diffMethod << " diff file " << fullTemp.generic_wstring() << std::endl;
+			if( !pExternalEncoder->EncodeDiffFile( fullNew.generic_string().c_str(), fullOld.generic_string().c_str(), fullTemp.generic_string().c_str() ) )
+			{
+				char errorMessage[ 256 ];
+				pExternalEncoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+				out << "Encoding error " << errorMessage << std::endl;
+				return false;
+			}
+
+			dung::MemoryBlock deltaFile;
+			if( !ReadWholeFile( fullTemp.generic_string(), deltaFile ) )
+			{
+				out << "Can't read file " << fullTemp.generic_wstring() << std::endl;
+				return false;
+			}
+
+			if( !package.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size ) )
+			{
+				out << "Can't write file " << relativeTemp.generic_wstring() << " to package. Size=" << deltaFile.size << std::endl;
+				return false;
+			}
+		}
+		else
+		{
+			fileInfo.diffMethod = _T("xdelta");
+			out << "Encoding " << fileInfo.diffMethod << " diff file " << fullTemp.generic_wstring() << std::endl;
+
+			if( !EncodeAndWriteBlock( newFile, oldFile, fullTemp, relativeTemp, package, out ) )
+				return false;
+		}				
+	}
 
 	return true;
 }
 
 bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncoders const& diffEncoders,
-	Path_t const& relativePath, PackageOutput_t& output, FileInfo& fileInfo )
+	Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FileInfo& fileInfo )
 {
 	Path_t fullNew = options.pathToNew / relativePath / fileInfo.name;
 	Path_t fullOld = options.pathToOld / relativePath / fileInfo.name;
@@ -61,7 +123,11 @@ bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncod
 
 	dung::MemoryBlock oldFile;
 	if( !ReadWholeFile( fullOld.wstring(), oldFile ) )
+	{
+		out << "Can't read file " << fullOld.wstring() << std::endl;
 		return false;
+	}
+	
 	dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
 	fileInfo.oldSize = oldFile.size;
 
@@ -70,82 +136,75 @@ bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncod
 
 	dung::MemoryBlock newFile;
 	if( !ReadWholeFile( fullNew.wstring(), newFile ) )
+	{
+		out << "Can't read file " << fullNew.wstring() << std::endl;
 		return false;
+	}
+
 	dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
 	fileInfo.newSize = newFile.size;
+
+	bool result = true;
 
 	if( fileInfo.newSha1 != fileInfo.oldSha1 )
 	{
 		fileInfo.isDifferent = true;
 		fs::create_directories( fullTemp.parent_path() );
 
- 		dung::DiffEncoder_i* pEncoder = diffEncoders.FindEncoder( fileInfo.name, fileInfo.diffMethod );
-		if( pEncoder != NULL )
-		{
-		}
-		else
-		{
-			dung::DiffEncoderExternal_i* pExternalEncoder = diffEncoders.FindExternalEncoder( fileInfo.name, fileInfo.diffMethod );
-			if( pExternalEncoder != NULL )
-			{
-				if( !pExternalEncoder->EncodeDiffFile( fullNew.generic_string().c_str(), fullOld.generic_string().c_str(), fullTemp.generic_string().c_str() ) )
-				{
-					char errorMessage[ 256 ];
-					pExternalEncoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
-					return false;
-				}
-
-				dung::MemoryBlock deltaFile;
-				if( !ReadWholeFile( fullTemp.generic_string(), deltaFile ) )
-					return false;
-
-				output.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size );
-			}
-			else
-			{
-				if( !EncodeAndWrite( newFile, oldFile, fullTemp, relativeTemp, output ) )
-					return false;
-				fileInfo.diffMethod = _T("xdelta");
-			}				
-		}
+		result &= CreateDiffFile( diffEncoders, fileInfo, fullNew, fullOld, fullTemp, relativeTemp, newFile, oldFile, package, out );
 	}
 	else
 		fileInfo.isDifferent = false;
 
-	return true;
+	return result;
 }
 
-void rab::BuildDiffFiles( Options const& options, Config const& config, DiffEncoders const& diffEncoders,
-	Path_t const& relativePath, PackageOutput_t& output, FolderInfo::FileInfos_t const& fileInfos )
+bool rab::BuildDiffFiles( Options const& options, Config const& config, DiffEncoders const& diffEncoders,
+	Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FolderInfo::FileInfos_t const& fileInfos )
 {
+	bool result = true;
+
 	for( FolderInfo::FileInfos_t::const_iterator i = fileInfos.begin(); i != fileInfos.end(); ++i )
 	{
 		FileInfo& fileInfo = **i;
 
-		BuildDiffFile( options, config, diffEncoders, relativePath, output, fileInfo );
+		result &= BuildDiffFile( options, config, diffEncoders, relativePath, package, out, fileInfo );
 	}
+
+	return result;
 }
 
-void rab::BuildDiffFolders( Options const& options, Config const& config, DiffEncoders const& diffEncoders, 
-	Path_t const& relativePath, PackageOutput_t& output, FolderInfo::FolderInfos_t const& folderInfos )
+bool rab::BuildDiffFolders( Options const& options, Config const& config, DiffEncoders const& diffEncoders, 
+	Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FolderInfo::FolderInfos_t const& folderInfos )
 {
+	bool result = true;
+
 	for( FolderInfo::FolderInfos_t::const_iterator i = folderInfos.begin(); i != folderInfos.end(); ++i )
 	{
 		FolderInfo& folderInfo = **i;
 		
 		Path_t nextRelativePath = relativePath / folderInfo.name;
 
-		BuildDiffFiles( options, config, diffEncoders, nextRelativePath, output, folderInfo.files_existInBoth );
-		BuildDiffFolders( options, config, diffEncoders, nextRelativePath, output, folderInfo.folders_existInBoth );
+		result &= BuildDiffFiles( options, config, diffEncoders, nextRelativePath, package, out, folderInfo.files_existInBoth );
+		result &= BuildDiffFolders( options, config, diffEncoders, nextRelativePath, package, out, folderInfo.folders_existInBoth );
 	}
+
+	return result;
 }
 
-void rab::BuildDiffs( Options const& options, Config const& config, DiffEncoders const& diffEncoders, FolderInfo const& rootFolder, PackageOutput_t& output )
+bool rab::BuildDiffs( Options const& options, Config const& config, DiffEncoders const& diffEncoders, FolderInfo const& rootFolder, 
+	PackageOutput_t& package, LogOutput_t& out )
 {
+	bool result = true;
+
+	out << "Building diff files..." << std::endl;
+
 	Path_t relativePath;
 
-	BuildDiffFiles( options, config, diffEncoders, relativePath, output, rootFolder.files_existInBoth );
-	BuildDiffFolders( options, config, diffEncoders, relativePath, output, rootFolder.folders_existInBoth );
+	result &= BuildDiffFiles( options, config, diffEncoders, relativePath, package, out, rootFolder.files_existInBoth );
+	result &= BuildDiffFolders( options, config, diffEncoders, relativePath, package, out, rootFolder.folders_existInBoth );
+
+	return result;
 }
 
 

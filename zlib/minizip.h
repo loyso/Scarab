@@ -20,19 +20,23 @@ namespace zip
 	class ZipArchiveOutput
 	{
 	public:
-		ZipArchiveOutput( String_t const& archiveName, bool utf8fileNames, int compressionLevel );
+		ZipArchiveOutput();
+		~ZipArchiveOutput();
 
-		void WriteFile( String_t const& fileName, const void* pMemoryBlock, size_t size );
-		void Close();
+		bool Open( String_t const& archiveName, bool utf8fileNames, int compressionLevel );
+		bool WriteFile( String_t const& fileName, const void* pMemoryBlock, size_t size );
+		bool Close();
+
+		const char* ErrorMessage() const;
 
 	private:
 		String_t m_archiveName;
 		bool m_utf8fileNames;
 		
+		char* m_errorMessage;
 		int err;
 		const char* password;
 		int opt_compress_level;
-		int errclose;
 
 		typedef void* ZipFile_t;
 		ZipFile_t zf;

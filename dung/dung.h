@@ -59,4 +59,17 @@ namespace dung
 		void put_char( int c_ );
 	};
 
+	class nil_wbuf : public std::wstreambuf  
+	{
+	public:
+		nil_wbuf();
+		virtual	~nil_wbuf();
+
+	protected:
+		virtual int	overflow( int c_ );
+		virtual int sync();
+		void put_buffer();
+		void put_char( int c_ );
+	};
+
 }

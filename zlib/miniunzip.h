@@ -15,7 +15,7 @@ namespace zip
 		~ZipArchiveInput();
 
 		bool Open( String_t const& archiveName, bool caseSensitive );
-		void Close();
+		bool Close();
 
 		bool LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );
 		bool ReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size );

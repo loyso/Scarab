@@ -11,12 +11,18 @@ namespace rab
 {
 	typedef fs::path Path_t;
 
-	void GatherSha1Files( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos );
-	void GatherSha1Folders( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FolderInfos_t const& folderInfos );
+	bool GatherSha1Files( Options const& options, Config const& config, Path_t const& relativePath, 
+		FolderInfo::FileInfos_t const& fileInfos, LogOutput_t& out );
+
+	bool GatherSha1Folders( Options const& options, Config const& config, Path_t const& relativePath, 
+		FolderInfo::FolderInfos_t const& folderInfos, LogOutput_t& out );
 }
 
-void rab::GatherSha1Files( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos )
+bool rab::GatherSha1Files( Options const& options, Config const& config, Path_t const& relativePath, 
+	FolderInfo::FileInfos_t const& fileInfos, LogOutput_t& out )
 {
+	int errors = 0;
+
 	for( FolderInfo::FileInfos_t::const_iterator i = fileInfos.begin(); i != fileInfos.end(); ++i )
 	{
 		FileInfo& fileInfo = **i;
@@ -24,35 +30,51 @@ void rab::GatherSha1Files( Options const& options, Config const& config, Path_t 
 		Path_t fullOld = options.pathToOld / relativePath / fileInfo.name;
 
 		dung::MemoryBlock oldFile;
-		if( dung::ReadWholeFile( fullOld.wstring(), oldFile ) )
+		if( !dung::ReadWholeFile( fullOld.wstring(), oldFile ) )
 		{
-			dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
-			fileInfo.oldSize = oldFile.size;
+			out << "Can't read file " << fullOld.wstring() << std::endl;
+			errors++;
+			continue;
 		}
+		
+		dung::SHA1Compute( oldFile.pBlock, oldFile.size, fileInfo.oldSha1 );
+		fileInfo.oldSize = oldFile.size;
 	}
+
+	return errors == 0;
 }
 
-void rab::GatherSha1Folders( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FolderInfos_t const& folderInfos )
+bool rab::GatherSha1Folders( Options const& options, Config const& config, Path_t const& relativePath, 
+	FolderInfo::FolderInfos_t const& folderInfos, LogOutput_t& out )
 {
+	bool result = true;
+
 	for( FolderInfo::FolderInfos_t::const_iterator i = folderInfos.begin(); i != folderInfos.end(); ++i )
 	{
 		FolderInfo& folderInfo = **i;
 
 		Path_t nextRelativePath = relativePath / folderInfo.name;
 
-		GatherSha1Files( options, config, nextRelativePath, folderInfo.files_oldOnly );
+		result &= GatherSha1Files( options, config, nextRelativePath, folderInfo.files_oldOnly, out );
 		
-		GatherSha1Folders( options, config, nextRelativePath, folderInfo.folders_oldOnly );
-		GatherSha1Folders( options, config, nextRelativePath, folderInfo.folders_existInBoth );
+		result &= GatherSha1Folders( options, config, nextRelativePath, folderInfo.folders_oldOnly, out );
+		result &= GatherSha1Folders( options, config, nextRelativePath, folderInfo.folders_existInBoth, out );
 	}
+
+	return result;
 }
 
-void rab::GatherSha1( Options const& options, Config const& config, FolderInfo const& rootFolder )
+bool rab::GatherSha1( Options const& options, Config const& config, FolderInfo const& rootFolder, LogOutput_t& out )
 {
+	bool result = true;
+
 	Path_t relativePath;
 
-	GatherSha1Files( options, config, relativePath, rootFolder.files_oldOnly );
+	out << "Gathering SHA1 digests for files in old directory" << std:: endl;
+	result &= GatherSha1Files( options, config, relativePath, rootFolder.files_oldOnly, out );
 
-	GatherSha1Folders( options, config, relativePath, rootFolder.folders_oldOnly );
-	GatherSha1Folders( options, config, relativePath, rootFolder.folders_existInBoth );
+	result &= GatherSha1Folders( options, config, relativePath, rootFolder.folders_oldOnly, out );
+	result &= GatherSha1Folders( options, config, relativePath, rootFolder.folders_existInBoth, out );
+
+	return result;
 }

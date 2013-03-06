@@ -300,10 +300,11 @@ bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& p
 	return true;
 }
 
-void zip::ZipArchiveInput::Close()
+bool zip::ZipArchiveInput::Close()
 {
-	unzClose(uf);
+	int errClose = unzClose(uf);
 	m_nameToEntry.clear();
+	return errClose == UNZ_OK;
 }
 
 bool zip::ZipArchiveInput::Index()

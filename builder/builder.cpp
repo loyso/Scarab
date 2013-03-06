@@ -32,6 +32,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("package,P", po::wvalue(&options.packageFile)->default_value(_T("package.zip"), "package.zip"), "name of output package file.")
 		("new_ver", po::wvalue(&options.newVersion), "a name for new version")
 		("old_ver", po::wvalue(&options.oldVersion), "a name for old version")
+		("quiet,Q", po::bool_switch(&options.quiet)->default_value(false), "quiet mode")
 		;
 
 	po::options_description config_file_options("Config file options");
@@ -116,7 +117,12 @@ int _tmain(int argc, _TCHAR* argv[])
 		deltaMaxEncoder.SetUserLicense( encodersConfig.deltaMax_userName.c_str(), encodersConfig.deltaMax_licenseKey.c_str() );
 		diffEncoders.AddExternalEncoder( deltaMaxEncoder, _T("deltamax"), encodersConfig.deltaMax_packFiles );
 #endif
-		rollABall.ProcessData( options, config, diffEncoders );
+		std::wostream nil_out( SCARAB_NEW dung::nil_wbuf );
+
+		if( rollABall.ProcessData( options, config, diffEncoders, options.quiet ? nil_out : std::wcout ) )
+			result = 0;
+
+		delete nil_out.rdbuf( NULL );
 	}
 	catch(std::exception& e) {
 		std::cerr << e.what() << "\n";
@@ -124,5 +130,5 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	std::locale::global(std::locale::classic());
 	
-	return 0;
+	return result;
 }

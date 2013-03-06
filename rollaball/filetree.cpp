@@ -11,8 +11,11 @@ namespace rab
 	typedef std::vector< String_t > VectorString_t;
 	typedef fs::path Path_t;
 
-	void BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, FolderInfo& rootFolder );
-	void BuildFileTreeForFolder_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, FolderInfo::FolderInfos_t const& folderInfos );
+	void BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, 
+		FolderInfo& rootFolder, LogOutput_t& out );
+
+	void BuildFileTreeForFolder_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, 
+		FolderInfo::FolderInfos_t const& folderInfos, LogOutput_t& out );
 
 	void BuildFilesAndFoldersForPath( Config const& config, Path_t const& path, StringSet_t& files, StringSet_t& folders, bool newPath );
 
@@ -125,16 +128,16 @@ void rab::CreateFoldersInTree( VectorString_t const& names, FolderInfo::FolderIn
 	}
 }
 
-void rab::BuildFileTreeForFolder_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, FolderInfo::FolderInfos_t const& folderInfos )
+void rab::BuildFileTreeForFolder_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, FolderInfo::FolderInfos_t const& folderInfos, LogOutput_t& out )
 {
 	for( FolderInfo::FolderInfos_t::const_iterator i = folderInfos.begin(); i != folderInfos.end(); ++i )
 	{
 		FolderInfo& folderInfo = **i;
-		BuildFileTree_Rec( config, pathToNew / folderInfo.name, pathToOld / folderInfo.name, folderInfo );
+		BuildFileTree_Rec( config, pathToNew / folderInfo.name, pathToOld / folderInfo.name, folderInfo, out );
 	}
 }
 
-void rab::BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, FolderInfo& folderInfo )
+void rab::BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path_t const& pathToOld, FolderInfo& folderInfo, LogOutput_t& out )
 {
 	StringSet_t newFiles, oldFiles;
 	StringSet_t newFolders, oldFolders;
@@ -164,13 +167,14 @@ void rab::BuildFileTree_Rec( Config const& config, Path_t const& pathToNew, Path
 		CreateFoldersInTree( oldOnly, folderInfo.folders_oldOnly );
 	}
 
-	BuildFileTreeForFolder_Rec( config, pathToNew, pathToOld, folderInfo.folders_existInBoth );
-	BuildFileTreeForFolder_Rec( config, pathToNew, pathToOld, folderInfo.folders_newOnly );
-	BuildFileTreeForFolder_Rec( config, pathToNew, pathToOld, folderInfo.folders_oldOnly );
+	BuildFileTreeForFolder_Rec( config, pathToNew, pathToOld, folderInfo.folders_existInBoth, out );
+	BuildFileTreeForFolder_Rec( config, pathToNew, pathToOld, folderInfo.folders_newOnly, out );
+	BuildFileTreeForFolder_Rec( config, pathToNew, pathToOld, folderInfo.folders_oldOnly, out );
 }
 
-void rab::BuildFileTree( Options const& options, Config const& config, FolderInfo& rootFolder )
+void rab::BuildFileTree( Options const& options, Config const& config, FolderInfo& rootFolder, LogOutput_t& out )
 {
-	BuildFileTree_Rec( config, options.pathToNew, options.pathToOld, rootFolder );
+	out << "Gathering all names in new and old directories..." << std::endl;
+	BuildFileTree_Rec( config, options.pathToNew, options.pathToOld, rootFolder, out );
 }
 

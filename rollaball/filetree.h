@@ -39,5 +39,5 @@ namespace rab
 		FileInfos_t files_existInBoth;
 	};
 
-	void BuildFileTree( Options const& options, Config const& config, FolderInfo& rootFolder );
+	void BuildFileTree( Options const& options, Config const& config, FolderInfo& rootFolder, LogOutput_t& out );
 }

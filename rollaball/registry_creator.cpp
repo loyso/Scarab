@@ -18,9 +18,10 @@ namespace rab
 
 	struct OutputContext
 	{
-		OutputContext( OutputStream_t& stream );
+		OutputContext( OutputStream_t& stream, LogOutput_t& out );
 
 		OutputStream_t& stream;
+		LogOutput_t& out;
 	};
 
 	void WriteRegistryFiles( Options const& options, Config const& config, FolderInfo::FileInfos_t const& fileInfos, dung::Action::Enum action, Path_t const& relativePath, OutputContext& output );
@@ -30,8 +31,9 @@ namespace rab
 	const _TCHAR quote = '\"';
 }
 
-rab::OutputContext::OutputContext( OutputStream_t& stream )
+rab::OutputContext::OutputContext( OutputStream_t& stream, LogOutput_t& out )
 	: stream( stream )
+	, out( out )
 {
 }
 
@@ -102,16 +104,22 @@ void rab::WriteRegistryFolders( Options const& options, Config const& config, Fo
 	}
 }
 
-bool rab::WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, PackageOutput_t& output )
+bool rab::WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, PackageOutput_t& package, LogOutput_t& out )
 {
 	std::wofstream file ( dung::WREGISTRY_FILENAME, std::ios::out|std::ios::trunc );
 	if( !file.is_open() )
+	{
+		out << "Can't create " << dung::WREGISTRY_FILENAME << std::endl;
 		return false;
+	}
 
-	OutputContext os( file );
+	OutputContext os( file, out );
 
-	os.stream << _T("new_version=") << quote << options.newVersion << quote << endl;
-	os.stream << _T("old_version=") << quote << options.oldVersion << quote << endl;
+	if( !options.newVersion.empty() )
+		os.stream << _T("new_version=") << quote << options.newVersion << quote << endl;
+	
+	if( !options.oldVersion.empty() )
+		os.stream << _T("old_version=") << quote << options.oldVersion << quote << endl;
 
 	Path_t relativePath;
 	WriteRegistryFolders( options, config, FolderInfo::FolderInfos_t( 1, &rootFolder ), relativePath, os );
@@ -120,9 +128,16 @@ bool rab::WriteRegistry( Options const& options, Config const& config, FolderInf
 
 	dung::MemoryBlock registryFileContent;
 	if( !dung::ReadWholeFile( dung::WREGISTRY_FILENAME, registryFileContent ) )
+	{
+		out << "Can't read file " << dung::WREGISTRY_FILENAME << std::endl;
 		return false;
+	}
 
-	output.WriteFile( dung::WREGISTRY_FILENAME, registryFileContent.pBlock, registryFileContent.size );
+	if( !package.WriteFile( dung::WREGISTRY_FILENAME, registryFileContent.pBlock, registryFileContent.size ) )
+	{
+		out << "Can't write file " << dung::WREGISTRY_FILENAME << " to package" << std::endl;
+		return false;
+	}
 
 	return true;
 }

@@ -20,6 +20,7 @@ namespace rab
 {
 	typedef _tstring String_t;
 	typedef zip::ZipArchiveOutput PackageOutput_t;
+	typedef std::wostream LogOutput_t;
 	typedef std::wregex Regex_t;
 	typedef _tstring DiffMethod_t;
 
@@ -29,6 +30,7 @@ namespace rab
 		String_t newVersion, oldVersion;
 		String_t configFile;
 		String_t packageFile;
+		bool quiet;
 	};
 
 	struct Config
@@ -72,7 +74,7 @@ namespace rab
 		RollABall();
 		~RollABall();
 
-		void ProcessData( Options const &options, Config&config, DiffEncoders const& diffEncoders );
+		bool ProcessData( Options const &options, Config&config, DiffEncoders const& diffEncoders, LogOutput_t& out );
 	};
 };
 

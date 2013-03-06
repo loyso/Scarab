@@ -50,5 +50,6 @@ namespace rab
 		DiffExternalEncoders_t m_diffEncodersExternal;
 	};
 
-	void BuildDiffs( Options const& options, Config const& config, DiffEncoders const& diffEncoders, FolderInfo const& rootFolder, PackageOutput_t& output );
+	bool BuildDiffs( Options const& options, Config const& config, DiffEncoders const& diffEncoders, FolderInfo const& rootFolder, 
+		PackageOutput_t& output, LogOutput_t& out );
 }

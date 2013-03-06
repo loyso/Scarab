@@ -33,3 +33,29 @@ void dung::nil_buf::put_char( int c_ )
 }
 
 
+dung::nil_wbuf::nil_wbuf()
+{
+}
+
+dung::nil_wbuf::~nil_wbuf()
+{
+}
+
+int dung::nil_wbuf::overflow( int c_ )
+{
+	return 0;
+}
+
+int dung::nil_wbuf::sync()
+{
+	return 0;
+}
+
+void dung::nil_wbuf::put_buffer()
+{
+}
+
+void dung::nil_wbuf::put_char( int c_ )
+{
+}
+

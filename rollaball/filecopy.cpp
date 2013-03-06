@@ -12,12 +12,18 @@ namespace rab
 {
 	typedef fs::path Path_t;
 
-	void BuildTempCopiesFiles( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos, PackageOutput_t& output );
-	void BuildTempCopiesFolders( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FolderInfos_t const& folderInfos, PackageOutput_t& output );
+	bool BuildTempCopiesFiles( Options const& options, Config const& config, Path_t const& relativePath, 
+		FolderInfo::FileInfos_t const& fileInfos, PackageOutput_t& output, LogOutput_t& out );
+
+	bool BuildTempCopiesFolders( Options const& options, Config const& config, Path_t const& relativePath, 
+		FolderInfo::FolderInfos_t const& folderInfos, PackageOutput_t& output, LogOutput_t& out );
 }
 
-void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FileInfos_t const& fileInfos, PackageOutput_t& output )
+bool rab::BuildTempCopiesFiles( Options const& options, Config const& config, Path_t const& relativePath, 
+	FolderInfo::FileInfos_t const& fileInfos, PackageOutput_t& zipOut, LogOutput_t& out )
 {
+	int errors = 0;
+
 	for( FolderInfo::FileInfos_t::const_iterator i = fileInfos.begin(); i != fileInfos.end(); ++i )
 	{
 		FileInfo& fileInfo = **i;
@@ -27,44 +33,71 @@ void rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 		Path_t fullTemp = options.pathToTemp / relativeTemp;
 
 		dung::MemoryBlock newFile;
-		if( dung::ReadWholeFile( fullNew.wstring(), newFile ) )
+		if( !dung::ReadWholeFile( fullNew.wstring(), newFile ) )
 		{
-			dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
-			fileInfo.newSize = newFile.size;
+			out << "Can't read file " << fullNew.wstring() << std::endl;
+			errors++;
+			continue;
+		}
 
-			if( config.newFileLimit == 0 || fileInfo.newSize < config.newFileLimit )
+		dung::SHA1Compute( newFile.pBlock, newFile.size, fileInfo.newSha1 );
+		fileInfo.newSize = newFile.size;
+
+		if( config.newFileLimit == 0 || fileInfo.newSize < config.newFileLimit )
+		{
+			fs::create_directories( fullTemp.parent_path() );
+
+			if( !dung::WriteWholeFile( fullTemp.wstring(), newFile ) )
 			{
-				fs::create_directories( fullTemp.parent_path() );
-				if( !fs::exists(fullTemp) )
-					dung::WriteWholeFile( fullTemp.wstring(), newFile );
+				out << "Can't write whole file " << fullTemp.wstring() << std::endl;
+				errors++;
+			}
 
-				output.WriteFile( relativeTemp.generic_wstring(), newFile.pBlock, newFile.size );
+			if( !zipOut.WriteFile( relativeTemp.generic_wstring(), newFile.pBlock, newFile.size ) )
+			{
+				out << "Can't write file to archive " << relativeTemp.generic_wstring() << " size=" << newFile.size << std::endl;
+				errors++;
 			}
 		}
+		else
+			out << "Skipping file " << fullNew.wstring() << "size=" << fileInfo.newSize << " because of limit " << config.newFileLimit << std::endl;
 	}
+
+	return errors == 0;
 }
 
-void rab::BuildTempCopiesFolders( Options const& options, Config const& config, Path_t const& relativePath, FolderInfo::FolderInfos_t const& folderInfos, PackageOutput_t& output )
+bool rab::BuildTempCopiesFolders( Options const& options, Config const& config, Path_t const& relativePath, 
+	FolderInfo::FolderInfos_t const& folderInfos, PackageOutput_t& zipOut, LogOutput_t& out )
 {
+	bool result = true;
+
 	for( FolderInfo::FolderInfos_t::const_iterator i = folderInfos.begin(); i != folderInfos.end(); ++i )
 	{
 		FolderInfo& folderInfo = **i;
 
 		Path_t nextRelativePath = relativePath / folderInfo.name;
 
-		BuildTempCopiesFiles( options, config, nextRelativePath, folderInfo.files_newOnly, output );
+		result &= BuildTempCopiesFiles( options, config, nextRelativePath, folderInfo.files_newOnly, zipOut, out );
 		
-		BuildTempCopiesFolders( options, config, nextRelativePath, folderInfo.folders_newOnly, output );
-		BuildTempCopiesFolders( options, config, nextRelativePath, folderInfo.folders_existInBoth, output );
+		result &= BuildTempCopiesFolders( options, config, nextRelativePath, folderInfo.folders_newOnly, zipOut, out );
+		result &= BuildTempCopiesFolders( options, config, nextRelativePath, folderInfo.folders_existInBoth, zipOut, out );
 	}
+
+	return result;
 }
 
-void rab::BuildTempCopies( Options const& options, Config const& config, FolderInfo const& rootFolder, PackageOutput_t& output )
+bool rab::BuildTempCopies( Options const& options, Config const& config, FolderInfo const& rootFolder, 
+	PackageOutput_t& zipOut, LogOutput_t& out )
 {
+	bool result = true;
+
 	Path_t relativePath;
 
-	BuildTempCopiesFiles( options, config, relativePath, rootFolder.files_newOnly, output );
+	out << "Building whole file copies in " << options.pathToTemp << " folder..." << std::endl;
+	result &= BuildTempCopiesFiles( options, config, relativePath, rootFolder.files_newOnly, zipOut, out );
 
-	BuildTempCopiesFolders( options, config, relativePath, rootFolder.folders_newOnly, output );
-	BuildTempCopiesFolders( options, config, relativePath, rootFolder.folders_existInBoth, output );
+	result &= BuildTempCopiesFolders( options, config, relativePath, rootFolder.folders_newOnly, zipOut, out );
+	result &= BuildTempCopiesFolders( options, config, relativePath, rootFolder.folders_existInBoth, zipOut, out );
+
+	return result;
 }

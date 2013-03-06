@@ -134,15 +134,33 @@ int isLargeFile(const char* filename)
  return largeFile;
 }
 
-zip::ZipArchiveOutput::ZipArchiveOutput( String_t const& archiveName, bool utf8fileNames, int compressionLevel )
-	: m_archiveName( archiveName )
-	, m_utf8fileNames( utf8fileNames )
-	, opt_compress_level( compressionLevel )
+namespace zip
+{
+	static const int MAX_ERROR_STRING = 4096;
+}
+
+zip::ZipArchiveOutput::ZipArchiveOutput()
+	: m_archiveName()
+	, m_utf8fileNames( false )
+	, opt_compress_level( CompressionLevel::NO_COMPRESSION )
 	, password()
-	, err( 0 )
-	, errclose( 0 )
+	, err( ZIP_OK )
 	, zf()
 {
+	m_errorMessage = new char[ MAX_ERROR_STRING ];
+}
+
+zip::ZipArchiveOutput::~ZipArchiveOutput()
+{
+	delete[] m_errorMessage;
+}
+
+bool zip::ZipArchiveOutput::Open( String_t const& archiveName, bool utf8fileNames, int compressionLevel )
+{
+	m_archiveName = archiveName;
+	m_utf8fileNames = utf8fileNames;
+	opt_compress_level = compressionLevel;
+
 	const fs::path& archiveNamePath = archiveName;
 	std::string zipArchiveName = archiveNamePath.generic_string();
 #ifdef USEWIN32IOAPI
@@ -154,10 +172,16 @@ zip::ZipArchiveOutput::ZipArchiveOutput( String_t const& archiveName, bool utf8f
 #endif
 
 	if (zf == NULL)
+	{
 		err = ZIP_ERRNO;
+		sprintf( m_errorMessage, "Can't open %s\n", m_archiveName.c_str() );
+		return false;
+	}
+	
+	return true;
 }
 
-void zip::ZipArchiveOutput::WriteFile( String_t const& fileName, const void* pMemoryBlock, size_t size )
+bool zip::ZipArchiveOutput::WriteFile( String_t const& fileName, const void* pMemoryBlock, size_t size )
 {
     const boost::filesystem::path& filenamePath = fileName;
 	std::string c_str = filenamePath.generic_string();
@@ -172,7 +196,7 @@ void zip::ZipArchiveOutput::WriteFile( String_t const& fileName, const void* pMe
     zi.internal_fa = 0;
     zi.external_fa = 0;
     filetime(filenameinzip,&zi.tmz_date,&zi.dosDate);
-    if ((password != NULL) && (err==ZIP_OK))
+    if( password != NULL && err == ZIP_OK )
 	{
 		unsigned long crcFile=0;
 		crcFile = crc32(crcFile,(Bytef*)pMemoryBlock,size);
@@ -193,13 +217,13 @@ void zip::ZipArchiveOutput::WriteFile( String_t const& fileName, const void* pMe
                         password,crcFile, zipVersion, zipUtf8FilenamesEncoding, zip64);
 
     if (err != ZIP_OK)
-        printf("error in opening %s in zipfile\n",filenameinzip);
+        sprintf( m_errorMessage, "error in creating new %s in zipfile\n", filenameinzip );
 
     if (err == ZIP_OK)
 		err = zipWriteInFileInZip (zf,pMemoryBlock,size);
 	
 	if (err<0)
-		printf("error in writing %s in the zipfile\n", filenameinzip);
+		sprintf( m_errorMessage, "error in writing %s in the zipfile\n", filenameinzip);
 
     if (err<0)
         err=ZIP_ERRNO;
@@ -207,11 +231,19 @@ void zip::ZipArchiveOutput::WriteFile( String_t const& fileName, const void* pMe
     {
         err = zipCloseFileInZip(zf);
         if (err!=ZIP_OK)
-            printf("error in closing %s in the zipfile\n", filenameinzip);
+            sprintf( m_errorMessage, "error in closing %s in the zipfile\n", filenameinzip);
     }
+
+	return err == ZIP_OK;
 }
 
-void zip::ZipArchiveOutput::Close()
+bool zip::ZipArchiveOutput::Close()
 {
-	errclose = zipClose(zf,NULL);
+	int errclose = zipClose(zf, NULL);
+	return errclose == ZIP_OK;
+}
+
+const char* zip::ZipArchiveOutput::ErrorMessage() const
+{
+	return m_errorMessage;
 }

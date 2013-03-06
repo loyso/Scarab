@@ -12,5 +12,5 @@ namespace rab
 
 namespace rab
 {
-	void GatherSha1( Options const& options, Config const& config, FolderInfo const& rootFolder );
+	bool GatherSha1( Options const& options, Config const& config, FolderInfo const& rootFolder, LogOutput_t& out );
 }
