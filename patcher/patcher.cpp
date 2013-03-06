@@ -31,7 +31,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, hatch::Options& options, Decoders
 		("checkOldSha1,C", po::bool_switch(&options.checkOldSha1)->default_value(false), "check old file sha1 hash")
 		;
 
-#if DELTAMAX
+#if SCARAB_DELTAMAX
 	// Expose DeltaMAX options.	
 	command_line_options.add_options()
 		("deltamax.user_name", po::value(&decodersConfig.deltaMax_userName), "registered user name")
@@ -71,7 +71,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			return result;
 
 		hatch::HatchOut hatchOut;
-#if DELTAMAX
+#if SCARAB_DELTAMAX
 		// Plug in DeltaMAX encoder.
 		deltamax::DeltaMaxDecoder deltaMaxDecoder;
 		deltaMaxDecoder.SetUserLicense( decodersConfig.deltaMax_userName.c_str(), decodersConfig.deltaMax_licenseKey.c_str() );

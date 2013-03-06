@@ -15,6 +15,12 @@ dung::MemoryBlock::MemoryBlock( size_t size )
 	pBlock = SCARAB_NEW Byte_t[ size ];
 }
 
+dung::MemoryBlock::MemoryBlock( void* pBlock, size_t size )
+	: pBlock( (Byte_t*)pBlock )
+	, size( size )
+{
+}
+
 dung::MemoryBlock::~MemoryBlock()
 {
 	delete[] pBlock;

@@ -1,10 +1,12 @@
 #pragma once
 
-#ifndef DELTAMAX
-#define DELTAMAX 0 // disabled by default
+#include "diffmethods.h"
+
+#ifndef SCARAB_DELTAMAX
+#define SCARAB_DELTAMAX 0 // disabled by default
 #endif
 
-#if DELTAMAX
+#if SCARAB_DELTAMAX
 
 #include <dung/diffencoder.h>
 #include <dung/diffdecoder.h>
@@ -44,4 +46,4 @@ namespace deltamax
 	};
 }
 
-#endif // DELTAMAX
+#endif // SCARAB_DELTAMAX

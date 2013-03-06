@@ -1,6 +1,6 @@
 #include "diff_deltamax.h"
 
-#if DELTAMAX
+#if SCARAB_DELTAMAX
 
 #pragma comment(linker, "/defaultlib:DeltaMAX.lib")
 #pragma message("Automatically linking with DeltaMAX.lib (DeltaMAX.dll)")
@@ -95,4 +95,4 @@ void deltamax::DeltaMaxDecoder::GetErrorMessage( char* errorMessage, size_t buff
 	DeltaMax::GetErrorMessage( errorMessage, bufferSize );
 }
 
-#endif // DELTAMAX
+#endif // SCARAB_DELTAMAX

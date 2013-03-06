@@ -2,8 +2,12 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="diff_deltamax.cpp" />
+    <ClCompile Include="diff_xdelta.cpp" />
+    <ClCompile Include="diffmethods.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diff_deltamax.h" />
+    <ClInclude Include="diff_xdelta.h" />
+    <ClInclude Include="diffmethods.h" />
   </ItemGroup>
 </Project>

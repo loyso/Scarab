@@ -6,12 +6,11 @@
 
 namespace dung
 {
-	typedef unsigned char Byte_t;
-
 	struct MemoryBlock
 	{
 		MemoryBlock();
 		MemoryBlock( size_t size );
+		MemoryBlock( void* pBlock, size_t size );
 		~MemoryBlock();
 
 		bool operator==( const MemoryBlock& other ) const;

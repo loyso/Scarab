@@ -10,14 +10,20 @@ namespace po = boost::program_options;
 #include <rollaball/filediff.h>
 
 #include <diffmethods/diff_deltamax.h>
+#include <diffmethods/diff_xdelta.h>
 
 struct EncodersConfig
 {
+#if SCARAB_DELTAMAX
 	rab::Config::StringValues_t deltaMax_packFiles;
 	std::string deltaMax_userName;
 	std::string deltaMax_licenseKey;
+#endif // SCARAB_DELTAMAX
 
+#if SCARAB_XDELTA
 	rab::Config::StringValues_t xdelta_packFiles;
+	xdelta::Config xdelta_config;
+#endif // SCARAB_XDELTA
 };
 
 int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Config& config, EncodersConfig& encodersConfig )
@@ -50,14 +56,31 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
 		;
 
-#if DELTAMAX
+#if SCARAB_DELTAMAX
 	// Expose DeltaMAX options.	
 	config_file_options.add_options()
 		("deltamax.pack_files", po::wvalue(&encodersConfig.deltaMax_packFiles), "files to pack with DeltaMAX")
 		("deltamax.user_name", po::value(&encodersConfig.deltaMax_userName), "registered user name")
 		("deltamax.license_key", po::value(&encodersConfig.deltaMax_licenseKey), "license key string")
 	;
-#endif // DELTAMAX
+#endif // SCARAB_DELTAMAX
+
+#if SCARAB_XDELTA
+	// Expose xdelta options.	
+	config_file_options.add_options()
+		("xdelta.pack_files", po::wvalue(&encodersConfig.xdelta_packFiles), "files to pack with xdelta")
+		("xdelta.DJW", po::bool_switch(&encodersConfig.xdelta_config.DJW)->default_value(false), "use DJW static huffman")
+		("xdelta.FGK", po::bool_switch(&encodersConfig.xdelta_config.FGK)->default_value(false), "use FGK adaptive huffman")
+		("xdelta.LZMA", po::bool_switch(&encodersConfig.xdelta_config.LZMA)->default_value(false), "use LZMA secondary")
+		("xdelta.nodata", po::bool_switch(&encodersConfig.xdelta_config.nodata)->default_value(false), "disable secondary compression of the data section")
+		("xdelta.noinst", po::bool_switch(&encodersConfig.xdelta_config.noinst)->default_value(false), "disable secondary compression of the inst section")
+		("xdelta.noaddr", po::bool_switch(&encodersConfig.xdelta_config.noaddr)->default_value(false), "disable secondary compression of the addr section")
+		("xdelta.adler32", po::bool_switch(&encodersConfig.xdelta_config.adler32)->default_value(false), "enable checksum computation in the encoder")
+		("xdelta.adler32_nover", po::bool_switch(&encodersConfig.xdelta_config.adler32_nover)->default_value(false), "disable checksum verification in the decoder")
+		("xdelta.be_greedy", po::bool_switch(&encodersConfig.xdelta_config.beGreedy)->default_value(false), "disable the '1.5-pass algorithm', instead use greedy matching. Greedy is off by default.")
+		("xdelta.compression", po::value(&encodersConfig.xdelta_config.compression)->default_value(0), "1 through 9 (0 corresponds to the NOCOMPRESS flag, and is independent of compression level")
+		;
+#endif // SCARAB_XDELTA
 
 	po::variables_map vm;
 	po::store(po::wcommand_line_parser(argc, argv).options(command_line_options).run(), vm);
@@ -111,12 +134,22 @@ int _tmain(int argc, _TCHAR* argv[])
 			return result;
 
 		rab::RollABall rollABall;
-#if DELTAMAX
+
+#if SCARAB_XDELTA
+		// Plug in xdelta encoder.
+		xdelta::XdeltaEncoder xdeltaEncoder( encodersConfig.xdelta_config );
+		if( encodersConfig.xdelta_packFiles.empty() )
+			encodersConfig.xdelta_packFiles.push_back( _T(".*") );
+		diffEncoders.AddEncoder( xdeltaEncoder, _T("xdelta"), encodersConfig.xdelta_packFiles );
+#endif // SCARAB_XDELTA
+
+#if SCARAB_DELTAMAX
 		// Plug in DeltaMAX encoder.
 		deltamax::DeltaMaxEncoder deltaMaxEncoder;
 		deltaMaxEncoder.SetUserLicense( encodersConfig.deltaMax_userName.c_str(), encodersConfig.deltaMax_licenseKey.c_str() );
 		diffEncoders.AddExternalEncoder( deltaMaxEncoder, _T("deltamax"), encodersConfig.deltaMax_packFiles );
-#endif
+#endif // SCARAB_DELTAMAX
+
 		std::wostream nil_out( SCARAB_NEW dung::nil_wbuf );
 
 		if( rollABall.ProcessData( options, config, diffEncoders, options.quiet ? nil_out : std::wcout ) )

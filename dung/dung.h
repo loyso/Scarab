@@ -35,6 +35,8 @@
 
 namespace dung
 {
+	typedef unsigned char Byte_t;
+
 	extern const wchar_t WREGISTRY_FILENAME[];
 	extern const char REGISTRY_FILENAME[];
 

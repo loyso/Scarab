@@ -11,17 +11,9 @@
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
 
-extern "C"
-{
-#include <external/xdelta/xdelta3.h>
-}
-
 namespace rab
 {
 	typedef fs::path Path_t;
-
-	bool EncodeAndWriteBlock( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp,
-		Path_t const& relativeTemp, PackageOutput_t& package, LogOutput_t& out );
 
 	bool CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, Path_t const& fullNew, Path_t const& fullOld, Path_t const& fullTemp, Path_t const& relativeTemp, 
 		dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, PackageOutput_t &package, LogOutput_t& out );
@@ -36,42 +28,37 @@ namespace rab
 		Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FolderInfo::FolderInfos_t const& folderInfos );
 }
 
-bool rab::EncodeAndWriteBlock( dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, Path_t const& fullTemp,
-	Path_t const& relativeTemp, PackageOutput_t& package, LogOutput_t& out )
-{
-	const size_t reservedSize = max( newFile.size, 1024 );
-	dung::MemoryBlock deltaFile( reservedSize );
-	deltaFile.size = 0;
-
-	int ret = xd3_encode_memory( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, &deltaFile.size, reservedSize, 0 );
-	if( ret != 0 )
-	{
-		out << "Can't encode memory with xdelta. Error code: " << ret << std::endl;
-		return false;
-	}
-
-	if( !WriteWholeFile( fullTemp.wstring(), deltaFile ) )
-	{
-		out << "Can't write file " << fullTemp.generic_wstring() << std::endl;
-		return false;
-	}
-
-	if( !package.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size ) )
-	{
-		out << "Can't write file " << relativeTemp.generic_wstring() << " to package. Size=" << deltaFile.size << std::endl;
-		return false;
-	}
-
-	return true;
-}
-
-
 bool rab::CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, Path_t const& fullNew, Path_t const& fullOld, Path_t const& fullTemp, Path_t const& relativeTemp, 
 	dung::MemoryBlock const& newFile, dung::MemoryBlock const& oldFile, PackageOutput_t &package, LogOutput_t& out )
 {
 	dung::DiffEncoder_i* pEncoder = diffEncoders.FindEncoder( fileInfo.name, fileInfo.diffMethod );
 	if( pEncoder != NULL )
-	{
+	{		
+		out << "Encoding " << fileInfo.diffMethod << " diff file " << fullTemp.generic_wstring() << std::endl;
+		
+		void* pDiffBlock = NULL;
+		size_t diffSize = 0;
+		if( !pEncoder->EncodeDiffMemoryBlock( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, pDiffBlock, diffSize ) )
+		{
+			char errorMessage[ 256 ];
+			pEncoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+			out << "Encoding error " << errorMessage << std::endl;
+			return false;
+		}
+
+		dung::MemoryBlock deltaFile( pDiffBlock, diffSize );
+
+		if( !WriteWholeFile( fullTemp.wstring(), deltaFile ) )
+		{
+			out << "Can't write file " << fullTemp.generic_wstring() << std::endl;
+			return false;
+		}
+
+		if( !package.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size ) )
+		{
+			out << "Can't write file " << relativeTemp.generic_wstring() << " to package. Size=" << deltaFile.size << std::endl;
+			return false;
+		}
 	}
 	else
 	{
@@ -102,11 +89,8 @@ bool rab::CreateDiffFile( DiffEncoders const &diffEncoders, FileInfo& fileInfo, 
 		}
 		else
 		{
-			fileInfo.diffMethod = _T("xdelta");
-			out << "Encoding " << fileInfo.diffMethod << " diff file " << fullTemp.generic_wstring() << std::endl;
-
-			if( !EncodeAndWriteBlock( newFile, oldFile, fullTemp, relativeTemp, package, out ) )
-				return false;
+			out << "Can't file encoder for file " << fileInfo.name << std::endl;
+			return false;
 		}				
 	}
 

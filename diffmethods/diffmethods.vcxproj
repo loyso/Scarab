@@ -11,10 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="diffmethods.cpp" />
     <ClCompile Include="diff_deltamax.cpp" />
+    <ClCompile Include="diff_xdelta.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="diffmethods.h" />
     <ClInclude Include="diff_deltamax.h" />
+    <ClInclude Include="diff_xdelta.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{605D7E8A-72E2-44EF-A1A2-99D6D8796A9F}</ProjectGuid>
