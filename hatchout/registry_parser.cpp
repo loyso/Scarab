@@ -287,7 +287,7 @@ hatch::Registry::Registry()
 
 hatch::Registry::~Registry()
 {
-	DeleteContainer( actions );
+	dung::DeleteContainer( actions );
 }
 
 

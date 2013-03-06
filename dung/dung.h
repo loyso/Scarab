@@ -31,12 +31,32 @@
 #	define _tstring std::string
 #endif
 
-extern const _TCHAR REGISTRY_FILENAME[];
+#include <streambuf>
 
-template< typename T >
-void DeleteContainer( T& container )
+namespace dung
 {
-	for( T::iterator i = container.begin(); i != container.end(); ++i )
-		delete *i;
-	container.clear();
+	extern const wchar_t WREGISTRY_FILENAME[];
+	extern const char REGISTRY_FILENAME[];
+
+	template< typename T >
+	void DeleteContainer( T& container )
+	{
+		for( T::iterator i = container.begin(); i != container.end(); ++i )
+			delete *i;
+		container.clear();
+	}
+
+	class nil_buf : public std::streambuf  
+	{
+	public:
+		nil_buf();
+		virtual	~nil_buf();
+
+	protected:
+		virtual int	overflow( int c_ );
+		virtual int sync();
+		void put_buffer();
+		void put_char( int c_ );
+	};
+
 }

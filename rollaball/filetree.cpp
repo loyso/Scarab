@@ -33,13 +33,13 @@ rab::FileInfo::FileInfo()
 
 rab::FolderInfo::~FolderInfo()
 {
-	DeleteContainer( folders_newOnly );
-	DeleteContainer( folders_oldOnly );
-	DeleteContainer( folders_existInBoth );
+	dung::DeleteContainer( folders_newOnly );
+	dung::DeleteContainer( folders_oldOnly );
+	dung::DeleteContainer( folders_existInBoth );
 
-	DeleteContainer( files_newOnly );
-	DeleteContainer( files_oldOnly );
-	DeleteContainer( files_existInBoth );
+	dung::DeleteContainer( files_newOnly );
+	dung::DeleteContainer( files_oldOnly );
+	dung::DeleteContainer( files_existInBoth );
 }
 
 void rab::BuildFilesAndFoldersForPath( Config const& config, Path_t const& path, StringSet_t& files, StringSet_t& folders, bool newPath )

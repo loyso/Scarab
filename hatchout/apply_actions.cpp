@@ -64,8 +64,7 @@ bool hatch::CreateNewFile( Options const& options, RegistryAction const& action,
 		size_t existFileSize;
 		if( zip::FileSize( fullPathNew.c_str(), existFileSize ) )
 		{
-			if( !options.quiet )
-				out << "Can't create new file " << action.new_path << ". File already exists." << std::endl;
+			out << "Can't create new file " << action.new_path << ". File already exists." << std::endl;
 			return false;
 		}
 	}
@@ -73,30 +72,26 @@ bool hatch::CreateNewFile( Options const& options, RegistryAction const& action,
 	dung::MemoryBlock memoryBlock;
 	if( !zipInput.ReadFile( action.new_path, memoryBlock.pBlock, memoryBlock.size ) )
 	{
-		if( !options.quiet )
-			out << "Can't unzip file " << action.new_path << ". zip error: " << zipInput.ErrorMessage() << std::endl;
+		out << "Can't unzip file " << action.new_path << ". zip error: " << zipInput.ErrorMessage() << std::endl;
 		return false;
 	}
 
 	String_t dirPath;
 	if( !ParentPath( fullPathNew, dirPath ) )
 	{
-		if( !options.quiet )
-			out << "Can't extract parent path from " << fullPathNew << std::endl;
+		out << "Can't extract parent path from " << fullPathNew << std::endl;
 		return false;
 	}
 
 	if( !zip::ZipCreateDirectories( dirPath.c_str() ) )
 	{
-		if( !options.quiet )
-			out << "Can't create directory " << dirPath << std::endl;
+		out << "Can't create directory " << dirPath << std::endl;
 		return false;
 	}
 
 	if( !dung::WriteWholeFile( fullPathNew, memoryBlock ) )
 	{
-		if( !options.quiet )
-			out << "Can't write file " << fullPathNew << std::endl;
+		out << "Can't write file " << fullPathNew << std::endl;
 		return false;
 	}
 
@@ -107,8 +102,7 @@ bool hatch::CheckOldFileData( Options const& options, dung::MemoryBlock const& o
 {
 	if( options.checkOldSize && oldFile.size != action.oldSize )
 	{
-		if( !options.quiet )
-			out << "Old file has wrong size. " << action.old_path << " Real size=" << oldFile.size << ", registry size=" << action.oldSize << std::endl;
+		out << "Old file has wrong size. " << action.old_path << " Real size=" << oldFile.size << ", registry size=" << action.oldSize << std::endl;
 		return false;
 	}
 
@@ -118,8 +112,7 @@ bool hatch::CheckOldFileData( Options const& options, dung::MemoryBlock const& o
 		dung::SHA1Compute( oldFile.pBlock, oldFile.size, oldSha1 );
 		if( oldSha1 != action.oldSha1 )
 		{
-			if( !options.quiet )
-				out << "Old file has wrong SHA1. " << action.old_path << " Real SHA1=" << SHA1ToString(oldSha1) << ", registry SHA1=" << SHA1ToString(action.oldSha1) << std::endl;
+			out << "Old file has wrong SHA1. " << action.old_path << " Real SHA1=" << SHA1ToString(oldSha1) << ", registry SHA1=" << SHA1ToString(action.oldSha1) << std::endl;
 			return false;
 		}
 	}
@@ -132,8 +125,7 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 	dung::MemoryBlock diffBlock;
 	if( !zipInput.ReadFile( action.diff_path, diffBlock.pBlock, diffBlock.size ) )
 	{
-		if( !options.quiet )
-			out << "Can't unzip file " << action.diff_path << ". zip error: " << zipInput.ErrorMessage() << std::endl;
+		out << "Can't unzip file " << action.diff_path << ". zip error: " << zipInput.ErrorMessage() << std::endl;
 		return false;
 	}
 
@@ -141,8 +133,7 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 	String_t fullPathOld = FullPath( options, action.old_path );
 	if( !ReadWholeFile( fullPathOld, oldFile ) )
 	{
-		if( !options.quiet )
-			out << "Can't read file " << fullPathOld << std::endl;
+		out << "Can't read file " << fullPathOld << std::endl;
 		return false;
 	}
 
@@ -161,16 +152,14 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 			String_t oldTempPath = TempPath( options, action.old_path );
 			if( !WriteWholeFile( oldTempPath, oldFile ) )
 			{
-				if( !options.quiet )
-					out << "Can't write file " << oldTempPath << std::endl;
+				out << "Can't write file " << oldTempPath << std::endl;
 				return false;
 			}
 
 			String_t diffTempPath = TempPath( options, action.diff_path );
 			if( !WriteWholeFile( diffTempPath, diffBlock ) )
 			{
-				if( !options.quiet )
-					out << "Can't write file " << diffTempPath << std::endl;
+				out << "Can't write file " << diffTempPath << std::endl;
 				DeleteFile( oldTempPath.c_str() );
 				return false;
 			}
@@ -195,8 +184,7 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 			int ret = xd3_decode_memory( diffBlock.pBlock, diffBlock.size, oldFile.pBlock, oldFile.size, newFile.pBlock, &size, newFile.size, 0 );
 			if( ret != 0 )
 			{
-				if( !options.quiet )
-					out << "Can't decode file " << action.diff_path << " error code=" << ret << std::endl;
+				out << "Can't decode file " << action.diff_path << " error code=" << ret << std::endl;
 				return false;
 			}
 
@@ -204,8 +192,7 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 
 			if( !WriteWholeFile( fullPathOld, newFile ) )
 			{
-				if( !options.quiet )
-					out << "Can't write file " << fullPathOld << std::endl;
+				out << "Can't write file " << fullPathOld << std::endl;
 				return false;
 			}
 		}
@@ -219,10 +206,7 @@ bool hatch::DeleteOldFile( Options const& options, RegistryAction const& action,
 	String_t fullPath = FullPath( options, action.old_path );
 	bool result = DeleteFile( fullPath.c_str() );
 	if( !result )
-	{
-		if( !options.quiet )
-			out << "Can't delete file " << fullPath << std::endl;
-	}
+		out << "Can't delete file " << fullPath << std::endl;
 
 	return result;
 }
@@ -300,8 +284,7 @@ bool hatch::ApplyActions( Options const& options, DiffDecoders const& diffDecode
 	if( numErrors == 0 )
 		return true;
 
-	if( !options.quiet )
-		out << "FAILED. " << numErrors << " errors occured." << std::endl;
+	out << "FAILED. " << numErrors << " errors occured." << std::endl;
 
 	return false;
 }

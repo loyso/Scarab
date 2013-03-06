@@ -104,7 +104,7 @@ void rab::WriteRegistryFolders( Options const& options, Config const& config, Fo
 
 bool rab::WriteRegistry( Options const& options, Config const& config, FolderInfo& rootFolder, PackageOutput_t& output )
 {
-	std::wofstream file ( REGISTRY_FILENAME, std::ios::out|std::ios::trunc );
+	std::wofstream file ( dung::WREGISTRY_FILENAME, std::ios::out|std::ios::trunc );
 	if( !file.is_open() )
 		return false;
 
@@ -119,10 +119,10 @@ bool rab::WriteRegistry( Options const& options, Config const& config, FolderInf
 	file.close();
 
 	dung::MemoryBlock registryFileContent;
-	if( !dung::ReadWholeFile( REGISTRY_FILENAME, registryFileContent ) )
+	if( !dung::ReadWholeFile( dung::WREGISTRY_FILENAME, registryFileContent ) )
 		return false;
 
-	output.WriteFile( REGISTRY_FILENAME, registryFileContent.pBlock, registryFileContent.size );
+	output.WriteFile( dung::WREGISTRY_FILENAME, registryFileContent.pBlock, registryFileContent.size );
 
 	return true;
 }

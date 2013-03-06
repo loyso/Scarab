@@ -19,20 +19,16 @@ bool hatch::HatchOut::ProcessData( Options const& options, DiffDecoders const& d
 	zip::ZipArchiveInput zipInput;
 	if( !zipInput.Open( options.pathToPackage, false ) )
 	{
-		if( !options.quiet )
-			out << "Can't open zip archive " << options.pathToPackage << " zip error: " << zipInput.ErrorMessage() << std::endl;
+		out << "Can't open zip archive " << options.pathToPackage << " zip error: " << zipInput.ErrorMessage() << std::endl;
 		return false;
 	}
 
-	if( !options.quiet )
-		out << "Opened " << options.pathToPackage << std::endl;
+	out << "Opened " << options.pathToPackage << std::endl;
 
 	dung::MemoryBlock registryContent;
-	const char registryFileName[] = "registry.txt";
-	if( !zipInput.ReadFile( registryFileName, registryContent.pBlock, registryContent.size ) )
+	if( !zipInput.ReadFile( dung::REGISTRY_FILENAME, registryContent.pBlock, registryContent.size ) )
 	{
-		if( !options.quiet )
-			out << "Can't read file " << registryFileName << " from zip. zip error: " << zipInput.ErrorMessage() << std::endl;
+		out << "Can't read file " << dung::REGISTRY_FILENAME << " from zip. zip error: " << zipInput.ErrorMessage() << std::endl;
 		return false;
 	}
 
@@ -42,23 +38,19 @@ bool hatch::HatchOut::ProcessData( Options const& options, DiffDecoders const& d
 		parser.Open( (const char*)registryContent.pBlock, registryContent.size );
 		if( !parser.Parse( registry ) )
 		{
-			if( !options.quiet )
-				out << "Can't parse file " << registryFileName << ". parse error: " << parser.ErrorMessage() << std::endl;
+			out << "Can't parse file " << dung::REGISTRY_FILENAME << ". parse error: " << parser.ErrorMessage() << std::endl;
 			return false;
 		}
 		parser.Close();
 	}
 
-	if( !options.quiet )
-	{
-		out << "Parsed " << registryFileName << std::endl;
-		if( options.verbose )
-			out << registry.actions.size() << " actions in total." << std::endl;
-	}
+	out << "Parsed " << dung::REGISTRY_FILENAME << std::endl;
+	if( options.verbose )
+		out << registry.actions.size() << " actions in total." << std::endl;
 
 	bool result = ApplyActions( options, diffDecoders, registry, zipInput, out );
 
-	if( result && !options.quiet )
+	if( result )
 		out << "Successfully done!" << std::endl;
 
 	zipInput.Close();

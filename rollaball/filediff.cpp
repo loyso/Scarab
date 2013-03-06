@@ -155,8 +155,8 @@ rab::DiffEncoders::DiffEncoders()
 
 rab::DiffEncoders::~DiffEncoders()
 {
-	DeleteContainer( m_diffEncoders );
-	DeleteContainer( m_diffEncodersExternal );
+	dung::DeleteContainer( m_diffEncoders );
+	dung::DeleteContainer( m_diffEncodersExternal );
 }
 
 void rab::DiffEncoders::AddEncoder( dung::DiffEncoder_i& diffEncoder, DiffMethod_t const& encoderName, Config::StringValues_t const& packFiles )

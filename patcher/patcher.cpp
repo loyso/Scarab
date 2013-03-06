@@ -78,12 +78,16 @@ int _tmain(int argc, _TCHAR* argv[])
 		diffDecoders.AddExternalDecoder( deltaMaxDecoder, "deltamax" );
 #endif
 
-		if( !hatchOut.ProcessData( options, diffDecoders, std::cout ) )
-			return 1;
+		std::ostream nil_out( SCARAB_NEW dung::nil_buf );
+
+		if( hatchOut.ProcessData( options, diffDecoders, options.quiet ? nil_out : std::cout ) )
+			result = 0;
+
+		delete nil_out.rdbuf( NULL );
 	}
 	catch(std::exception& e) {
 		std::cerr << e.what() << "\n";
 	}
 
-	return 0;
+	return result;
 }
