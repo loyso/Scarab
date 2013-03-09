@@ -216,10 +216,10 @@ bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryB
 		for (size_t i = 0; i < fileNameKey.size(); ++i )
 			fileNameKey[i] = tolower( fileNameKey[i] );
 
-	NameToEntry_t::const_iterator keyValue = m_nameToEntry.find( fileName );
+	NameToEntry_t::const_iterator keyValue = m_nameToEntry.find( fileNameKey );
 	if( keyValue == m_nameToEntry.end() )
 	{
-		sprintf( m_errorMessage, "file %s not found in the zip index\n", fileName.c_str() );
+		sprintf( m_errorMessage, "file %s not found in the zip index\n", fileNameKey.c_str() );
 		return false;
 	}
 
