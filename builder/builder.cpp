@@ -55,7 +55,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		("new_override_files", po::wvalue(&config.newOverrideFiles), "force override new files")
 		("new_file_limit", po::wvalue(&config.newFileLimit)->default_value(0), "skip source files greater then the limit")		
 		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
-		("zip.compression", po::wvalue(&config.zipCompressionLevel)->default_value(0), "1 through 9 (0 corresponds to STORE)")		
+		("zip.compression", po::wvalue(&config.zipCompressionLevel)->default_value(9), "1 through 9 (0 corresponds to STORE)")		
 		;
 
 #if SCARAB_DELTAMAX
