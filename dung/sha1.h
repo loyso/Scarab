@@ -115,6 +115,5 @@ namespace dung
 	std::wstring SHA1ToWString( Sha1 const& sha1 );
 	std::string SHA1ToString( Sha1 const& sha1 );
 
-	bool StringToSHA1( const char* parse, Sha1& sha1 );
-	bool StringToSHA1( const wchar_t* parse, Sha1& sha1 );
+	bool StringToSHA1( const _TCHAR* parse, Sha1& sha1 );
 }

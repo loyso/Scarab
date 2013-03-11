@@ -3,10 +3,11 @@
 #include <dung/dung.h>
 
 #include <string>
+#include <sstream>
 
 namespace zip
 {
-	typedef std::wstring String_t;
+	typedef _tstring String_t;
 
 	namespace CompressionLevel
 	{
@@ -29,13 +30,13 @@ namespace zip
 		bool WriteFile( String_t const& fileName, const void* pMemoryBlock, size_t size );
 		bool Close();
 
-		const char* ErrorMessage() const;
+		_tstring ErrorMessage() const;
 
 	private:
 		String_t m_archiveName;
 		bool m_utf8fileNames;
 		
-		char* m_errorMessage;
+		_tstringstream m_errorMessage;
 		int err;
 		const char* password;
 		int opt_compress_level;

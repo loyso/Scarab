@@ -6,6 +6,14 @@
 #include <vector>
 #include <regex>
 
+namespace boost
+{
+	namespace filesystem
+	{
+		class path;
+	}
+}
+
 namespace zip
 {
 	class ZipArchiveOutput;
@@ -20,9 +28,10 @@ namespace rab
 {
 	typedef _tstring String_t;
 	typedef zip::ZipArchiveOutput PackageOutput_t;
-	typedef std::wostream LogOutput_t;
-	typedef std::wregex Regex_t;
+	typedef _tostream LogOutput_t;
+	typedef _tregex Regex_t;
 	typedef _tstring DiffMethod_t;
+	typedef boost::filesystem::path Path_t;
 
 	struct Options
 	{
@@ -72,6 +81,9 @@ namespace rab
 
 	void BuildRegexVector( Config::StringValues_t const& strings, Config::RegexValues_t& regexps );
 	bool MatchName( Config::RegexValues_t const & filters, String_t const& name );
+	
+	_tstring GenericString( Path_t const& p );
+	_tstring FileString( Path_t const& p );
 
 	class RollABall
 	{

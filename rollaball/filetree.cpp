@@ -51,7 +51,7 @@ void rab::BuildFilesAndFoldersForPath( Config const& config, Path_t const& path,
 	{		
 		fs::file_status status = it->status();
 		fs::path fullpath = it->path();
-		String_t name = fullpath.filename().generic_wstring();
+		String_t name = GenericString( fullpath.filename() );
 
 		if( fs::is_regular_file( status ))
 		{
@@ -59,7 +59,7 @@ void rab::BuildFilesAndFoldersForPath( Config const& config, Path_t const& path,
 				&& !MatchName( config.ignoreFiles_regex, name ) )
 			{
 				if( !newPath || !MatchName( config.newIgnoreFiles_regex, name ) )
-					files.insert( fullpath.filename().wstring() );
+					files.insert( FileString( fullpath.filename() ) );
 			}
 		}
 		else if( fs::is_directory( status ) )
@@ -68,7 +68,7 @@ void rab::BuildFilesAndFoldersForPath( Config const& config, Path_t const& path,
 				&& !MatchName( config.ignoreFolders_regex, name ) )
 			{
 				if( !newPath || !MatchName( config.newIgnoreFolders_regex, name ) )
-					folders.insert( fullpath.filename().wstring() );
+					folders.insert( FileString( fullpath.filename() ) );
 			}
 		}
 	}

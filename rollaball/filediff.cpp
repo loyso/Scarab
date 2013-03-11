@@ -27,15 +27,6 @@ namespace rab
 	
 	bool BuildDiffFolders( Options const& options, Config const& config, DiffEncoders const& diffEncoders, 
 		Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FolderInfo::FolderInfos_t const& folderInfos );
-
-	_tstring generic_string( Path_t const& p )
-	{
-#ifdef SCARAB_WCHAR_MODE
-		return p.generic_wstring();
-#else
-		return p.generic_string();
-#endif
-	}
 }
 
 bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncoders, FileInfo& fileInfo, 
@@ -53,14 +44,14 @@ bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncode
 	dung::DiffEncoder_i* pEncoder = diffEncoders.FindEncoder( fileInfo.name, fileInfo.diffMethod );
 	if( pEncoder != NULL )
 	{		
-		out << "Encoding " << fileInfo.diffMethod << " diff file " << relativeTemp.generic_wstring() << std::endl;
+		out << "Encoding " << fileInfo.diffMethod << " diff file " << GenericString( relativeTemp ) << std::endl;
 		
 		dung::MemoryBlock deltaFile;
 		if( !pEncoder->EncodeDiffMemoryBlock( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, deltaFile.size ) )
 		{
 			_tstring errorMessage;
 			pEncoder->GetErrorMessage( errorMessage );
-			out << "Encoding error " << errorMessage << std::endl;
+			out << "Encoding error: " << errorMessage << std::endl;
 			return false;
 		}
 
@@ -68,14 +59,14 @@ bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncode
 		{
 			if( !WriteWholeFile( fullTemp.wstring(), deltaFile ) )
 			{
-				out << "Can't write file " << fullTemp.generic_wstring() << std::endl;
+				out << "Can't write file " << GenericString( fullTemp ) << std::endl;
 				return false;
 			}
 		}
 
-		if( !package.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size ) )
+		if( !package.WriteFile( GenericString( relativeTemp ), deltaFile.pBlock, deltaFile.size ) )
 		{
-			out << "Can't write file " << relativeTemp.generic_wstring() << " to package. Size=" << deltaFile.size << std::endl;
+			out << "Can't write file " << GenericString( relativeTemp ) << " to package. Size=" << deltaFile.size << std::endl;
 			return false;
 		}
 	}
@@ -84,28 +75,28 @@ bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncode
 		dung::DiffEncoderExternal_i* pExternalEncoder = diffEncoders.FindExternalEncoder( fileInfo.name, fileInfo.diffMethod );
 		if( pExternalEncoder != NULL )
 		{
-			out << "Encoding " << fileInfo.diffMethod << " diff file " << relativeTemp.generic_wstring() << std::endl;
-			if( !pExternalEncoder->EncodeDiffFile( generic_string(fullNew).c_str(), generic_string(fullOld).c_str(), generic_string(fullTemp).c_str() ) )
+			out << "Encoding " << fileInfo.diffMethod << " diff file " << GenericString( relativeTemp ) << std::endl;
+			if( !pExternalEncoder->EncodeDiffFile( GenericString(fullNew).c_str(), GenericString(fullOld).c_str(), GenericString(fullTemp).c_str() ) )
 			{
 				_tstring errorMessage;
 				pExternalEncoder->GetErrorMessage( errorMessage );
-				out << "Encoding error " << errorMessage << std::endl;
+				out << "Encoding error: " << errorMessage << std::endl;
 				return false;
 			}
 
 			dung::MemoryBlock deltaFile;
 			if( !ReadWholeFile( fullTemp.generic_string(), deltaFile ) )
 			{
-				out << "Can't read file " << fullTemp.generic_wstring() << std::endl;
+				out << "Can't read file " << GenericString(fullTemp) << std::endl;
 				return false;
 			}
 
 			if( !options.produceTemp )
 				fs::remove( fullTemp );
 
-			if( !package.WriteFile( relativeTemp.generic_wstring(), deltaFile.pBlock, deltaFile.size ) )
+			if( !package.WriteFile( GenericString(relativeTemp), deltaFile.pBlock, deltaFile.size ) )
 			{
-				out << "Can't write file " << relativeTemp.generic_wstring() << " to package. Size=" << deltaFile.size << std::endl;
+				out << "Can't write file " << GenericString(relativeTemp) << " to package. Size=" << deltaFile.size << std::endl;
 				return false;
 			}
 		}
@@ -129,7 +120,7 @@ bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncod
 	dung::MemoryBlock oldFile;
 	if( !ReadWholeFile( fullOld.wstring(), oldFile ) )
 	{
-		out << "Can't read file " << fullOld.wstring() << std::endl;
+		out << "Can't read file " << FileString(fullOld) << std::endl;
 		return false;
 	}
 	
@@ -142,7 +133,7 @@ bool rab::BuildDiffFile( Options const& options, Config const& config, DiffEncod
 	dung::MemoryBlock newFile;
 	if( !ReadWholeFile( fullNew.wstring(), newFile ) )
 	{
-		out << "Can't read file " << fullNew.wstring() << std::endl;
+		out << "Can't read file " << FileString(fullNew) << std::endl;
 		return false;
 	}
 

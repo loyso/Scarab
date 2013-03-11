@@ -97,6 +97,25 @@ void rab::BuildRegexVector( Config::StringValues_t const& strings, Config::Regex
 	}
 }
 
+_tstring rab::GenericString( Path_t const& p )
+{
+#ifdef SCARAB_WCHAR_MODE
+	return p.generic_wstring();
+#else
+	return p.generic_string();
+#endif
+}
+
+_tstring rab::FileString( Path_t const& p )
+{
+#ifdef SCARAB_WCHAR_MODE
+	return p.wstring();
+#else
+	return p.string();
+#endif
+}
+
+
 rab::Config::Config()
 	: newFileLimit( 0 )
 	, zipCompressionLevel( 0 )

@@ -18,7 +18,7 @@ namespace loc = boost::locale;
 namespace rab
 {
 	typedef fs::path Path_t;
-	typedef std::wostream OutputStream_t;
+	typedef _tostream OutputStream_t;
 
 	struct OutputContext
 	{
@@ -64,25 +64,25 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 		output.stream << _T("file") << endl;
 		output.stream << _T("{") << endl;
 
-		output.stream << _T("\t") << _T("action=") << dung::ActionToWString(fileAction) << endl;
+		output.stream << _T("\t") << _T("action=") << dung::ActionToString(fileAction) << endl;
 
 		if( fileAction != dung::Action::DELETE && fileAction != dung::Action::NONE )
 		{
-			output.stream << _T("\t") << _T("new_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
+			output.stream << _T("\t") << _T("new_path=") << quote << GenericString( relativePath / fileInfo.name ) << quote << endl;
 			output.stream << _T("\t") << _T("new_size=") << fileInfo.newSize << endl;
-			output.stream << _T("\t") << _T("new_sha1=") << quote << dung::SHA1ToWString(fileInfo.newSha1) << quote << endl;
+			output.stream << _T("\t") << _T("new_sha1=") << quote << dung::SHA1_TO_TSTRING(fileInfo.newSha1) << quote << endl;
 		}
 
 		if( fileAction != dung::Action::NEW && fileAction != dung::Action::OVERRIDE && fileAction != dung::Action::NEW_BUT_NOT_INCLUDED )
 		{
-			output.stream << _T("\t") << _T("old_path=") << quote << ( relativePath / fileInfo.name ).generic_wstring() << quote << endl;
+			output.stream << _T("\t") << _T("old_path=") << quote << GenericString( relativePath / fileInfo.name ) << quote << endl;
 			output.stream << _T("\t") << _T("old_size=") << fileInfo.oldSize << endl;
-			output.stream << _T("\t") << _T("old_sha1=") << quote << dung::SHA1ToWString(fileInfo.oldSha1) << quote << endl;
+			output.stream << _T("\t") << _T("old_sha1=") << quote << dung::SHA1_TO_TSTRING(fileInfo.oldSha1) << quote << endl;
 		}
 
 		if( fileAction == dung::Action::APPLY_DIFF )
 		{
-			output.stream << _T("\t") << _T("diff_path=") << quote << ( relativePath / DiffFileName(fileInfo.name, config) ).generic_wstring() << quote << endl;
+			output.stream << _T("\t") << _T("diff_path=") << quote << GenericString( relativePath / DiffFileName(fileInfo.name, config) ) << quote << endl;
 			output.stream << _T("\t") << _T("diff_method=") << fileInfo.diffMethod << endl;
 		}
 
@@ -112,7 +112,7 @@ bool rab::WriteRegistry( Options const& options, Config const& config, FolderInf
 {
 	out << "Creating registry file..." << std:: endl;
 
-	std::wostringstream stringStream;
+	_tstringstream stringStream;
 	OutputContext outputContext( stringStream, out );
 
 	if( !options.newVersion.empty() )
@@ -124,7 +124,7 @@ bool rab::WriteRegistry( Options const& options, Config const& config, FolderInf
 	Path_t relativePath;
 	WriteRegistryFolders( options, config, FolderInfo::FolderInfos_t( 1, &rootFolder ), relativePath, outputContext );
 
-	std::wstring fileContent = stringStream.str();
+	_tstring fileContent = stringStream.str();
 	std::string fileContentUtf8 = loc::conv::utf_to_utf<char>( fileContent );
 
 	if( !package.WriteFile( dung::REGISTRY_FILENAME, fileContentUtf8.c_str(), fileContentUtf8.size() ) )

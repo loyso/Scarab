@@ -4,15 +4,22 @@
 
 #ifdef SCARAB_WCHAR_MODE
 #	pragma comment(linker, "/defaultlib:DeltaMAX_unicode.lib")
-#	pragma message("Automatically linking with DeltaMAX_unicode.lib (DeltaMAX_unicode.dll)")
+#	pragma message("Automatically linking with DeltaMAX_unicode.lib (DeltaMAX.dll)")
 #else
 #	pragma comment(linker, "/defaultlib:DeltaMAX.lib")
 #	pragma message("Automatically linking with DeltaMAX.lib (DeltaMAX.dll)")
 #endif
 
-#define _TCHAR_DEFINED
-#define TCHAR _TCHAR
+#ifdef SCARAB_WCHAR_MODE
+#	define TCHAR _TCHAR
+#else
+#	undef UNICODE
+#	undef _T
+#	define _T(x) x
+#	define TCHAR char
+#endif
 
+#define _TCHAR_DEFINED
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 

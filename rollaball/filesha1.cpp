@@ -32,7 +32,7 @@ bool rab::GatherSha1Files( Options const& options, Config const& config, Path_t 
 		dung::MemoryBlock oldFile;
 		if( !dung::ReadWholeFile( fullOld.wstring(), oldFile ) )
 		{
-			out << "Can't read file " << fullOld.wstring() << std::endl;
+			out << "Can't read file " << FileString( fullOld ) << std::endl;
 			errors++;
 			continue;
 		}

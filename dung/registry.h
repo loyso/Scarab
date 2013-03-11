@@ -16,9 +16,6 @@ namespace dung
 		};
 	}
 
-	std::string ActionToString( Action::Enum action );
-	std::wstring ActionToWString( Action::Enum action );
-
-	bool StringToAction( const char* parse, Action::Enum& action );
-	bool StringToAction( const wchar_t* parse, Action::Enum& action );
+	_tstring ActionToString( Action::Enum action );
+	bool StringToAction( const _TCHAR* parse, Action::Enum& action );
 }

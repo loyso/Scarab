@@ -472,27 +472,7 @@ bool dung::CharToByte( _TCHAR c, unsigned char& byte )
 	return false;
 }
 
-bool dung::StringToSHA1( const char* parse, Sha1& sha1 )
-{
-	int size = StrLen( parse );
-	if( size+1 != SHA1StringSize )
-		return false;
-
-	for (int i = 0; i < SHA1HashSize; i++)
-	{
-		unsigned char hi, lo;
-		if( !CharToByte( parse[i*2], hi ) )
-			return false;
-		if( !CharToByte( parse[i*2+1], lo ) )
-			return false;
-
-		sha1.digest[i] = ( hi << 4 ) | lo;
-	}
-
-	return true;
-}
-
-bool dung::StringToSHA1( const wchar_t* parse, Sha1& sha1 )
+bool dung::StringToSHA1( const _TCHAR* parse, Sha1& sha1 )
 {
 	size_t size = StrLen( parse );
 	if( size+1 != SHA1StringSize )

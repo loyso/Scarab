@@ -4,7 +4,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#define SCARAB_WCHAR_MODE
+#define SCARAB_WCHAR_MODE // you can comment it out.
 
 #define NOMINMAX
 
@@ -36,6 +36,8 @@
 #	define _tstreambuf std::wstreambuf
 #	define _tchar_to_long _wtol
 #	define _ttolower towlower
+#	define _tregex std::wregex
+#	define _tstrcmp wcscmp
 #else
 #	define	_TCHAR char
 #	define _T(x) x
@@ -44,9 +46,11 @@
 #	define _tostream std::ostream
 #	define _tcout std::cout
 #	define _tstringstream std::stringstream
-#	define _tstreambuf std::wstreambuf
+#	define _tstreambuf std::streambuf
 #	define _tchar_to_long atol
 #	define _ttolower tolower
+#	define _tregex std::regex
+#	define _tstrcmp strcmp
 #endif
 
 #include <streambuf>

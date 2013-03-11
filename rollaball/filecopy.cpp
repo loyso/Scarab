@@ -35,7 +35,7 @@ bool rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 		dung::MemoryBlock newFile;
 		if( !dung::ReadWholeFile( fullNew.wstring(), newFile ) )
 		{
-			out << "Can't read file " << fullNew.wstring() << std::endl;
+			out << "Can't read file " << FileString(fullNew) << std::endl;
 			errors++;
 			continue;
 		}
@@ -49,21 +49,21 @@ bool rab::BuildTempCopiesFiles( Options const& options, Config const& config, Pa
 			{
 				fs::create_directories( fullTemp.parent_path() );
 
-				if( !dung::WriteWholeFile( fullTemp.wstring(), newFile ) )
+				if( !dung::WriteWholeFile( FileString(fullTemp), newFile ) )
 				{
-					out << "Can't write whole file " << fullTemp.wstring() << std::endl;
+					out << "Can't write whole file " << FileString(fullTemp) << std::endl;
 					errors++;
 				}
 			}
 
-			if( !zipOut.WriteFile( relativeTemp.generic_wstring(), newFile.pBlock, newFile.size ) )
+			if( !zipOut.WriteFile( GenericString(relativeTemp), newFile.pBlock, newFile.size ) )
 			{
-				out << "Can't write file to archive " << relativeTemp.generic_wstring() << " size=" << newFile.size << std::endl;
+				out << "Can't write file to archive " << GenericString(relativeTemp) << " size=" << newFile.size << std::endl;
 				errors++;
 			}
 		}
 		else
-			out << "Skipping file " << fullNew.wstring() << "size=" << fileInfo.newSize << " because of limit " << config.newFileLimit << std::endl;
+			out << "Skipping file " << FileString(fullNew) << "size=" << fileInfo.newSize << " because of limit " << config.newFileLimit << std::endl;
 	}
 
 	return errors == 0;

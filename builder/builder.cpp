@@ -108,7 +108,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 		ifs.open(options.configFile.c_str());
 		if (!ifs)
 		{
-			std::wcout << _T("can not open config file: ") << options.configFile << _T("\n");
+			_tcout << _T("can not open config file: ") << options.configFile << _T("\n");
 			return 1;
 		}
 	}
@@ -160,9 +160,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		diffEncoders.AddExternalEncoder( deltaMaxEncoder, _T("deltamax"), encodersConfig.deltaMax_packFiles );
 #endif // SCARAB_DELTAMAX
 
-		std::wostream nil_out( SCARAB_NEW dung::nil_buf );
+		_tostream nil_out( SCARAB_NEW dung::nil_buf );
 
-		if( rollABall.ProcessData( options, config, diffEncoders, options.quiet ? nil_out : std::wcout ) )
+		if( rollABall.ProcessData( options, config, diffEncoders, options.quiet ? nil_out : _tcout ) )
 			result = 0;
 
 		delete nil_out.rdbuf( NULL );

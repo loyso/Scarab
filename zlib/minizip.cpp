@@ -147,12 +147,10 @@ zip::ZipArchiveOutput::ZipArchiveOutput()
 	, err( ZIP_OK )
 	, zf()
 {
-	m_errorMessage = new char[ MAX_ERROR_STRING ];
 }
 
 zip::ZipArchiveOutput::~ZipArchiveOutput()
 {
-	delete[] m_errorMessage;
 }
 
 bool zip::ZipArchiveOutput::Open( String_t const& archiveName, bool utf8fileNames, int compressionLevel )
@@ -177,7 +175,7 @@ bool zip::ZipArchiveOutput::Open( String_t const& archiveName, bool utf8fileName
 	if (zf == NULL)
 	{
 		err = ZIP_ERRNO;
-		sprintf( m_errorMessage, "Can't open %s\n", m_archiveName.c_str() );
+		m_errorMessage << "Can't open " << m_archiveName << std::endl;
 		return false;
 	}
 	
@@ -220,13 +218,13 @@ bool zip::ZipArchiveOutput::WriteFile( String_t const& fileName, const void* pMe
                         password,crcFile, zipVersion, zipUtf8FilenamesEncoding, zip64);
 
     if (err != ZIP_OK)
-        sprintf( m_errorMessage, "error in creating new %s in zipfile\n", filenameinzip );
+		m_errorMessage << "Error creating new  " << fileName << std::endl;
 
     if (err == ZIP_OK)
 		err = zipWriteInFileInZip (zf,pMemoryBlock,size);
 	
 	if (err<0)
-		sprintf( m_errorMessage, "error in writing %s in the zipfile\n", filenameinzip);
+		m_errorMessage << "Error writing " << fileName << " to zip archive. " << std::endl;
 
     if (err<0)
         err=ZIP_ERRNO;
@@ -234,7 +232,7 @@ bool zip::ZipArchiveOutput::WriteFile( String_t const& fileName, const void* pMe
     {
         err = zipCloseFileInZip(zf);
         if (err!=ZIP_OK)
-            sprintf( m_errorMessage, "error in closing %s in the zipfile\n", filenameinzip);
+			m_errorMessage << "Error closing " << fileName << " in zip archive. " << std::endl;
     }
 
 	return err == ZIP_OK;
@@ -246,7 +244,7 @@ bool zip::ZipArchiveOutput::Close()
 	return errclose == ZIP_OK;
 }
 
-const char* zip::ZipArchiveOutput::ErrorMessage() const
+_tstring zip::ZipArchiveOutput::ErrorMessage() const
 {
-	return m_errorMessage;
+	return m_errorMessage.str();
 }

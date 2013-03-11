@@ -128,8 +128,12 @@ bool zip::ZipArchiveInput::Open( String_t const& archiveName, bool caseSensitive
 bool zip::ZipArchiveInput::LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
 {
 	int err = UNZ_OK;
-	std::string fileNameUtf8 = utf_convert::as_utf8( fileName );
-	if ( unzLocateFile( uf, fileNameUtf8.c_str(), m_caseSensitive ) != UNZ_OK )
+#ifdef SCARAB_WCHAR_MODE
+	std::string fileNameInZip = utf_convert::as_utf8( fileName );
+#else
+	std::string fileNameInZip = fileName;
+#endif
+	if ( unzLocateFile( uf, fileNameInZip.c_str(), m_caseSensitive ) != UNZ_OK )
 	{
 		m_errorMessage << "file " << fileName << " not found in the zipfile" << std::endl;
 		return false;
@@ -171,7 +175,11 @@ bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& p
 {
 	int err = UNZ_OK;
 
+#ifdef SCARAB_WCHAR_MODE
 	std::string filename_inzip = utf_convert::as_utf8( fileName );
+#else
+	std::string filename_inzip = fileName;
+#endif
 
 	unz_file_info64 file_info;
 	uLong ratio=0;
@@ -250,7 +258,11 @@ bool zip::ZipArchiveInput::Index()
 		err = unzGetCurrentFileInfo64(uf, NULL,	szCurrentFileName, sizeof(szCurrentFileName)-1,NULL,0,NULL,0);
 		if(err == UNZ_OK)
 		{
+#ifdef SCARAB_WCHAR_MODE
 			String_t fileNameKey = utf_convert::as_wide( szCurrentFileName );
+#else
+			String_t fileNameKey = szCurrentFileName;
+#endif
 			if( !m_caseSensitive )
 				for (size_t i = 0; i < fileNameKey.size(); ++i )
 					fileNameKey[i] = _ttolower( fileNameKey[i] );
