@@ -162,14 +162,17 @@ bool zip::ZipArchiveOutput::Open( String_t const& archiveName, bool utf8fileName
 	opt_compress_level = compressionLevel;
 
 	const fs::path& archiveNamePath = archiveName;
-	std::string zipArchiveName = archiveNamePath.generic_string();
 #ifdef USEWIN32IOAPI
 	zlib_filefunc64_def ffunc;
+#	ifdef SCARAB_WCHAR_MODE
+	fill_win32_filefunc64W(&ffunc);
+#	else
 	fill_win32_filefunc64A(&ffunc);
-	zf = zipOpen2_64(zipArchiveName.c_str(),false,NULL,&ffunc);
+#	endif
+	zf = zipOpen2_64(archiveNamePath.c_str(),false,NULL,&ffunc);
 #else
-	zf = zipOpen64(zipArchiveName.c_str(),false);
-#endif
+	zf = zipOpen64(archiveNamePath.c_str(),false);
+#endif // USEWIN32IOAPI
 
 	if (zf == NULL)
 	{

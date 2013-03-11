@@ -11,8 +11,9 @@ namespace hatch
 
 namespace hatch
 {
-	typedef std::string String_t;
-	typedef std::ostream LogOutput_t;
+	typedef _tstring String_t;
+	typedef _tostream LogOutput_t;
+	typedef _tstringstream StringStream_t;
 
 	struct Options
 	{

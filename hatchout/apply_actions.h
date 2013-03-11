@@ -24,8 +24,8 @@ namespace hatch
 		DiffDecoders();
 		~DiffDecoders();
 
-		void AddDecoder( dung::DiffDecoder_i& diffDecoder, const char* decoderName );
-		void AddExternalDecoder( dung::DiffDecoderExternal_i& diffDecoder, const char* decoderName );
+		void AddDecoder( dung::DiffDecoder_i& diffDecoder, String_t const& decoderName );
+		void AddExternalDecoder( dung::DiffDecoderExternal_i& diffDecoder, String_t const& decoderName );
 
 		dung::DiffDecoder_i* FindDecoder( String_t const& decoderName ) const;
 		dung::DiffDecoderExternal_i* FindExternalDecoder( String_t const& decoderName ) const;

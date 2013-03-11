@@ -64,7 +64,7 @@ void rab::WriteRegistryFiles( Options const& options, Config const& config,
 		output.stream << _T("file") << endl;
 		output.stream << _T("{") << endl;
 
-		output.stream << _T("\t") << _T("action=") << dung::ActionToString(fileAction) << endl;
+		output.stream << _T("\t") << _T("action=") << dung::ActionToWString(fileAction) << endl;
 
 		if( fileAction != dung::Action::DELETE && fileAction != dung::Action::NONE )
 		{
@@ -127,18 +127,18 @@ bool rab::WriteRegistry( Options const& options, Config const& config, FolderInf
 	std::wstring fileContent = stringStream.str();
 	std::string fileContentUtf8 = loc::conv::utf_to_utf<char>( fileContent );
 
-	if( !package.WriteFile( dung::WREGISTRY_FILENAME, fileContentUtf8.c_str(), fileContentUtf8.size() ) )
+	if( !package.WriteFile( dung::REGISTRY_FILENAME, fileContentUtf8.c_str(), fileContentUtf8.size() ) )
 	{
-		out << "Can't write file " << dung::WREGISTRY_FILENAME << " to package" << std::endl;
+		out << "Can't write file " << dung::REGISTRY_FILENAME << " to package" << std::endl;
 		return false;
 	}
 
 	if( options.produceTemp )
 	{
-		std::ofstream file ( dung::WREGISTRY_FILENAME, std::ios::out|std::ios::binary|std::ios::trunc );
+		std::ofstream file ( dung::REGISTRY_FILENAME, std::ios::out|std::ios::binary|std::ios::trunc );
 		if( !file.is_open() )
 		{
-			out << "Can't create " << dung::WREGISTRY_FILENAME << std::endl;
+			out << "Can't create " << dung::REGISTRY_FILENAME << std::endl;
 			return false;
 		}
 

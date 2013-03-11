@@ -27,6 +27,15 @@ namespace rab
 	
 	bool BuildDiffFolders( Options const& options, Config const& config, DiffEncoders const& diffEncoders, 
 		Path_t const& relativePath, PackageOutput_t& package, LogOutput_t& out, FolderInfo::FolderInfos_t const& folderInfos );
+
+	_tstring generic_string( Path_t const& p )
+	{
+#ifdef SCARAB_WCHAR_MODE
+		return p.generic_wstring();
+#else
+		return p.generic_string();
+#endif
+	}
 }
 
 bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncoders, FileInfo& fileInfo, 
@@ -49,8 +58,8 @@ bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncode
 		dung::MemoryBlock deltaFile;
 		if( !pEncoder->EncodeDiffMemoryBlock( newFile.pBlock, newFile.size, oldFile.pBlock, oldFile.size, deltaFile.pBlock, deltaFile.size ) )
 		{
-			char errorMessage[ 256 ];
-			pEncoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+			_tstring errorMessage;
+			pEncoder->GetErrorMessage( errorMessage );
 			out << "Encoding error " << errorMessage << std::endl;
 			return false;
 		}
@@ -76,10 +85,10 @@ bool rab::CreateDiffFile( Options const& options, DiffEncoders const &diffEncode
 		if( pExternalEncoder != NULL )
 		{
 			out << "Encoding " << fileInfo.diffMethod << " diff file " << relativeTemp.generic_wstring() << std::endl;
-			if( !pExternalEncoder->EncodeDiffFile( fullNew.generic_string().c_str(), fullOld.generic_string().c_str(), fullTemp.generic_string().c_str() ) )
+			if( !pExternalEncoder->EncodeDiffFile( generic_string(fullNew).c_str(), generic_string(fullOld).c_str(), generic_string(fullTemp).c_str() ) )
 			{
-				char errorMessage[ 256 ];
-				pExternalEncoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+				_tstring errorMessage;
+				pExternalEncoder->GetErrorMessage( errorMessage );
 				out << "Encoding error " << errorMessage << std::endl;
 				return false;
 			}

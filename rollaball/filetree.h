@@ -1,10 +1,9 @@
 #pragma once
 
-#include <vector>
-
-#include <dung/sha1.h>
-
 #include "rollaball.h"
+
+#include <vector>
+#include <dung/sha1.h>
 
 namespace rab
 {

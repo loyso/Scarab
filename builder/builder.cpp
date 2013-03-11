@@ -16,8 +16,8 @@ struct EncodersConfig
 {
 #if SCARAB_DELTAMAX
 	rab::Config::StringValues_t deltaMax_packFiles;
-	std::string deltaMax_userName;
-	std::string deltaMax_licenseKey;
+	_tstring deltaMax_userName;
+	_tstring deltaMax_licenseKey;
 #endif // SCARAB_DELTAMAX
 
 #if SCARAB_XDELTA
@@ -26,51 +26,59 @@ struct EncodersConfig
 #endif // SCARAB_XDELTA
 };
 
+#ifdef SCARAB_WCHAR_MODE
+#	define COMMAND_LINE_PARSER wcommand_line_parser
+#	define PO_VALUE po::wvalue
+#else
+#	define COMMAND_LINE_PARSER command_line_parser
+#	define PO_VALUE po::value
+#endif
+
 int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Config& config, EncodersConfig& encodersConfig )
 {
 	po::options_description command_line_options("Command line options");
 	command_line_options.add_options()
 		("help,H", "produce help message")
-		("new,N", po::wvalue(&options.pathToNew)->required(), "path to new content folder")
-		("old,O", po::wvalue(&options.pathToOld)->required(), "path to old content folder")
-		("tmp,T", po::wvalue(&options.pathToTemp)->default_value(_T("temp"),"temp"), "path to temp folder")
-		("config,C", po::wvalue(&options.configFile), "name of a configuration file.")
-		("package,P", po::wvalue(&options.packageFile)->default_value(_T("package.zip"), "package.zip"), "name of output package file.")
-		("new_ver", po::wvalue(&options.newVersion), "a name for new version")
-		("old_ver", po::wvalue(&options.oldVersion), "a name for old version")
+		("new,N", PO_VALUE(&options.pathToNew)->required(), "path to new content folder")
+		("old,O", PO_VALUE(&options.pathToOld)->required(), "path to old content folder")
+		("tmp,T", PO_VALUE(&options.pathToTemp)->default_value(_T("temp"),"temp"), "path to temp folder")
+		("config,C", PO_VALUE(&options.configFile), "name of a configuration file.")
+		("package,P", PO_VALUE(&options.packageFile)->default_value(_T("package.zip"), "package.zip"), "name of output package file.")
+		("new_ver", PO_VALUE(&options.newVersion), "a name for new version")
+		("old_ver", PO_VALUE(&options.oldVersion), "a name for old version")
 		("quiet,Q", po::bool_switch(&options.quiet)->default_value(false), "quiet mode")
 		("produce_temp", po::bool_switch(&options.produceTemp)->default_value(false), "create temp files in addition to archive")
 		;
 
 	po::options_description config_file_options("Config file options");
 	config_file_options.add_options()
-		("include_folders", po::wvalue(&config.includeFolders), "folders to process")
-		("include_files", po::wvalue(&config.includeFiles), "files to process")
-		("ignore_folders", po::wvalue(&config.ignoreFolders), "skip destination folders")
-		("ignore_files", po::wvalue(&config.ignoreFiles), "skip destination files")
-		("old_skip_changed", po::wvalue(&config.oldSkipChanged), "destination files not to patch, if dst changed")
-		("old_preserve_removed", po::wvalue(&config.oldPreserveRemoved), "destination files to preserve, if src removed")
-		("new_ignore_folders", po::wvalue(&config.newIgnoreFolders), "skip source folders")
-		("new_ignore_files", po::wvalue(&config.newIgnoreFiles), "skip source files")
-		("new_override_files", po::wvalue(&config.newOverrideFiles), "force override new files")
-		("new_file_limit", po::wvalue(&config.newFileLimit)->default_value(0), "skip source files greater then the limit")		
-		("packed_extension", po::wvalue(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
-		("zip.compression", po::wvalue(&config.zipCompressionLevel)->default_value(9), "1 through 9 (0 corresponds to STORE)")		
+		("include_folders", PO_VALUE(&config.includeFolders), "folders to process")
+		("include_files", PO_VALUE(&config.includeFiles), "files to process")
+		("ignore_folders", PO_VALUE(&config.ignoreFolders), "skip destination folders")
+		("ignore_files", PO_VALUE(&config.ignoreFiles), "skip destination files")
+		("old_skip_changed", PO_VALUE(&config.oldSkipChanged), "destination files not to patch, if dst changed")
+		("old_preserve_removed", PO_VALUE(&config.oldPreserveRemoved), "destination files to preserve, if src removed")
+		("new_ignore_folders", PO_VALUE(&config.newIgnoreFolders), "skip source folders")
+		("new_ignore_files", PO_VALUE(&config.newIgnoreFiles), "skip source files")
+		("new_override_files", PO_VALUE(&config.newOverrideFiles), "force override new files")
+		("new_file_limit", PO_VALUE(&config.newFileLimit)->default_value(0), "skip source files greater then the limit")		
+		("packed_extension", PO_VALUE(&config.packedExtension)->default_value(_T("diff"),"diff"), "extension for packed files")
+		("zip.compression", PO_VALUE(&config.zipCompressionLevel)->default_value(9), "1 through 9 (0 corresponds to STORE)")		
 		;
 
 #if SCARAB_DELTAMAX
 	// Expose DeltaMAX options.	
 	config_file_options.add_options()
-		("deltamax.pack_files", po::wvalue(&encodersConfig.deltaMax_packFiles), "files to pack with DeltaMAX")
-		("deltamax.user_name", po::value(&encodersConfig.deltaMax_userName), "registered user name")
-		("deltamax.license_key", po::value(&encodersConfig.deltaMax_licenseKey), "license key string")
+		("deltamax.pack_files", PO_VALUE(&encodersConfig.deltaMax_packFiles), "files to pack with DeltaMAX")
+		("deltamax.user_name", PO_VALUE(&encodersConfig.deltaMax_userName), "registered user name")
+		("deltamax.license_key", PO_VALUE(&encodersConfig.deltaMax_licenseKey), "license key string")
 	;
 #endif // SCARAB_DELTAMAX
 
 #if SCARAB_XDELTA
 	// Expose xdelta options.	
 	config_file_options.add_options()
-		("xdelta.pack_files", po::wvalue(&encodersConfig.xdelta_packFiles), "files to pack with xdelta")
+		("xdelta.pack_files", PO_VALUE(&encodersConfig.xdelta_packFiles), "files to pack with xdelta")
 		("xdelta.DJW", po::bool_switch(&encodersConfig.xdelta_config.DJW)->default_value(false), "use DJW static huffman")
 		("xdelta.FGK", po::bool_switch(&encodersConfig.xdelta_config.FGK)->default_value(false), "use FGK adaptive huffman")
 		("xdelta.LZMA", po::bool_switch(&encodersConfig.xdelta_config.LZMA)->default_value(false), "use LZMA secondary")
@@ -85,7 +93,7 @@ int ParseCommandLine( int argc, _TCHAR** argv, rab::Options& options, rab::Confi
 #endif // SCARAB_XDELTA
 
 	po::variables_map vm;
-	po::store(po::wcommand_line_parser(argc, argv).options(command_line_options).run(), vm);
+	po::store(po::COMMAND_LINE_PARSER(argc, argv).options(command_line_options).run(), vm);
 
 	if (argc == 1 || vm.count("help")) 
 	{
@@ -152,7 +160,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		diffEncoders.AddExternalEncoder( deltaMaxEncoder, _T("deltamax"), encodersConfig.deltaMax_packFiles );
 #endif // SCARAB_DELTAMAX
 
-		std::wostream nil_out( SCARAB_NEW dung::nil_wbuf );
+		std::wostream nil_out( SCARAB_NEW dung::nil_buf );
 
 		if( rollABall.ProcessData( options, config, diffEncoders, options.quiet ? nil_out : std::wcout ) )
 			result = 0;

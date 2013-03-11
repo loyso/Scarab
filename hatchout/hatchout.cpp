@@ -25,7 +25,7 @@ bool hatch::HatchOut::ProcessData( Options const& options, DiffDecoders const& d
 	zip::ZipArchiveInput zipInput;
 	if( !zipInput.Open( options.pathToPackage, false ) )
 	{
-		out << "Can't open zip archive " << options.pathToPackage << " zip error: " << zipInput.ErrorMessage() << std::endl;
+		out << "Can't open zip archive " << options.pathToPackage << ". Zip error: " << zipInput.ErrorMessage() << std::endl;
 		return false;
 	}
 
@@ -34,7 +34,7 @@ bool hatch::HatchOut::ProcessData( Options const& options, DiffDecoders const& d
 	dung::MemoryBlock registryContent;
 	if( !zipInput.ReadFile( dung::REGISTRY_FILENAME, registryContent.pBlock, registryContent.size ) )
 	{
-		out << "Can't read file " << dung::REGISTRY_FILENAME << " from zip. zip error: " << zipInput.ErrorMessage() << std::endl;
+		out << "Can't read file " << dung::REGISTRY_FILENAME << " from zip. Zip error: " << zipInput.ErrorMessage() << std::endl;
 		return false;
 	}
 

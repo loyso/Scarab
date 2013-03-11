@@ -94,6 +94,12 @@ int SHA1Input( SHA1Context *, const uint8_t *, unsigned );
 ///		sha Error Code.
 int SHA1Result( SHA1Context *, uint8_t Message_Digest[SHA1HashSize] );
 
+#ifdef SCARAB_WCHAR_MODE
+#	define SHA1_TO_TSTRING SHA1ToWString
+#else
+#	define SHA1_TO_TSTRING SHA1ToString
+#endif
+
 namespace dung
 {
 	struct Sha1
@@ -105,7 +111,10 @@ namespace dung
 	};
 
 	void SHA1Compute( const void * pMemoryBlock, size_t size, Sha1& sha1 );
+
 	std::wstring SHA1ToWString( Sha1 const& sha1 );
 	std::string SHA1ToString( Sha1 const& sha1 );
+
 	bool StringToSHA1( const char* parse, Sha1& sha1 );
+	bool StringToSHA1( const wchar_t* parse, Sha1& sha1 );
 }

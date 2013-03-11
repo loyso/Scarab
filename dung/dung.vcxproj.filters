@@ -6,6 +6,7 @@
     <ClCompile Include="memoryblock.cpp" />
     <ClCompile Include="tokenizer.cpp" />
     <ClCompile Include="registry.cpp" />
+    <ClCompile Include="utf_convert.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dung.h" />
@@ -15,5 +16,6 @@
     <ClInclude Include="registry.h" />
     <ClInclude Include="diffdecoder.h" />
     <ClInclude Include="diffencoder.h" />
+    <ClInclude Include="utf_convert.h" />
   </ItemGroup>
 </Project>

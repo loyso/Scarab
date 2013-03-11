@@ -80,80 +80,6 @@ void ChangeFileDate( const char *filename, uLong dosdate, tm_unz tmu_date )
 #endif
 }
 
-
-int zip::ZipCreateDirectory( const char* dirname )
-{
-    int ret=0;
-#ifdef WIN32
-    ret = _mkdir(dirname);
-#else
-    ret = mkdir (dirname,0775);
-#endif
-    return ret;
-}
-
-bool zip::ZipCreateDirectories( const char *newdir )
-{
-	char *buffer ;
-	char *p;
-	int  len = (int)strlen(newdir);
-
-	if (len <= 0)
-		return false;
-
-	buffer = (char*)malloc(len+1);
-	if (buffer==NULL)
-	{
-		printf("Error allocating memory\n");
-		return false;
-	}
-	strcpy(buffer,newdir);
-
-	if (buffer[len-1] == '/') {
-		buffer[len-1] = '\0';
-	}
-
-	if (ZipCreateDirectory(buffer) == 0)
-	{
-		free(buffer);
-		return true;
-	}
-
-	p = buffer+1;
-	while (1)
-	{
-		char hold;
-
-		while(*p && *p != '\\' && *p != '/')
-			p++;
-		hold = *p;
-		*p = 0;
-		if ((ZipCreateDirectory(buffer) == -1) && (errno == ENOENT))
-		{
-			printf("couldn't create directory %s\n",buffer);
-			free(buffer);
-			return false;
-		}
-		if (hold == 0)
-			break;
-		*p++ = hold;
-	}
-	free(buffer);
-	return true;
-}
-
-bool zip::FileSize( const char* path, size_t& size )
-{
-	FILE* fp = fopen( path, "rb");
-	if( fp == NULL )
-		return false;
-
-	fseek(fp, 0L, SEEK_END);
-	size = ftell(fp);
-	fclose( fp );
-	return true;
-}
-
 namespace zip
 {
 	static const int MAX_ERROR_STRING = 4096;
@@ -164,12 +90,10 @@ zip::ZipArchiveInput::ZipArchiveInput()
 	, uf()
 	, password()
 {
-	m_errorMessage = new char[ MAX_ERROR_STRING ];
 }
 
 zip::ZipArchiveInput::~ZipArchiveInput()
 {
-	delete[] m_errorMessage;
 }
 
 bool zip::ZipArchiveInput::Open( String_t const& archiveName, bool caseSensitive )
@@ -182,15 +106,19 @@ bool zip::ZipArchiveInput::Open( String_t const& archiveName, bool caseSensitive
 #endif
 
 #ifdef USEWIN32IOAPI
+#	ifdef SCARAB_WCHAR_MODE
+	fill_win32_filefunc64W(&ffunc);
+#	else
 	fill_win32_filefunc64A(&ffunc);
+#	endif
 	uf = unzOpen2_64(m_archiveName.c_str(),&ffunc);
 #else
 	uf = unzOpen64(m_archiveName.c_str());
-#endif
+#endif // USEWIN32IOAPI
 
 	if (uf==NULL)
 	{
-		sprintf( m_errorMessage, "Can't open %s\n", m_archiveName.c_str() );
+		m_errorMessage << _T("Can't open ") << m_archiveName << std::endl;
 		return false;
 	}
 
@@ -200,9 +128,10 @@ bool zip::ZipArchiveInput::Open( String_t const& archiveName, bool caseSensitive
 bool zip::ZipArchiveInput::LocateAndReadFile( String_t const& fileName, Byte_t*& pMemoryBlock, size_t& size )
 {
 	int err = UNZ_OK;
-	if ( unzLocateFile( uf, fileName.c_str(), m_caseSensitive ) != UNZ_OK )
+	std::string fileNameUtf8 = utf_convert::as_utf8( fileName );
+	if ( unzLocateFile( uf, fileNameUtf8.c_str(), m_caseSensitive ) != UNZ_OK )
 	{
-		sprintf( m_errorMessage, "file %s not found in the zipfile\n", fileName.c_str() );
+		m_errorMessage << "file " << fileName << " not found in the zipfile" << std::endl;
 		return false;
 	}
 
@@ -214,12 +143,12 @@ bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryB
 	String_t fileNameKey = fileName;
 	if( !m_caseSensitive )
 		for (size_t i = 0; i < fileNameKey.size(); ++i )
-			fileNameKey[i] = tolower( fileNameKey[i] );
+			fileNameKey[i] = _ttolower( fileNameKey[i] );
 
 	NameToEntry_t::const_iterator keyValue = m_nameToEntry.find( fileNameKey );
 	if( keyValue == m_nameToEntry.end() )
 	{
-		sprintf( m_errorMessage, "file %s not found in the zip index\n", fileNameKey.c_str() );
+		m_errorMessage << "file " << fileNameKey << " not found in the zip index" << std::endl;
 		return false;
 	}
 
@@ -231,7 +160,7 @@ bool zip::ZipArchiveInput::ReadFile( String_t const& fileName, Byte_t*& pMemoryB
 	int err = unzGoToFilePos( uf, &pos );
 	if( err != UNZ_OK )
 	{
-		sprintf( m_errorMessage, "can't go to file %s\n", fileName.c_str());
+		m_errorMessage << "Can't go to file " << fileName << std::endl;
 		return false;
 	}
 
@@ -242,15 +171,14 @@ bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& p
 {
 	int err = UNZ_OK;
 
-	char filename_inzip[256];
-	strncpy( filename_inzip, fileName.c_str(), sizeof(filename_inzip) );
+	std::string filename_inzip = utf_convert::as_utf8( fileName );
 
 	unz_file_info64 file_info;
 	uLong ratio=0;
-	err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+	err = unzGetCurrentFileInfo64(uf,&file_info,(char*)filename_inzip.c_str(),filename_inzip.size()+1,NULL,0,NULL,0);
 	if ( err != UNZ_OK )
 	{
-		sprintf( m_errorMessage, "error %d with file %s in unzGetCurrentFileInfo\n", err, fileName.c_str() );
+		m_errorMessage << "unzGetCurrentFileInfo error in file " << fileName << " error code: " << err << std::endl;
 		return false;
 	}
 
@@ -258,21 +186,21 @@ bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& p
 	void* buf = malloc(size_buf);
 	if (buf == NULL)
 	{
-		sprintf( m_errorMessage, "Error allocating memory %d for file %s\n", size_buf, fileName.c_str() );
+		m_errorMessage << "Error allocating memory for file " << fileName << " requested: " << size_buf << std::endl;
 		return false;
 	}
 
 	err = unzOpenCurrentFilePassword(uf,password);
 	if (err != UNZ_OK)
 	{
-		sprintf( m_errorMessage, "error %d with file %s in unzOpenCurrentFilePassword\n", err, fileName.c_str() );
+		m_errorMessage << "unzOpenCurrentFilePassword error in file " << fileName << " error code: " << err << std::endl;
 		return false;
 	}
 
 	int numRead = unzReadCurrentFile(uf,buf,size_buf);
 	if( numRead < 0 )
 	{
-		sprintf( m_errorMessage, "error %d with file %s in unzReadCurrentFile\n", err, fileName.c_str() );
+		m_errorMessage << "unzReadCurrentFile error in file " << fileName << " error code: " << err << std::endl;
 		err = numRead;
 	}
 	else
@@ -282,9 +210,7 @@ bool zip::ZipArchiveInput::ReadCurrentFile( String_t const& fileName, Byte_t*& p
 	{
 		err = unzCloseCurrentFile (uf);
 		if (err!=UNZ_OK)
-		{
-			sprintf( m_errorMessage, "error %d with file %s in unzCloseCurrentFile\n",err, fileName.c_str() );
-		}
+			m_errorMessage << "unzCloseCurrentFile error in file " << fileName << " error code: " << err << std::endl;
 	}
 	else
 		unzCloseCurrentFile(uf); /* don't lose the error */
@@ -314,7 +240,7 @@ bool zip::ZipArchiveInput::Index()
 	int err = unzGoToFirstFile(uf);
 	if( err != UNZ_OK )
 	{
-		sprintf( m_errorMessage, "Can't go to first file\n" );
+		m_errorMessage << "Can't go to first file" << std::endl;
 		return false;
 	}
 
@@ -324,33 +250,34 @@ bool zip::ZipArchiveInput::Index()
 		err = unzGetCurrentFileInfo64(uf, NULL,	szCurrentFileName, sizeof(szCurrentFileName)-1,NULL,0,NULL,0);
 		if(err == UNZ_OK)
 		{
+			String_t fileNameKey = utf_convert::as_wide( szCurrentFileName );
 			if( !m_caseSensitive )
-				for (int i = 0; szCurrentFileName[i]; ++i )
-					szCurrentFileName[i] = tolower( szCurrentFileName[i] );
+				for (size_t i = 0; i < fileNameKey.size(); ++i )
+					fileNameKey[i] = _ttolower( fileNameKey[i] );
 
 			unz_file_pos pos;
 			err = unzGetFilePos( uf, &pos );
 			if( err != UNZ_OK )
 			{
-				sprintf( m_errorMessage, "Can't get file position for %s\n", szCurrentFileName );
+				m_errorMessage << "Can't get file position for " << fileNameKey << std::endl;
 				return false;
 			}
 
 			ZipEntry zipEntry;
 			zipEntry.pos_in_zip_directory = pos.pos_in_zip_directory;
 			zipEntry.num_of_file = pos.num_of_file;
-			m_nameToEntry.insert( std::make_pair( szCurrentFileName, zipEntry ) );
+			m_nameToEntry.insert( std::make_pair( fileNameKey, zipEntry ) );
 
 			err = unzGoToNextFile(uf);
 			if( err != UNZ_OK && err != UNZ_END_OF_LIST_OF_FILE )
 			{
-				sprintf( m_errorMessage, "Can't go to next file\n" );
+				m_errorMessage << "Can't go to next file" << std::endl;
 				return false;
 			}
 		}
 		else
 		{
-			sprintf( m_errorMessage, "Can't get file info\n" );
+			m_errorMessage << "Can't get file info" << std::endl;
 			return false;
 		}
 	}
@@ -358,9 +285,9 @@ bool zip::ZipArchiveInput::Index()
 	return err == UNZ_END_OF_LIST_OF_FILE;
 }
 
-const char* zip::ZipArchiveInput::ErrorMessage() const
+_tstring zip::ZipArchiveInput::ErrorMessage() const
 {
-	return m_errorMessage;
+	return m_errorMessage.str();
 }
 
 

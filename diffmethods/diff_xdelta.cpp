@@ -42,10 +42,13 @@ bool xdelta::XdeltaEncoder::EncodeDiffMemoryBlock( const dung::Byte_t* newBlock,
 	return m_errorCode == 0;
 }
 
-void xdelta::XdeltaEncoder::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
+void xdelta::XdeltaEncoder::GetErrorMessage( _tstring& errorMessage ) const
 {
-	if( m_errorCode != 0 )
-		sprintf( errorMessage, "Can't encode memory with xdelta. Error code: %d", m_errorCode );
+	if( m_errorCode == 0 )
+		return;
+
+	errorMessage = _T("Can't encode memory with xdelta. Error code: ");
+	errorMessage += m_errorCode;
 }
 
 int xdelta::XdeltaEncoder::MakeFlags( Config const& config )
@@ -93,10 +96,13 @@ bool xdelta::XdeltaDecoder::DecodeDiffMemoryBlock( const dung::Byte_t* oldBlock,
 	return m_errorCode == 0;
 }
 
-void xdelta::XdeltaDecoder::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
+void xdelta::XdeltaDecoder::GetErrorMessage( _tstring& errorMessage ) const
 {
-	if( m_errorCode != 0 )
-		sprintf( errorMessage, "Can't decode memory with xdelta. Error code: %d", m_errorCode );
+	if( m_errorCode == 0 )
+		return;
+
+	errorMessage = _T("Can't decode memory with xdelta. Error code: ");
+	errorMessage += m_errorCode;
 }
 
 #endif // SCARAB_XDELTA

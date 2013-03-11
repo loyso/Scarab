@@ -16,6 +16,7 @@
     <ClCompile Include="registry.cpp" />
     <ClCompile Include="sha1.cpp" />
     <ClCompile Include="tokenizer.cpp" />
+    <ClCompile Include="utf_convert.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="diffdecoder.h" />
@@ -25,6 +26,7 @@
     <ClInclude Include="registry.h" />
     <ClInclude Include="sha1.h" />
     <ClInclude Include="tokenizer.h" />
+    <ClInclude Include="utf_convert.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DA69A041-D12C-447C-BF78-C7E11EC33A49}</ProjectGuid>

@@ -2,8 +2,7 @@
 
 namespace dung
 {
-	static const wchar_t WREGISTRY_FILENAME[] = L"registry.txt";
-	static const char REGISTRY_FILENAME[] = "registry.txt";
+	static const _TCHAR REGISTRY_FILENAME[] = _T("registry.txt");
 }
 
 dung::nil_buf::nil_buf()
@@ -32,30 +31,12 @@ void dung::nil_buf::put_char( int c_ )
 {
 }
 
-
-dung::nil_wbuf::nil_wbuf()
+size_t dung::StrLen( const char* str )
 {
+	return strlen( str );
 }
 
-dung::nil_wbuf::~nil_wbuf()
+size_t dung::StrLen( const wchar_t* str )
 {
+	return wcslen( str );
 }
-
-int dung::nil_wbuf::overflow( int c_ )
-{
-	return 0;
-}
-
-int dung::nil_wbuf::sync()
-{
-	return 0;
-}
-
-void dung::nil_wbuf::put_buffer()
-{
-}
-
-void dung::nil_wbuf::put_char( int c_ )
-{
-}
-

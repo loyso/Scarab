@@ -2,21 +2,17 @@
 
 #if SCARAB_DELTAMAX
 
-#pragma comment(linker, "/defaultlib:DeltaMAX.lib")
-#pragma message("Automatically linking with DeltaMAX.lib (DeltaMAX.dll)")
-
-#ifdef DELTAMAX_UNICODE
-#	define _T(x) L ## x
-#	define TCHAR wchar_t
+#ifdef SCARAB_WCHAR_MODE
+#	pragma comment(linker, "/defaultlib:DeltaMAX_unicode.lib")
+#	pragma message("Automatically linking with DeltaMAX_unicode.lib (DeltaMAX_unicode.dll)")
 #else
-#	undef UNICODE
-#	undef _T
-#	define _T(x) x
-#	define TCHAR char
+#	pragma comment(linker, "/defaultlib:DeltaMAX.lib")
+#	pragma message("Automatically linking with DeltaMAX.lib (DeltaMAX.dll)")
 #endif
 
-#define _CRT_SECURE_NO_WARNINGS
 #define _TCHAR_DEFINED
+#define TCHAR _TCHAR
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -35,16 +31,15 @@ deltamax::DeltaMax::DeltaMax()
 {
 }
 
-void deltamax::DeltaMax::SetUserLicense( const char* userName, const char* licenseKey )
+void deltamax::DeltaMax::SetUserLicense( const _TCHAR* userName, const _TCHAR* licenseKey )
 {
 	m_userName = userName;
 	m_licenseKey = licenseKey;
 }
 
-void deltamax::DeltaMax::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
+void deltamax::DeltaMax::GetErrorMessage( _tstring& errorMessage ) const
 {
-	const char* errorString = DeltaMAXGetErrorString( m_result );
-	strncpy( errorMessage, errorString, bufferSize-1 );
+	errorMessage = DeltaMAXGetErrorString( m_result );
 }
 
 
@@ -52,7 +47,7 @@ deltamax::DeltaMaxEncoder::DeltaMaxEncoder()
 {
 }
 
-bool deltamax::DeltaMaxEncoder::EncodeDiffFile( const char* newFileName, const char* oldFileName, const char* diffFileName )
+bool deltamax::DeltaMaxEncoder::EncodeDiffFile( const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName )
 {
 	DELTAMAX_ENCODE_OPTIONS options;
 	DeltaMAXInitEncodeOptions( &options );
@@ -67,16 +62,16 @@ bool deltamax::DeltaMaxEncoder::EncodeDiffFile( const char* newFileName, const c
 	return false;
 }
 
-void deltamax::DeltaMaxEncoder::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
+void deltamax::DeltaMaxEncoder::GetErrorMessage( _tstring& errorMessage ) const
 {
-	DeltaMax::GetErrorMessage( errorMessage, bufferSize );
+	DeltaMax::GetErrorMessage( errorMessage );
 }
 
 deltamax::DeltaMaxDecoder::DeltaMaxDecoder()
 {
 }
 
-bool deltamax::DeltaMaxDecoder::DecodeDiffFile( const char* newFileName, const char* oldFileName, const char* diffFileName )
+bool deltamax::DeltaMaxDecoder::DecodeDiffFile( const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName )
 {
 	DELTAMAX_DECODE_OPTIONS options;
 	DeltaMAXInitDecodeOptions( &options );
@@ -91,9 +86,9 @@ bool deltamax::DeltaMaxDecoder::DecodeDiffFile( const char* newFileName, const c
 	return false;
 }
 
-void deltamax::DeltaMaxDecoder::GetErrorMessage( char* errorMessage, size_t bufferSize ) const
+void deltamax::DeltaMaxDecoder::GetErrorMessage( _tstring& errorMessage ) const
 {
-	DeltaMax::GetErrorMessage( errorMessage, bufferSize );
+	DeltaMax::GetErrorMessage( errorMessage );
 }
 
 #endif // SCARAB_DELTAMAX

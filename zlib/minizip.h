@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dung/dung.h>
+
 #include <string>
 
 namespace zip

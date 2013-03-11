@@ -5,6 +5,10 @@
 
 #include <zlib/miniunzip.h>
 
+#ifdef WIN32
+#	include <direct.h>
+#endif
+
 namespace hatch
 {
 	bool CreateNewFile( Options const& options, RegistryAction const& action, bool overrideFile, zip::ZipArchiveInput& zipInput, LogOutput_t& out );
@@ -16,12 +20,12 @@ namespace hatch
 
 	String_t FullPath( Options const& options, String_t const& relativePath )
 	{
-		return options.pathToOld + "/" + relativePath;
+		return options.pathToOld + _T("/") + relativePath;
 	}
 
 	String_t TempPath( Options const& options, String_t const& relativePath )
 	{
-		return options.pathToOld + "/" + relativePath + ".tmp";
+		return options.pathToOld + _T("/") + relativePath + _T(".tmp");
 	}
 
 	bool ParentPath( String_t const& path, String_t& parentPath )
@@ -44,6 +48,84 @@ namespace hatch
 	{
 		return !::remove( path );
 	}
+
+	bool DeleteFile( const wchar_t* path )
+	{
+		return !::_wremove( path );
+	}
+
+	bool FileSize( const char* path, size_t& size )
+	{
+		FILE* fp = fopen( path, "rb");
+		if( fp == NULL )
+			return false;
+
+		fseek(fp, 0L, SEEK_END);
+		size = ftell(fp);
+		fclose( fp );
+		return true;
+	}
+
+	bool FileSize( const wchar_t* path, size_t& size )
+	{
+		FILE* fp = _wfopen( path, L"rb");
+		if( fp == NULL )
+			return false;
+
+		fseek(fp, 0L, SEEK_END);
+		size = ftell(fp);
+		fclose( fp );
+		return true;
+	}
+
+	int CreateDirectory( const char* dirname )
+	{
+		int ret=0;
+#ifdef WIN32
+		ret = _mkdir(dirname);
+#else
+		ret = mkdir (dirname,0775);
+#endif
+		return ret;
+	}
+
+	int CreateDirectory( const wchar_t* dirname )
+	{
+		int ret=0;
+#ifdef WIN32
+		ret = _wmkdir(dirname);
+#else
+		ret = mkdir (dirname,0775);
+#endif
+		return ret;
+	}
+
+	bool CreateDirectories( const _TCHAR *newdir )
+	{
+		size_t len = dung::StrLen( newdir );
+		if (len <= 0)
+			return false;
+
+		_tstring buffer( newdir );
+
+		if( buffer[len-1] == _T('/') || buffer[len-1] == _T('\\') )
+			buffer.resize( len-1 );
+
+		if( CreateDirectory( buffer.c_str() ) == 0 )
+			return true;
+
+		for( size_t p = 1; p<len; ++p )
+		{
+			while( p<len && buffer[p] != _T('\\') && buffer[p] != _T('/') )
+				p++;
+
+			_tstring subDir = buffer.substr( 0, p );
+			if( CreateDirectory( subDir.c_str() ) == -1 && errno == ENOENT )
+				return false;
+		}
+
+		return true;
+	}
 }
 
 bool hatch::CreateNewFile( Options const& options, RegistryAction const& action, bool overrideFile, zip::ZipArchiveInput& zipInput, LogOutput_t& out )
@@ -53,7 +135,7 @@ bool hatch::CreateNewFile( Options const& options, RegistryAction const& action,
 	if( !overrideFile )
 	{
 		size_t existFileSize;
-		if( zip::FileSize( fullPathNew.c_str(), existFileSize ) )
+		if( FileSize( fullPathNew.c_str(), existFileSize ) )
 		{
 			out << "Can't create new file " << action.new_path << ". File already exists." << std::endl;
 			return false;
@@ -74,7 +156,7 @@ bool hatch::CreateNewFile( Options const& options, RegistryAction const& action,
 		return false;
 	}
 
-	if( !zip::ZipCreateDirectories( dirPath.c_str() ) )
+	if( !CreateDirectories( dirPath.c_str() ) )
 	{
 		out << "Can't create directory " << dirPath << std::endl;
 		return false;
@@ -93,7 +175,7 @@ bool hatch::CheckOldFileData( Options const& options, dung::MemoryBlock const& o
 {
 	if( options.checkOldSize && oldFile.size != action.oldSize )
 	{
-		out << "Old file has wrong size. " << action.old_path << " Real size=" << oldFile.size << ", registry size=" << action.oldSize << std::endl;
+		out << _T("Old file has wrong size. ") << action.old_path << _T(" Real size=") << oldFile.size << _T(", registry size=") << action.oldSize << std::endl;
 		return false;
 	}
 
@@ -103,7 +185,7 @@ bool hatch::CheckOldFileData( Options const& options, dung::MemoryBlock const& o
 		dung::SHA1Compute( oldFile.pBlock, oldFile.size, oldSha1 );
 		if( oldSha1 != action.oldSha1 )
 		{
-			out << "Old file has wrong SHA1. " << action.old_path << " Real SHA1=" << SHA1ToString(oldSha1) << ", registry SHA1=" << SHA1ToString(action.oldSha1) << std::endl;
+			out << _T("Old file has wrong SHA1. ") << action.old_path << _T(" Real SHA1=") << SHA1_TO_TSTRING(oldSha1) << _T(", registry SHA1=") << SHA1_TO_TSTRING(action.oldSha1) << std::endl;
 			return false;
 		}
 	}
@@ -142,8 +224,8 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 			result = false;
 		if( !result )
 		{
-			char errorMessage[ 256 ];
-			pDecoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+			_tstring errorMessage;
+			pDecoder->GetErrorMessage( errorMessage );
 			out << "Can't decode with " << action.diff_method << " for file " << action.diff_path << " " << errorMessage << std::endl;
 		}
 		else
@@ -180,8 +262,8 @@ bool hatch::ApplyDiff( Options const& options, DiffDecoders const& diffDecoders,
 			bool result = pExternalDecoder->DecodeDiffFile( fullPathOld.c_str(), oldTempPath.c_str(), diffTempPath.c_str() );
 			if( !result )
 			{
-				char errorMessage[ 256 ];
-				pExternalDecoder->GetErrorMessage( errorMessage, sizeof( errorMessage ) );
+				_tstring errorMessage;
+				pExternalDecoder->GetErrorMessage( errorMessage );
 				out << "Can't decode with " << action.diff_method << " for file " << action.diff_path << " " << errorMessage << std::endl;
 			}
 
@@ -297,12 +379,12 @@ hatch::DiffDecoders::~DiffDecoders()
 {	
 }
 
-void hatch::DiffDecoders::AddDecoder( dung::DiffDecoder_i& diffDecoder, const char* decoderName )
+void hatch::DiffDecoders::AddDecoder( dung::DiffDecoder_i& diffDecoder, String_t const& decoderName )
 {
 	m_nameToDecoder.insert( std::make_pair( String_t(decoderName), &diffDecoder ) );
 }
 
-void hatch::DiffDecoders::AddExternalDecoder( dung::DiffDecoderExternal_i& diffDecoder, const char* decoderName )
+void hatch::DiffDecoders::AddExternalDecoder( dung::DiffDecoderExternal_i& diffDecoder, String_t const& decoderName )
 {
 	m_nameToDecoderExternal.insert( std::make_pair( String_t(decoderName), &diffDecoder ) );
 }

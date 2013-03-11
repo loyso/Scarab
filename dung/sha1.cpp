@@ -395,7 +395,8 @@ void SHA1PadMessage ( SHA1Context *context )
 namespace dung
 {
 	const int SHA1StringSize = SHA1HashSize * 2 + 1;
-	bool CharToByte( char c, unsigned char& byte );
+
+	bool CharToByte( _TCHAR c, unsigned char& byte );
 }
 
 dung::Sha1::Sha1()
@@ -432,7 +433,7 @@ std::wstring dung::SHA1ToWString( Sha1 const& sha1 )
 	wchar_t output[SHA1StringSize+1];
 
 	for (int i = 0; i < SHA1HashSize; i++)
-		swprintf(output + (i * 2), 3, _T("%02X"), sha1.digest[i]);
+		swprintf(output + (i * 2), 3, L"%02X", sha1.digest[i]);
 
 	output[SHA1StringSize] = 0;
 	return output;
@@ -450,30 +451,50 @@ std::string dung::SHA1ToString( Sha1 const& sha1 )
 	return output;
 }
 
-bool dung::CharToByte( char c, unsigned char& byte )
+bool dung::CharToByte( _TCHAR c, unsigned char& byte )
 {
-	if( c >= '0' && c <= '9' )
+	if( c >= _T('0') && c <= _T('9') )
 	{
-		byte = c - '0';
+		byte = c - _T('0');
 		return true;
 	}
-	if( c >= 'a' && c <= 'f' )
+	if( c >= _T('a') && c <= _T('f') )
 	{
-		byte = c - 'a' + 10;
+		byte = c - _T('a') + 10;
 		return true;
 	}
-	if( c >= 'A' && c <= 'F' )
+	if( c >= _T('A') && c <= _T('F') )
 	{
-		byte = c - 'A' + 10;
+		byte = c - _T('A') + 10;
 		return true;
 	}
-	
+
 	return false;
 }
 
 bool dung::StringToSHA1( const char* parse, Sha1& sha1 )
 {
-	int size = strlen( parse );
+	int size = StrLen( parse );
+	if( size+1 != SHA1StringSize )
+		return false;
+
+	for (int i = 0; i < SHA1HashSize; i++)
+	{
+		unsigned char hi, lo;
+		if( !CharToByte( parse[i*2], hi ) )
+			return false;
+		if( !CharToByte( parse[i*2+1], lo ) )
+			return false;
+
+		sha1.digest[i] = ( hi << 4 ) | lo;
+	}
+
+	return true;
+}
+
+bool dung::StringToSHA1( const wchar_t* parse, Sha1& sha1 )
+{
+	size_t size = StrLen( parse );
 	if( size+1 != SHA1StringSize )
 		return false;
 

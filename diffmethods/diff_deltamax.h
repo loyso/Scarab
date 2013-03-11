@@ -17,13 +17,13 @@ namespace deltamax
 	{
 	public:
 		DeltaMax();
-		void SetUserLicense( const char* userName, const char* licenseKey );
+		void SetUserLicense( const _TCHAR* userName, const _TCHAR* licenseKey );
 
 	protected:
-		void GetErrorMessage( char* errorMessage, size_t bufferSize ) const;
+		void GetErrorMessage( _tstring& errorMessage ) const;
 
-		const char* m_userName; 
-		const char* m_licenseKey;
+		const _TCHAR* m_userName; 
+		const _TCHAR* m_licenseKey;
 		int m_result;
 	};
 
@@ -32,8 +32,8 @@ namespace deltamax
 	public:
 		DeltaMaxEncoder();
 	private:
-		virtual bool EncodeDiffFile( const char* newFileName, const char* oldFileName, const char* diffFileName );
-		virtual void GetErrorMessage( char* errorMessage, size_t bufferSize ) const;
+		virtual bool EncodeDiffFile( const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName );
+		virtual void GetErrorMessage( _tstring& errorMessage ) const;
 	};
 
 	class DeltaMaxDecoder : public DeltaMax, public dung::DiffDecoderExternal_i
@@ -41,8 +41,8 @@ namespace deltamax
 	public:
 		DeltaMaxDecoder();
 	private:
-		virtual bool DecodeDiffFile( const char* newFileName, const char* oldFileName, const char* diffFileName );
-		virtual void GetErrorMessage( char* errorMessage, size_t bufferSize ) const;
+		virtual bool DecodeDiffFile( const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName );
+		virtual void GetErrorMessage( _tstring& errorMessage ) const;
 	};
 }
 

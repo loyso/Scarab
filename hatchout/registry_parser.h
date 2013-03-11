@@ -1,5 +1,7 @@
 #pragma once
 
+#include "hatchout.h"
+
 #include <dung/tokenizer.h>
 #include <dung/sha1.h>
 #include <dung/registry.h>
@@ -16,9 +18,6 @@ namespace hatch
 
 namespace hatch
 {
-	typedef std::string String_t;
-	typedef std::stringstream StringStream_t;
-
 	class RegistryParser
 	{
 	public:

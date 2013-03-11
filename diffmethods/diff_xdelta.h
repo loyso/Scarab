@@ -40,7 +40,7 @@ namespace xdelta
 	private:
 		static int MakeFlags( Config const& config );
 		virtual bool EncodeDiffMemoryBlock( const dung::Byte_t* newBlock, size_t newSize, const dung::Byte_t* oldBlock, size_t oldSize, dung::Byte_t*& diffBlock, size_t& diffSize );
-		virtual void GetErrorMessage( char* errorMessage, size_t bufferSize ) const;
+		virtual void GetErrorMessage( _tstring& errorMessage ) const;
 
 		Config m_config;
 		int m_errorCode;
@@ -54,7 +54,7 @@ namespace xdelta
 
 	private:
 		virtual bool DecodeDiffMemoryBlock( const dung::Byte_t* oldBlock, size_t oldSize, const dung::Byte_t* diffBlock, size_t diffSize, dung::Byte_t*& newBlock, size_t& newSize );
-		virtual void GetErrorMessage( char* errorMessage, size_t bufferSize ) const;
+		virtual void GetErrorMessage( _tstring& errorMessage ) const;
 
 		int m_errorCode;
 	};

@@ -106,7 +106,11 @@ bool hatch::RegistryParser::ParseWordValue( String_t& value )
 		return false;
 	}
 	
+#ifdef SCARAB_WCHAR_MODE
+	value = utf_convert::as_wide( m_tokenizer.GetWord() );
+#else
 	value = m_tokenizer.GetWord();
+#endif
 	return true;
 }
 
@@ -124,7 +128,11 @@ bool hatch::RegistryParser::ParseStringValue( String_t& value )
 		return false;
 	}
 
+#ifdef SCARAB_WCHAR_MODE
+	value = utf_convert::as_wide( m_tokenizer.GetString() );
+#else
 	value = m_tokenizer.GetString();
+#endif
 	return true;
 }
 
@@ -142,7 +150,11 @@ bool hatch::RegistryParser::ParseNumValue( String_t& value )
 		return false;
 	}
 
+#ifdef SCARAB_WCHAR_MODE
+	value = utf_convert::as_wide( m_tokenizer.GetNumber() );
+#else
 	value = m_tokenizer.GetNumber();
+#endif
 	return true;
 }
 
@@ -171,7 +183,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 
 				if( !dung::StringToAction( value.c_str(), action.action ) )
 				{
-					m_errorMessage << "Unknown action " << value;
+					m_errorMessage << _T("Unknown action ") << value;
 					return false;
 				}
 			}
@@ -179,7 +191,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 			{
 				if( !ParseStringValue( action.diff_path ) )
 				{
-					m_errorMessage << "for diff_path";
+					m_errorMessage << _T("for diff_path");
 					return false;
 				}
 			}
@@ -187,7 +199,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 			{
 				if( !ParseStringValue( action.old_path ) )
 				{
-					m_errorMessage << "for old_path";
+					m_errorMessage << _T("for old_path");
 					return false;
 				}
 			}
@@ -222,7 +234,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 					return false;
 				}
 
-				SCARAB_ASSERT( dung::SHA1ToString( action.oldSha1 ) == value );
+				SCARAB_ASSERT( dung::SHA1_TO_TSTRING( action.oldSha1 ) == value );
 			}
 			else if( Cmp( "new_sha1", key ) )
 			{
@@ -239,7 +251,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 					return false;
 				}
 
-				SCARAB_ASSERT( dung::SHA1ToString( action.newSha1 ) == value );
+				SCARAB_ASSERT( dung::SHA1_TO_TSTRING( action.newSha1 ) == value );
 			}
 			else if( Cmp( "old_size", key ) )
 			{
@@ -249,7 +261,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 					m_errorMessage << "for old_size";
 					return false;
 				}
-				action.oldSize = atol( value.c_str() );
+				action.oldSize = _tchar_to_long( value.c_str() );
 			}
 			else if( Cmp( "new_size", key ) )
 			{
@@ -259,7 +271,7 @@ bool hatch::RegistryParser::ParseFile( Registry& registry, RegistryAction& actio
 					m_errorMessage << "for new_size";
 					return false;
 				}
-				action.newSize = atol( value.c_str() );
+				action.newSize = _tchar_to_long( value.c_str() );
 			}
 		}
 		else if( m_tokenizer.IsSymbol() && m_tokenizer.GetSymbol() == '}' )
