@@ -4,3 +4,6 @@
 /data
 *.suo
 *.vcxproj.user
+/.vs
+/patcher/data
+/builder/data
