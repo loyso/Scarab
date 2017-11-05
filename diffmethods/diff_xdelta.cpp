@@ -34,11 +34,12 @@ bool xdelta::XdeltaEncoder::EncodeDiffMemoryBlock( const dung::Byte_t* newBlock,
 	const size_t reservedSize = max( newSize, 1024 );
 
 	diffBlock = SCARAB_NEW dung::Byte_t[ reservedSize ];
-	diffSize = 0;
+	uint32_t diffSize32 = 0;
 
 	int flags = MakeFlags( m_config );
-	m_errorCode = xd3_encode_memory( newBlock, newSize, oldBlock, oldSize, diffBlock, &diffSize, reservedSize, flags );
+	m_errorCode = xd3_encode_memory( newBlock, newSize, oldBlock, oldSize, diffBlock, &diffSize32, reservedSize, flags );
 
+	diffSize = diffSize32;
 	return m_errorCode == 0;
 }
 
@@ -88,9 +89,11 @@ bool xdelta::XdeltaDecoder::DecodeDiffMemoryBlock( const dung::Byte_t* oldBlock,
 	size_t reservedSize = newSize;
 
 	newBlock = SCARAB_NEW dung::Byte_t[ reservedSize ];
+	uint32_t newSize32 = 0;
 
-	m_errorCode = xd3_decode_memory( diffBlock, diffSize, oldBlock, oldSize, newBlock, &newSize, reservedSize, 0 );
+	m_errorCode = xd3_decode_memory( diffBlock, diffSize, oldBlock, oldSize, newBlock, &newSize32, reservedSize, 0 );
 
+	newSize = newSize32;
 	SCARAB_ASSERT( reservedSize == newSize );
 
 	return m_errorCode == 0;
