@@ -7,3 +7,4 @@
 /.vs
 /patcher/data
 /builder/data
+/external/.gitignore
