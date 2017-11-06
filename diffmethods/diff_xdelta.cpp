@@ -9,7 +9,17 @@
 
 extern "C"
 {
-#include <external/xdelta/xdelta3.h>
+// xdelta.lib must be compiled with the same logic. See Scarab/xdelta/xdelta.vcxproj
+// for SIZEOF_SIZE_T macro definition while compiling xdelta3.c
+#if defined(_M_IA64) || defined(_M_X64)
+#    define SIZEOF_SIZE_T 8
+#elif defined(_M_IX86)
+#    define SIZEOF_SIZE_T 4
+#else
+#    error "Unsupported MSVC platform"
+#endif
+
+#include <external/xdelta/xdelta3/xdelta3.h>
 #undef NEW
 #undef DELETE
 #undef MOVE
@@ -31,7 +41,7 @@ xdelta::XdeltaEncoder::~XdeltaEncoder()
 
 bool xdelta::XdeltaEncoder::EncodeDiffMemoryBlock( const dung::Byte_t* newBlock, size_t newSize, const dung::Byte_t* oldBlock, size_t oldSize, dung::Byte_t*& diffBlock, size_t& diffSize )
 {
-	const size_t reservedSize = max( newSize, 1024 );
+	const size_t reservedSize = dung::max( newSize, size_t(1024) );
 
 	diffBlock = SCARAB_NEW dung::Byte_t[ reservedSize ];
 	uint32_t diffSize32 = 0;

@@ -86,4 +86,10 @@ namespace dung
 
 	size_t StrLen( const char* str );
 	size_t StrLen( const wchar_t* str );
+
+	template<class T>
+	const T& max(const T& a, const T& b)
+	{
+		return (a < b) ? b : a;
+	}
 }
