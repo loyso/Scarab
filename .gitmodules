@@ -2,3 +2,6 @@
 	path = external/xdelta
 	url = https://github.com/jmacd/xdelta.git
 	branch = release3_0_apl
+[submodule "external/zlib"]
+	path = external/zlib
+	url = https://github.com/madler/zlib.git
