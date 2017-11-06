@@ -39,7 +39,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\external\xdelta\xdelta3.c">
+    <ClCompile Include="..\external\xdelta\xdelta3\xdelta3.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Itanium'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -52,20 +52,20 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\external\xdelta\xdelta3-blkcache.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-cfgs.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-decode.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-djw.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-fgk.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-hash.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-internal.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-list.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-lzma.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-main.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-merge.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-second.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3-test.h" />
-    <ClInclude Include="..\external\xdelta\xdelta3.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-blkcache.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-cfgs.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-decode.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-djw.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-fgk.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-hash.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-internal.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-list.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-lzma.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-main.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-merge.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-second.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-test.h" />
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8F9D37B5-B78E-4816-BE61-AEF679DBF3BC}</ProjectGuid>

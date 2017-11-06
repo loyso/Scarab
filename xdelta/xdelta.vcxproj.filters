@@ -1,46 +1,46 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\external\xdelta\xdelta3.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-blkcache.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-blkcache.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-cfgs.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-cfgs.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-decode.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-decode.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-djw.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-djw.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-fgk.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-fgk.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-hash.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-hash.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-internal.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-internal.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-list.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-list.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-lzma.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-lzma.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-main.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-main.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-merge.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-merge.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-second.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-second.h">
       <Filter>xdelta</Filter>
     </ClInclude>
-    <ClInclude Include="..\external\xdelta\xdelta3-test.h">
+    <ClInclude Include="..\external\xdelta\xdelta3\xdelta3-test.h">
       <Filter>xdelta</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +50,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\external\xdelta\xdelta3.c">
+    <ClCompile Include="..\external\xdelta\xdelta3\xdelta3.c">
       <Filter>xdelta</Filter>
     </ClCompile>
   </ItemGroup>
