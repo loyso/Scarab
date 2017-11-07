@@ -83,6 +83,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
 #if SCARAB_XDELTA
 		// Plug in Xdelta decoder.
+		xdelta::XdeltaDecoderExternal xdeltaDecoder;
+		diffDecoders.AddExternalDecoder(xdeltaDecoder, _T("xdelta"));
+#else
+		// Plug in Xdelta decoder.
 		xdelta::XdeltaDecoder xdeltaDecoder;
 		diffDecoders.AddDecoder( xdeltaDecoder, _T("xdelta") );
 #endif // SCARAB_XDELTA

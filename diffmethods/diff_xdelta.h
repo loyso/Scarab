@@ -46,6 +46,22 @@ namespace xdelta
 		int m_errorCode;
 	};
 
+	class XdeltaEncoderExternal : public dung::DiffEncoderExternal_i
+	{
+	public:
+		XdeltaEncoderExternal(Config const& config);
+		~XdeltaEncoderExternal();
+
+	private:
+		static int MakeFlags(Config const& config);
+		virtual bool EncodeDiffFile(const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName);
+		virtual void GetErrorMessage(_tstring& errorMessage) const;
+
+		Config m_config;
+		int m_errorCode;
+	};
+
+
 	class XdeltaDecoder : public dung::DiffDecoder_i
 	{
 	public:
@@ -55,6 +71,19 @@ namespace xdelta
 	private:
 		virtual bool DecodeDiffMemoryBlock( const dung::Byte_t* oldBlock, size_t oldSize, const dung::Byte_t* diffBlock, size_t diffSize, dung::Byte_t*& newBlock, size_t& newSize );
 		virtual void GetErrorMessage( _tstring& errorMessage ) const;
+
+		int m_errorCode;
+	};
+
+	class XdeltaDecoderExternal : public dung::DiffDecoderExternal_i
+	{
+	public:
+		XdeltaDecoderExternal();
+		~XdeltaDecoderExternal();
+
+	private:
+		virtual bool DecodeDiffFile(const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName);
+		virtual void GetErrorMessage(_tstring& errorMessage) const;
 
 		int m_errorCode;
 	};
