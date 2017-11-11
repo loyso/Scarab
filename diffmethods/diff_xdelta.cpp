@@ -27,123 +27,57 @@ extern "C"
 
 namespace xdelta
 {
-}
 
-xdelta::XdeltaEncoder::XdeltaEncoder( Config const& config )
-	: m_config( config )
-	, m_errorCode()
-{
-}
+const int FILE_BUFFER_SIZE = 64 * XD3_ALLOCSIZE; // 1 mb
 
-xdelta::XdeltaEncoder::~XdeltaEncoder()
-{
-}
-
-bool xdelta::XdeltaEncoder::EncodeDiffMemoryBlock( const dung::Byte_t* newBlock, size_t newSize, const dung::Byte_t* oldBlock, size_t oldSize, dung::Byte_t*& diffBlock, size_t& diffSize )
-{
-	const size_t reservedSize = dung::max( newSize, size_t(1024) );
-
-	diffBlock = SCARAB_NEW dung::Byte_t[ reservedSize ];
-	uint32_t diffSize32 = 0;
-
-	int flags = MakeFlags( m_config );
-	m_errorCode = xd3_encode_memory( newBlock, (usize_t)newSize, oldBlock, (usize_t)oldSize, diffBlock, &diffSize32, (usize_t)reservedSize, flags );
-
-	diffSize = diffSize32;
-	return m_errorCode == 0;
-}
-
-void xdelta::XdeltaEncoder::GetErrorMessage( _tstring& errorMessage ) const
-{
-	if( m_errorCode == 0 )
-		return;
-
-	errorMessage = _T("Can't encode memory with xdelta. Error code: ");
-	errorMessage += m_errorCode;
-}
-
-int xdelta::XdeltaEncoder::MakeFlags( Config const& config )
-{
-	int flags = 0;
-
-	if( config.DJW ) flags |= XD3_SEC_DJW;
-	if( config.FGK ) flags |= XD3_SEC_FGK;
-	if( config.LZMA ) flags |= XD3_SEC_LZMA;
-
-	if( config.nodata ) flags |= XD3_SEC_NODATA;
-	if( config.noinst ) flags |= XD3_SEC_NOINST;
-	if( config.noaddr ) flags |= XD3_SEC_NOADDR;
-
-	if( config.adler32 ) flags |= XD3_ADLER32;
-	if( config.adler32_nover ) flags |= XD3_ADLER32_NOVER;
-
-	if( config.beGreedy ) flags |= XD3_BEGREEDY;
-
-	if( config.compression != 0 ) flags |= ( ( config.compression << XD3_COMPLEVEL_SHIFT ) & XD3_COMPLEVEL_MASK );
-
-	return flags;
-}
-
-xdelta::XdeltaEncoderExternal::XdeltaEncoderExternal(Config const& config)
-	: m_config(config)
-	, m_errorCode()
-{
-}
-
-xdelta::XdeltaEncoderExternal::~XdeltaEncoderExternal()
-{
-}
-
-int code(bool encode, FILE*  InFile, FILE*  SrcFile, FILE* OutFile, int BufSize)
+int code(bool encode, FILE* inFile, FILE* srcFile, FILE* outFile, int flags, int bufSize, _tstring& outError)
 {
 	int r, ret;
 	struct stat statbuf;
 	xd3_stream stream;
 	xd3_config config;
 	xd3_source source;
-	void* Input_Buf;
-	int Input_Buf_Read;
+	void* inputBuf;
+	int inputBufRead;
 
-	if (BufSize < XD3_ALLOCSIZE)
-		BufSize = XD3_ALLOCSIZE;
+	if (bufSize < XD3_ALLOCSIZE)
+		bufSize = XD3_ALLOCSIZE;
 
 	memset(&stream, 0, sizeof(stream));
 	memset(&source, 0, sizeof(source));
 
-	xd3_init_config(&config, XD3_ADLER32);
-	config.winsize = BufSize;
+	xd3_init_config(&config, flags);
+	config.winsize = bufSize;
 	xd3_config_stream(&stream, &config);
 
-	if (SrcFile)
+	if (srcFile)
 	{
-		r = fstat(_fileno(SrcFile), &statbuf);
+		r = fstat(_fileno(srcFile), &statbuf);
 		if (r)
 			return r;
 
-		source.blksize = BufSize;
+		source.blksize = bufSize;
 		source.curblk = (const uint8_t*)malloc(source.blksize);
 
 		/* Load 1st block of stream. */
-		r = fseek(SrcFile, 0, SEEK_SET);
+		r = fseek(srcFile, 0, SEEK_SET);
 		if (r)
 			return r;
-		source.onblk = (usize_t)fread((void*)source.curblk, 1, source.blksize, SrcFile);
+		source.onblk = (usize_t)fread((void*)source.curblk, 1, source.blksize, srcFile);
 		source.curblkno = 0;
 		/* Set the stream. */
 		xd3_set_source(&stream, &source);
 	}
 
-	Input_Buf = malloc(BufSize);
+	inputBuf = malloc(bufSize);
 
-	fseek(InFile, 0, SEEK_SET);
+	fseek(inFile, 0, SEEK_SET);
 	do
 	{
-		Input_Buf_Read = (int)fread(Input_Buf, 1, BufSize, InFile);
-		if (Input_Buf_Read < BufSize)
-		{
+		inputBufRead = (int)fread(inputBuf, 1, bufSize, inFile);
+		if (inputBufRead < bufSize)
 			xd3_set_flags(&stream, XD3_FLUSH | stream.flags);
-		}
-		xd3_avail_input(&stream, (const uint8_t*)Input_Buf, Input_Buf_Read);
+		xd3_avail_input(&stream, (const uint8_t*)inputBuf, inputBufRead);
 
 	process:
 		if (encode)
@@ -153,66 +87,53 @@ int code(bool encode, FILE*  InFile, FILE*  SrcFile, FILE* OutFile, int BufSize)
 
 		switch (ret)
 		{
-		case XD3_INPUT:
-		{
-			fprintf(stderr, "XD3_INPUT\n");
-			continue;
-		}
+			case XD3_INPUT:
+				continue;
 
-		case XD3_OUTPUT:
-		{
-			fprintf(stderr, "XD3_OUTPUT\n");
-			r = (int)fwrite(stream.next_out, 1, stream.avail_out, OutFile);
-			if (r != (int)stream.avail_out)
-				return r;
-			xd3_consume_output(&stream);
-			goto process;
-		}
-
-		case XD3_GETSRCBLK:
-		{
-			fprintf(stderr, "XD3_GETSRCBLK %I64u\n", source.getblkno);
-			if (SrcFile)
+			case XD3_OUTPUT:
 			{
-				r = fseek(SrcFile, source.blksize * (usize_t)source.getblkno, SEEK_SET);
-				if (r)
+				r = (int)fwrite(stream.next_out, 1, stream.avail_out, outFile);
+				if (r != (int)stream.avail_out)
 					return r;
-				source.onblk = (usize_t)fread((void*)source.curblk, 1, source.blksize, SrcFile);
-				source.curblkno = source.getblkno;
+				xd3_consume_output(&stream);
+				goto process;
 			}
-			goto process;
+
+			case XD3_GETSRCBLK:
+			{
+				if (srcFile)
+				{
+					r = fseek(srcFile, source.blksize * (usize_t)source.getblkno, SEEK_SET);
+					if (r)
+						return r;
+					source.onblk = (usize_t)fread((void*)source.curblk, 1, source.blksize, srcFile);
+					source.curblkno = source.getblkno;
+				}
+				goto process;
+			}
+
+			case XD3_GOTHEADER:
+				goto process;
+
+			case XD3_WINSTART:
+				goto process;
+
+			case XD3_WINFINISH:
+				goto process;
+
+			default:
+			{
+#ifdef SCARAB_WCHAR_MODE
+				outError = utf_convert::as_wide(stream.msg);
+#else
+				outError = stream.msg;
+#endif
+				return ret;
+			}
 		}
+	} while (inputBufRead == bufSize);
 
-		case XD3_GOTHEADER:
-		{
-			fprintf(stderr, "XD3_GOTHEADER\n");
-			goto process;
-		}
-
-		case XD3_WINSTART:
-		{
-			fprintf(stderr, "XD3_WINSTART\n");
-			goto process;
-		}
-
-		case XD3_WINFINISH:
-		{
-			fprintf(stderr, "XD3_WINFINISH\n");
-			goto process;
-		}
-
-		default:
-		{
-			fprintf(stderr, "!!! INVALID %s %d !!!\n",
-				stream.msg, ret);
-			return ret;
-		}
-
-		}
-
-	} while (Input_Buf_Read == BufSize);
-
-	free(Input_Buf);
+	free(inputBuf);
 
 	free((void*)source.curblk);
 	xd3_close_stream(&stream);
@@ -221,33 +142,58 @@ int code(bool encode, FILE*  InFile, FILE*  SrcFile, FILE* OutFile, int BufSize)
 	return 0;
 };
 
-bool xdelta::XdeltaEncoderExternal::EncodeDiffFile(const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName)
+FILE* openFile(const char* fileName, bool read)
+{
+	return fopen(fileName, read ? "rb" : "wb");
+}
+
+FILE* openFile(const wchar_t* fileName, bool read)
+{
+	return _wfopen(fileName, read ? L"rb" : L"wb");
+}
+
+} // namespace xdelta
+
+
+xdelta::XdeltaEncoder::XdeltaEncoder(Config const& config)
+	: m_config(config)
+	, m_errorCode()
+{
+}
+
+xdelta::XdeltaEncoder::~XdeltaEncoder()
+{
+}
+
+bool xdelta::XdeltaEncoder::EncodeDiffFile(const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName)
 {
 	int flags = MakeFlags(m_config);
 
-	FILE* InFile = _wfopen(newFileName, L"rb");
-	FILE* SrcFile = _wfopen(oldFileName, L"rb");
-	FILE* OutFile = _wfopen(diffFileName, L"wb");
+	FILE* inFile = openFile(newFileName, true);
+	FILE* srcFile = openFile(oldFileName, true);
+	FILE* outFile = openFile(diffFileName, false);
 
-	m_errorCode = code(true, InFile, SrcFile, OutFile, 0x1000);
+	m_errorCode = xdelta::code(true, inFile, srcFile, outFile, flags, FILE_BUFFER_SIZE, m_errorMessage);
 
-	fclose(OutFile);
-	fclose(SrcFile);
-	fclose(InFile);
+	fclose(outFile);
+	fclose(srcFile);
+	fclose(inFile);
 
 	return m_errorCode == 0;
 }
 
-void xdelta::XdeltaEncoderExternal::GetErrorMessage(_tstring& errorMessage) const
+void xdelta::XdeltaEncoder::GetErrorMessage(_tstring& errorMessage) const
 {
 	if (m_errorCode == 0)
 		return;
 
-	errorMessage = _T("Can't encode memory with xdelta. Error code: ");
+	errorMessage = _T("Can't encode memory with xdelta. Error message: ");
+	errorMessage += m_errorMessage;
+	errorMessage = _T(" Error code: ");
 	errorMessage += m_errorCode;
 }
 
-int xdelta::XdeltaEncoderExternal::MakeFlags(Config const& config)
+int xdelta::XdeltaEncoder::MakeFlags(Config const& config)
 {
 	int flags = 0;
 
@@ -279,61 +225,29 @@ xdelta::XdeltaDecoder::~XdeltaDecoder()
 {
 }
 
-bool xdelta::XdeltaDecoder::DecodeDiffMemoryBlock( const dung::Byte_t* oldBlock, size_t oldSize, const dung::Byte_t* diffBlock, size_t diffSize, dung::Byte_t*& newBlock, size_t& newSize )
+bool xdelta::XdeltaDecoder::DecodeDiffFile(const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName)
 {
-	size_t reservedSize = newSize;
+	FILE* inFile = openFile(diffFileName, true);
+	FILE* srcFile = openFile(oldFileName, true);
+	FILE* outFile = openFile(newFileName, false);
 
-	newBlock = SCARAB_NEW dung::Byte_t[ reservedSize ];
-	uint32_t newSize32 = 0;
+	m_errorCode = xdelta::code(false, inFile, srcFile, outFile, XD3_ADLER32, FILE_BUFFER_SIZE, m_errorMessage);
 
-	m_errorCode = xd3_decode_memory( diffBlock, (uint32_t)diffSize, oldBlock, (uint32_t)oldSize, newBlock, &newSize32, (uint32_t)reservedSize, 0 );
-
-	newSize = newSize32;
-	SCARAB_ASSERT( reservedSize == newSize );
+	fclose(outFile);
+	fclose(srcFile);
+	fclose(inFile);
 
 	return m_errorCode == 0;
 }
 
-void xdelta::XdeltaDecoder::GetErrorMessage( _tstring& errorMessage ) const
-{
-	if( m_errorCode == 0 )
-		return;
-
-	errorMessage = _T("Can't decode memory with xdelta. Error code: ");
-	errorMessage += m_errorCode;
-}
-
-
-xdelta::XdeltaDecoderExternal::XdeltaDecoderExternal()
-	: m_errorCode()
-{
-}
-
-xdelta::XdeltaDecoderExternal::~XdeltaDecoderExternal()
-{
-}
-
-bool xdelta::XdeltaDecoderExternal::DecodeDiffFile(const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName)
-{
-	FILE* InFile = _wfopen(diffFileName, L"rb");
-	FILE* SrcFile = _wfopen(oldFileName, L"rb");
-	FILE* OutFile = _wfopen(newFileName, L"wb");
-
-	m_errorCode = code(false, InFile, SrcFile, OutFile, 0x1000);
-
-	fclose(OutFile);
-	fclose(SrcFile);
-	fclose(InFile);
-
-	return m_errorCode == 0;
-}
-
-void xdelta::XdeltaDecoderExternal::GetErrorMessage(_tstring& errorMessage) const
+void xdelta::XdeltaDecoder::GetErrorMessage(_tstring& errorMessage) const
 {
 	if (m_errorCode == 0)
 		return;
 
-	errorMessage = _T("Can't decode memory with xdelta. Error code: ");
+	errorMessage = _T("Can't decode memory with xdelta. Error message: ");
+	errorMessage += m_errorMessage;
+	errorMessage = _T(" Error code: ");
 	errorMessage += m_errorCode;
 }
 

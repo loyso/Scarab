@@ -147,16 +147,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
 #if SCARAB_XDELTA
 		// Plug in xdelta encoder.
-		xdelta::XdeltaEncoderExternal xdeltaEncoder(encodersConfig.xdelta_config);
+		xdelta::XdeltaEncoder xdeltaEncoder(encodersConfig.xdelta_config);
 		if (encodersConfig.xdelta_packFiles.empty())
 			encodersConfig.xdelta_packFiles.push_back(_T(".*"));
 		diffEncoders.AddExternalEncoder(xdeltaEncoder, _T("xdelta"), encodersConfig.xdelta_packFiles);
-#else
-		// Plug in xdelta encoder.
-		xdelta::XdeltaEncoder xdeltaEncoder( encodersConfig.xdelta_config );
-		if( encodersConfig.xdelta_packFiles.empty() )
-			encodersConfig.xdelta_packFiles.push_back( _T(".*") );
-		diffEncoders.AddEncoder( xdeltaEncoder, _T("xdelta"), encodersConfig.xdelta_packFiles );
 #endif // SCARAB_XDELTA
 
 #if SCARAB_DELTAMAX

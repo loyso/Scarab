@@ -31,26 +31,11 @@ namespace xdelta
 		bool beGreedy; 
 	};
 
-	class XdeltaEncoder : public dung::DiffEncoder_i
+	class XdeltaEncoder : public dung::DiffEncoderExternal_i
 	{
 	public:
-		XdeltaEncoder( Config const& config );
+		XdeltaEncoder(Config const& config);
 		~XdeltaEncoder();
-
-	private:
-		static int MakeFlags( Config const& config );
-		virtual bool EncodeDiffMemoryBlock( const dung::Byte_t* newBlock, size_t newSize, const dung::Byte_t* oldBlock, size_t oldSize, dung::Byte_t*& diffBlock, size_t& diffSize );
-		virtual void GetErrorMessage( _tstring& errorMessage ) const;
-
-		Config m_config;
-		int m_errorCode;
-	};
-
-	class XdeltaEncoderExternal : public dung::DiffEncoderExternal_i
-	{
-	public:
-		XdeltaEncoderExternal(Config const& config);
-		~XdeltaEncoderExternal();
 
 	private:
 		static int MakeFlags(Config const& config);
@@ -58,33 +43,22 @@ namespace xdelta
 		virtual void GetErrorMessage(_tstring& errorMessage) const;
 
 		Config m_config;
+		_tstring m_errorMessage;
 		int m_errorCode;
 	};
 
 
-	class XdeltaDecoder : public dung::DiffDecoder_i
+	class XdeltaDecoder : public dung::DiffDecoderExternal_i
 	{
 	public:
 		XdeltaDecoder();
 		~XdeltaDecoder();
 
 	private:
-		virtual bool DecodeDiffMemoryBlock( const dung::Byte_t* oldBlock, size_t oldSize, const dung::Byte_t* diffBlock, size_t diffSize, dung::Byte_t*& newBlock, size_t& newSize );
-		virtual void GetErrorMessage( _tstring& errorMessage ) const;
-
-		int m_errorCode;
-	};
-
-	class XdeltaDecoderExternal : public dung::DiffDecoderExternal_i
-	{
-	public:
-		XdeltaDecoderExternal();
-		~XdeltaDecoderExternal();
-
-	private:
 		virtual bool DecodeDiffFile(const _TCHAR* newFileName, const _TCHAR* oldFileName, const _TCHAR* diffFileName);
 		virtual void GetErrorMessage(_tstring& errorMessage) const;
 
+		_tstring m_errorMessage;
 		int m_errorCode;
 	};
 }
